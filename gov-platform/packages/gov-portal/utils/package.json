@@ -1,0 +1,12 @@
+{
+    "name": "@gov/utils",
+    "private": true,
+    "version": "0.0.0",
+    "main": "dist/index.js",
+    "scripts": {
+      "build": "echo \"(PR1 stub) build utils\"",
+      "test": "echo \"(PR2) utils tests\" && exit 0",
+      "clean": "rimraf dist || true"
+    }
+  }
+  

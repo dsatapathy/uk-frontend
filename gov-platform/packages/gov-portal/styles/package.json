@@ -1,0 +1,12 @@
+{
+    "name": "@gov/styles",
+    "private": true,
+    "version": "0.0.0",
+    "main": "dist/index.css",
+    "scripts": {
+      "build": "echo \"(PR1 stub) build styles\"",
+      "test": "echo \"(PR2) styles tests\" && exit 0",
+      "clean": "rimraf dist || true"
+    }
+  }
+  

@@ -1,0 +1,19 @@
+{
+    "name": "@gov/data",
+    "private": true,
+    "version": "0.0.0",
+    "main": "dist/index.js",
+    "scripts": {
+      "build": "echo \"(PR1 stub) build data\"",
+      "test": "echo \"(PR2) data tests\" && exit 0",
+      "clean": "rimraf dist || true"
+    },
+    "peerDependencies": {
+      "react": "^17",
+      "@tanstack/react-query": "^4",
+      "react-hook-form": "^7",
+      "zod": "^3",
+      "lodash": "^4"
+    }
+  }
+  

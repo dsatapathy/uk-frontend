@@ -1,0 +1,24 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "yarn"
+      - name: Install (frozen)
+        run: yarn --frozen-lockfile
+      - name: Dedupe lockfile
+        run: yarn dedupe
+      - name: Workspaces info
+        run: yarn workspaces info
+      - name: Build (stub)
+        run: yarn build

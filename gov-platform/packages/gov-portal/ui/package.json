@@ -1,0 +1,18 @@
+{
+    "name": "@gov/ui",
+    "private": true,
+    "version": "0.0.0",
+    "main": "dist/index.js",
+    "types": "",
+    "scripts": {
+      "build": "echo \"(PR1 stub) build ui\"",
+      "test": "echo \"(PR2) ui tests\" && exit 0",
+      "clean": "rimraf dist || true"
+    },
+    "peerDependencies": {
+      "react": "^17",
+      "react-dom": "^17",
+      "lodash": "^4"
+    }
+  }
+  
