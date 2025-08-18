@@ -20,7 +20,8 @@
       "@gov/modules": "0.0.0",
       "@gov/utils": "0.0.0",
       "@gov/mod-bpa": "0.1.0",
-      "@gov/mod-tl": "0.1.0"
+      "@gov/mod-tl": "0.1.0",
+      "@gov/mod-wns": "0.1.0"
     }
   }
   

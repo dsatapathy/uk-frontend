@@ -28,5 +28,7 @@ export function buildLazyModuleRoutes() {
   return [
     { path: "/bpa", exact: false, layout: "Shell", page: { type: "ModuleGate", props: { moduleKey: "bpa" } } },
     { path: "/tl",  exact: false, layout: "Shell", page: { type: "ModuleGate", props: { moduleKey: "tl"  } } },
+    { path: "/ws",  exact: false, layout: "Shell", page: { type: "ModuleGate", props: { moduleKey: "wns"  } } },
+
   ];
 }
