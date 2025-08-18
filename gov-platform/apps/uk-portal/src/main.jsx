@@ -1,12 +1,12 @@
 import React from "react";
 import ReactDOM from "react-dom";
-import { Router } from "react-router-dom";           // <-- use low-level Router
-import { createBrowserHistory } from "history";       // <-- external history
+import { Router } from "react-router-dom";
+import { createBrowserHistory } from "history";
 
 import { RouteBuilder, runtime } from "@gov/core";
-import { loadModules } from "./modules-orchestrator";
+import { makeModuleGate, buildLazyModuleRoutes } from "./modules-orchestrator.jsx";
 
-const history = createBrowserHistory();               // <-- single shared history
+const history = createBrowserHistory();
 
 // Layout
 const Shell = ({ children }) => (
@@ -17,19 +17,24 @@ const Shell = ({ children }) => (
 );
 runtime.registerLayout("Shell", Shell);
 
-// Collect routes from modules
-const routes = [];
-const app = {
-  history,                               // <-- pass the same history to modules
-  addRoutes: (r) => routes.push(...r),
-};
-
-await loadModules(app);                   // modules call register(app) and push routes
-
-// Context passed to ComponentFactory; you can keep actions empty now
-const context = { history, actions: {} };
-
 function App() {
+  // 1) routes are STATE (so updates from modules re-render)
+  const [routes, setRoutes] = React.useState(() => buildLazyModuleRoutes());
+
+  // App API passed to modules
+  const app = React.useMemo(() => ({
+    history,
+    // 2) PREPEND real routes so they win before the stub (Switch picks first match)
+    addRoutes: (r) => setRoutes(prev => [...r, ...prev]),
+  }), []);
+
+  // Context for ComponentFactory (kept simple here)
+  const context = React.useMemo(() => ({ history, actions: {} }), []);
+
+  // Register ModuleGate once
+  const ModuleGate = React.useMemo(() => makeModuleGate({ app }), [app]);
+  runtime.registerComponent("ModuleGate", ModuleGate);
+
   return (
     <Router history={history}>
       <RouteBuilder routes={routes} context={context} />
