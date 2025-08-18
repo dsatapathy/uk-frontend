@@ -29,7 +29,7 @@
     "preview:app": "yarn workspace uk-portal preview --strictPort",
     "clean:app": "yarn workspace uk-portal clean",
     "//------------- Utilities --------------": "────────",
-    "clean": "rimraf \"**/dist\" \"**/.vite\"",
+    "clean": "rimraf **/dist **/.vite",
     "dedupe": "yarn yarn-deduplicate -s fewer yarn.lock",
     "postinstall": "yarn run dedupe",
     "ws:info": "yarn workspaces info",
