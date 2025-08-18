@@ -5,29 +5,30 @@ import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
 const repoRoot = path.resolve(__dirname, "..", "..");
-const modulesSrcNative = path.resolve(repoRoot, "packages/gov-portal/modules/src");
-// Windows: force forward slashes so esbuild doesn’t get confused
-const modulesSrc = modulesSrcNative.replace(/\\/g, "/");
+
+const coreSrc  = path.resolve(repoRoot, "packages/gov-portal/core/src").replace(/\\/g, "/");
+const bpaSrc   = path.resolve(repoRoot, "packages/gov-portal/modules/bpa/src").replace(/\\/g, "/");
+const tlSrc    = path.resolve(repoRoot, "packages/gov-portal/modules/tl/src").replace(/\\/g, "/");
 
 export default defineConfig(({ command }) => {
-  const isServe = command === "serve"; // dev
+  const isServe = command === "serve";
   return {
-    plugins: [react({ fastRefresh: false })],
+    plugins: [react()],
     resolve: {
-      alias: isServe ? { "@gov/modules": modulesSrc } : {}
+      alias: isServe
+        ? {
+            "@gov/core": coreSrc,
+            "@gov/mod-bpa": bpaSrc,
+            "@gov/mod-tl": tlSrc
+          }
+        : {}
     },
     optimizeDeps: {
-      exclude: isServe ? ["@gov/modules"] : []
+      // keep these from being pre-bundled (they're source)
+      exclude: isServe ? ["@gov/core", "@gov/mod-bpa", "@gov/mod-tl"] : []
     },
-    server: {
-      port: 5173,
-      fs: { allow: [repoRoot] }
-    },
-    build: {
-      outDir: "dist",
-      emptyOutDir: true
-    }
+    server: { fs: { allow: [repoRoot] } },
+    build: { outDir: "dist", emptyOutDir: true }
   };
 });

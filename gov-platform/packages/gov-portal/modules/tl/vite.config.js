@@ -1,4 +1,3 @@
-// packages/gov-portal/modules/bpa/vite.config.js
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 
@@ -7,6 +6,7 @@ export default defineConfig({
   build: {
     lib: { entry: "src/index.js", formats: ["es"] },
     rollupOptions: {
+      // never bundle these
       external: ["react", "react-dom", "react-router-dom", "@gov/core"],
       output: {
         preserveModules: true,
@@ -17,6 +17,7 @@ export default defineConfig({
       }
     },
     outDir: "dist",
-    emptyOutDir: true
+    emptyOutDir: true,
+    sourcemap: false
   }
 });
