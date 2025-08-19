@@ -55,8 +55,8 @@ function App() {
 
 ReactDOM.render(
   <ThemeProvider theme={theme}>
-  <CssBaseline />
-  <ThemeBridge />
-  <App />
-</ThemeProvider>,
-  document.getElementById("root"), document.getElementById("root"));
+    <CssBaseline />
+    <ThemeBridge />
+    <App />
+  </ThemeProvider>,
+  document.getElementById("root"));

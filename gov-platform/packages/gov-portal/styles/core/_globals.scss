@@ -4,8 +4,8 @@
    --------------------------------------------------- */
 
 /* Bring in tokens and mixins */
-@use "./_tokens.scss" as *;
-@use "./_mixins.scss" as *;
+@use "./tokens" as *;
+@use "./mixins" as *;
 
 /* (Optional) add global CSS variables or utility classes */
 :root {

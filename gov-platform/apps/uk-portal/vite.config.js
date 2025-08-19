@@ -21,13 +21,7 @@ export default defineConfig(({ command }) => {
     plugins: [react()],
     css: {
       preprocessorOptions: {
-        scss: {
-          additionalData: `
-            @import "@gov/styles/core/_tokens.scss";
-            @import "@gov/styles/core/_mixins.scss";
-          ;
-          `
-        }
+        scss: {}
       }
     },    
     resolve: {
