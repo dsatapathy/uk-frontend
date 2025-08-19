@@ -2,7 +2,22 @@ import React from "react";
 import { registerComponent } from "@gov/core";
 import { CircularProgress } from "@mui/material";
 
-const loaded = new Map(); // moduleKey -> boolean
+/** Cache of in-flight loads: moduleKey -> Promise<mod> */
+const loadCache = new Map();
+/** Flags of completed registration: moduleKey -> true */
+const loadedFlags = new Map();
+/** Registry of manifests by key */
+const manifestMap = new Map();
+
+/** Start (or reuse) the dynamic import for a module. */
+export function prefetchModule(moduleKey) {
+  if (loadCache.has(moduleKey)) return loadCache.get(moduleKey);
+  const manifest = manifestMap.get(moduleKey);
+  if (!manifest) return Promise.resolve(null);
+  const p = manifest.loader();
+  loadCache.set(moduleKey, p);
+  return p;
+}
 
 export function makeModuleGate({ app, manifests }) {
   return function ModuleGate({ moduleKey, renderLoading }) {
@@ -14,34 +29,32 @@ export function makeModuleGate({ app, manifests }) {
     const [error, setError] = React.useState(null);
 
     React.useEffect(() => {
-      // If already loaded (from a previous visit), nothing to do.
-      if (loaded.get(moduleKey)) return;
+      // If already registered, nothing to do.
+      if (loadedFlags.get(moduleKey) === true) return;
 
       let cancel = false;
 
       Promise.resolve()
         .then(() => app.config.hooks?.beforeModuleRegister?.(moduleKey))
-        .then(() => manifest.loader())
+        // Use the prefetch (single import per key), do NOT call manifest.loader() again
+        .then(() => prefetchModule(moduleKey))
         .then((mod) => {
-          if (cancel) return;
-          // IMPORTANT: do not setState after this — register will typically unmount the gate.
+          if (cancel || !mod) return;
+          // Register routes/nav once. Do NOT set state after this: gate will usually unmount.
           mod.register?.(app);
-          loaded.set(moduleKey, true);
+          loadedFlags.set(moduleKey, true);
           app.config.hooks?.afterModuleRegister?.(moduleKey);
-          // No setState here: we expect this component to unmount immediately after routes are added.
         })
         .catch((e) => {
           console.error(`[ModuleGate] failed to load ${moduleKey}`, e);
           if (!cancel) setError(e);
         });
 
-      return () => {
-        cancel = true;
-      };
-    }, [moduleKey, app, manifest]);
+      return () => { cancel = true; };
+    }, [moduleKey, app]);
 
-    // If already loaded, render nothing (routes will take over)
-    if (loaded.get(moduleKey)) return null;
+    // If already registered, render nothing (module routes will render the real pages)
+    if (loadedFlags.get(moduleKey) === true) return null;
 
     // Error UI
     if (error) {
@@ -81,6 +94,7 @@ export function buildLazyModuleRoutes(manifests = [], redirects = []) {
 }
 
 export function registerModuleGate(app, manifests) {
+  manifests.forEach((m) => manifestMap.set(m.key, m));
   const ModuleGate = makeModuleGate({ app, manifests });
   registerComponent("ModuleGate", ModuleGate);
 }

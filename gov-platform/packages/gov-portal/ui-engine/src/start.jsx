@@ -5,7 +5,7 @@ import { createBrowserHistory } from "history";
 import { ThemeProvider, createTheme, CssBaseline } from "@mui/material";
 import { RouteBuilder, runtime } from "@gov/core";
 import ThemeBridge from "./ThemeBridge";
-import { registerModuleGate, buildLazyModuleRoutes } from "./modules-orchestrator";
+import { registerModuleGate, buildLazyModuleRoutes, prefetchModule  } from "./modules-orchestrator";
 import { ensureAuthGuard } from "./auth";
 
 // Default Shell (can be overridden by config.layout)
@@ -16,6 +16,25 @@ function DefaultShell({ children }) {
       <main style={{ padding: 16 }}>{children}</main>
     </div>
   );
+}
+
+function useModulePrefetch(manifests) {
+  React.useEffect(() => {
+    const handleHover = (e) => {
+      const key = e.target?.dataset?.moduleKey;
+      if (key) prefetchModule(key);
+    };
+    document.addEventListener("mouseover", handleHover);
+    const idleId =
+      typeof requestIdleCallback === "function"
+        ? requestIdleCallback(() => manifests.forEach((m) => prefetchModule(m.key)))
+        : setTimeout(() => manifests.forEach((m) => prefetchModule(m.key)), 0);
+    return () => {
+      document.removeEventListener("mouseover", handleHover);
+      if (typeof cancelIdleCallback === "function") cancelIdleCallback(idleId);
+      else clearTimeout(idleId);
+    };
+  }, [manifests]);
 }
 
 export function start(config) {
@@ -86,7 +105,7 @@ export function start(config) {
   function EngineApp() {
     const [routes, _setRoutes] = React.useState(guardedRoutes);
     setRoutes = _setRoutes;
-
+    useModulePrefetch(manifests);
     React.useEffect(() => {
       const unlisten = history.listen((loc, action) => hooks.onRouteChange?.(loc, action));
       return unlisten;
