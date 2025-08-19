@@ -1,62 +1,13 @@
-import React from "react";
-import ReactDOM from "react-dom";
-import { Router } from "react-router-dom";
-import { createBrowserHistory } from "history";
-import { ThemeProvider, createTheme, CssBaseline } from "@mui/material";
-import { RouteBuilder, runtime } from "@gov/core";
-import "@gov/styles/core/index.scss";
-import "@gov/styles/components/index.scss";
-import { makeModuleGate, buildLazyModuleRoutes } from "./modules-orchestrator.jsx";
-import ThemeBridge from "./ThemeBridge.jsx";
-const theme = createTheme({
-  palette: {
-    mode: "light",
-    primary: { main: "#0b5fff" },
-    secondary: { main: "#4f46e5" },
-    background: { default: "#f9fafb" },
-  },
-  shape: { borderRadius: 8 },
+import { start } from "@gov/ui-engine";
+start({
+  target: "#root",
+  base: "/uk-portal",
+  modules: [
+    { key: "bpa", basePath: "/bpa", loader: () => import("@gov/mod-bpa") },
+    { key: "tl",  basePath: "/tl",  loader: () => import("@gov/mod-tl")  },
+    { key: "wns", basePath: "/ws",  loader: () => import("@gov/mod-wns") },
+  ],
+  redirects: [{ from: "/", to: "/bpa" }],
+  auth: { strategy: "none" }, // or jwt/custom/oidc
+  theme: { palette: { mode: "light" } }
 });
-const history = createBrowserHistory();
-
-// Layout
-const Shell = ({ children }) => (
-  <div style={{ display: "grid", gridTemplateColumns: "216px 1fr" }}>
-    <aside style={{ borderRight: "1px solid #eee", padding: 12 }}>Sidebar</aside>
-    <main style={{ padding: 16 }}>{children}</main>
-  </div>
-);
-runtime.registerLayout("Shell", Shell);
-
-function App() {
-  // 1) routes are STATE (so updates from modules re-render)
-  const [routes, setRoutes] = React.useState(() => buildLazyModuleRoutes());
-
-  // App API passed to modules
-  const app = React.useMemo(() => ({
-    history,
-    // 2) PREPEND real routes so they win before the stub (Switch picks first match)
-    addRoutes: (r) => setRoutes(prev => [...r, ...prev]),
-  }), []);
-
-  // Context for ComponentFactory (kept simple here)
-  const context = React.useMemo(() => ({ history, actions: {} }), []);
-
-  // Register ModuleGate once
-  const ModuleGate = React.useMemo(() => makeModuleGate({ app }), [app]);
-  runtime.registerComponent("ModuleGate", ModuleGate);
-
-  return (
-    <Router history={history}>
-      <RouteBuilder routes={routes} context={context} />
-    </Router>
-  );
-}
-
-ReactDOM.render(
-  <ThemeProvider theme={theme}>
-    <CssBaseline />
-    <ThemeBridge />
-    <App />
-  </ThemeProvider>,
-  document.getElementById("root"));
