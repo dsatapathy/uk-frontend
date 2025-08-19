@@ -2,6 +2,7 @@
 import React from "react";
 import { registerComponent, registerAction } from "@gov/core";
 import { loadBpaCard, loadBpaStart } from "./widgets";
+import "@gov/styles/modules/bpa/index.scss";
 // small helper: wrap React.lazy with Suspense once
 const lazyWrap = (loader, name = "Loading") => {
   const Lazy = React.lazy(loader);

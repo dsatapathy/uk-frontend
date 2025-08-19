@@ -1,0 +1,9 @@
+.gbtn {
+    display:inline-flex; align-items:center; gap:8px;
+    padding: 8px 12px; border-radius: var(--g-radius);
+    border:1px solid var(--g-primary); background:var(--g-primary); color:#fff;
+    &:hover { filter: brightness(0.95); }
+    &:focus-visible { @include focus-ring; }
+    &--ghost { background:transparent; color:var(--g-primary); }
+  }
+  

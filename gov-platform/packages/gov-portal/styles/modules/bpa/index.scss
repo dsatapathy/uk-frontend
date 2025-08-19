@@ -1,0 +1,10 @@
+@use "../../core/mixins" as *;
+
+.mod-bpa {
+  .header { padding: var(--g-s4); border-bottom: 1px solid var(--g-border); }
+  .grid {
+    display: grid; gap: var(--g-s4); grid-template-columns: 1fr;
+    @include media(md) { grid-template-columns: 1fr 1fr; }
+    @include media(lg) { grid-template-columns: 2fr 1fr; }
+  }
+}

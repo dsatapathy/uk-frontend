@@ -1,0 +1,19 @@
+/* ---------------------------------------------------
+   Global style helpers
+   Re-exposes tokens + mixins without namespaces
+   --------------------------------------------------- */
+
+/* Bring in tokens and mixins */
+@use "./_tokens.scss" as *;
+@use "./_mixins.scss" as *;
+
+/* (Optional) add global CSS variables or utility classes */
+:root {
+  // spacing scale as CSS vars (if not already in _tokens.scss)
+  --g-s1: 4px;
+  --g-s2: 8px;
+  --g-s3: 12px;
+  --g-s4: 16px;
+  --g-s5: 24px;
+  --g-border: #e0e0e0;
+}

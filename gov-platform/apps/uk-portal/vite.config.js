@@ -19,6 +19,17 @@ export default defineConfig(({ command }) => {
   const isServe = command === "serve";
   return {
     plugins: [react()],
+    css: {
+      preprocessorOptions: {
+        scss: {
+          additionalData: `
+            @import "@gov/styles/core/_tokens.scss";
+            @import "@gov/styles/core/_mixins.scss";
+          ;
+          `
+        }
+      }
+    },    
     resolve: {
       alias: isServe
         ? {

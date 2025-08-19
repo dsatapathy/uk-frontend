@@ -1,11 +1,11 @@
 import React from "react";
 import { getAction } from "@gov/core";   // <-- pull from registry
-
+import s from "@gov/styles/modules/bpa/BpaHome.module.scss";
 export default function BpaCard({ title = "BPA" }) {
   return (
-    <div style={{ border: "1px solid #ddd", borderRadius: 8, padding: 12 }}>
-      <h3 style={{ margin: 0 }}>{title}</h3>
-      <p style={{ opacity: 0.75 }}>Building Plan Approval</p>
+    <div className={`mod-bpa ${s.page}`}>
+      <h3 className="header"><h2 className={s.title}>{title}</h2></h3>
+      <p className="grid">Building Plan Approval</p>
       <button onClick={() => getAction("bpa.start")?.()}>
         Start Application
       </button>

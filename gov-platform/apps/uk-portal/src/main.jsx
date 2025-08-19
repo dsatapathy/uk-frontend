@@ -2,10 +2,21 @@ import React from "react";
 import ReactDOM from "react-dom";
 import { Router } from "react-router-dom";
 import { createBrowserHistory } from "history";
-
+import { ThemeProvider, createTheme, CssBaseline } from "@mui/material";
 import { RouteBuilder, runtime } from "@gov/core";
+import "@gov/styles/core/index.scss";
+import "@gov/styles/components/index.scss";
 import { makeModuleGate, buildLazyModuleRoutes } from "./modules-orchestrator.jsx";
-
+import ThemeBridge from "./ThemeBridge.jsx";
+const theme = createTheme({
+  palette: {
+    mode: "light",
+    primary: { main: "#0b5fff" },
+    secondary: { main: "#4f46e5" },
+    background: { default: "#f9fafb" },
+  },
+  shape: { borderRadius: 8 },
+});
 const history = createBrowserHistory();
 
 // Layout
@@ -42,4 +53,10 @@ function App() {
   );
 }
 
-ReactDOM.render(<App />, document.getElementById("root"));
+ReactDOM.render(
+  <ThemeProvider theme={theme}>
+  <CssBaseline />
+  <ThemeBridge />
+  <App />
+</ThemeProvider>,
+  document.getElementById("root"), document.getElementById("root"));
