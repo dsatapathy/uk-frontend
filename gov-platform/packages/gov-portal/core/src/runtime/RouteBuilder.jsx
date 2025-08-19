@@ -14,12 +14,15 @@ export default function RouteBuilder({ routes = [], context }) {
       {routes.map((r) => {
         const Layout = (r.layout && getLayout(r.layout)) || React.Fragment;
         const GuardFn = r.guard && getGuard(r.guard);
+        const layoutProps = Layout === React.Fragment ? {} : { context };
         return (
           <Route key={r.path} exact={!!r.exact} path={r.path}>
             <Guarded guard={GuardFn} context={context}>
-              <Layout context={context}>
+              {React.createElement(
+                Layout,
+                layoutProps,
                 <ComponentFactory node={r.page} context={context} />
-              </Layout>
+              )}
             </Guarded>
           </Route>
         );
