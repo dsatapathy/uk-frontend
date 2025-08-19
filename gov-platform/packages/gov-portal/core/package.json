@@ -5,7 +5,9 @@
     "type": "module",
     "main": "./dist/index.js",
     "module": "./dist/index.js",
-    "exports": { ".": "./dist/index.js" },
+    "exports": {
+      ".": "./dist/index.js"
+    },
     "files": ["dist"],
     "sideEffects": false,
     "peerDependencies": {
@@ -16,7 +18,8 @@
     "scripts": {
       "build": "vite build",
       "dev": "vite build --watch",
-      "clean": "rimraf dist"
+      "clean": "rimraf dist",
+      "test": "node --test"
     },
     "devDependencies": {
       "@vitejs/plugin-react": "^4.3.0",

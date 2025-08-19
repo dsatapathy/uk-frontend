@@ -1,33 +1,71 @@
 import React from "react";
 import { registerComponent } from "@gov/core";
+import { CircularProgress } from "@mui/material";
 
-const loaded = new Map();
+const loaded = new Map(); // moduleKey -> boolean
 
 export function makeModuleGate({ app, manifests }) {
-  return function ModuleGate({ moduleKey }) {
+  return function ModuleGate({ moduleKey, renderLoading }) {
     const manifest = manifests.find((m) => m.key === moduleKey);
-    if (!manifest) return <div style={{ color: "crimson" }}>Unknown module: {moduleKey}</div>;
+    if (!manifest) {
+      return <div style={{ color: "crimson" }}>Unknown module: {moduleKey}</div>;
+    }
 
-    const [ready, setReady] = React.useState(Boolean(loaded.get(moduleKey)));
+    const [error, setError] = React.useState(null);
 
     React.useEffect(() => {
-      if (ready) return;
+      // If already loaded (from a previous visit), nothing to do.
+      if (loaded.get(moduleKey)) return;
+
       let cancel = false;
-      manifest
-        .loader()
+
+      Promise.resolve()
+        .then(() => app.config.hooks?.beforeModuleRegister?.(moduleKey))
+        .then(() => manifest.loader())
         .then((mod) => {
           if (cancel) return;
-          app.config.hooks?.beforeModuleRegister?.(moduleKey);
-          mod.register?.(app);              // module adds real routes/nav
+          // IMPORTANT: do not setState after this — register will typically unmount the gate.
+          mod.register?.(app);
           loaded.set(moduleKey, true);
-          setReady(true);
           app.config.hooks?.afterModuleRegister?.(moduleKey);
+          // No setState here: we expect this component to unmount immediately after routes are added.
         })
-        .catch((e) => console.error(`[ModuleGate] failed to load ${moduleKey}`, e));
-      return () => { cancel = true; };
-    }, [ready, moduleKey]);
+        .catch((e) => {
+          console.error(`[ModuleGate] failed to load ${moduleKey}`, e);
+          if (!cancel) setError(e);
+        });
 
-    return null; // real pages come from module routes
+      return () => {
+        cancel = true;
+      };
+    }, [moduleKey, app, manifest]);
+
+    // If already loaded, render nothing (routes will take over)
+    if (loaded.get(moduleKey)) return null;
+
+    // Error UI
+    if (error) {
+      return (
+        <div style={{ color: "crimson", padding: 16 }}>
+          Failed to load module: {moduleKey}
+        </div>
+      );
+    }
+
+    // Loading UI (customizable)
+    const hookContent = app.config.hooks?.renderModuleLoading?.({ moduleKey });
+    const loading =
+      typeof renderLoading === "function"
+        ? renderLoading({ moduleKey })
+        : renderLoading || hookContent;
+
+    return (
+      loading ?? (
+        <div style={{ display: "flex", justifyContent: "center", padding: 16 }}>
+          <CircularProgress />
+        </div>
+      )
+    );
   };
 }
 

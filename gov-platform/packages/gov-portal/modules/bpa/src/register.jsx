@@ -1,24 +1,15 @@
 // register.js
 import React from "react";
 import { registerComponent, registerAction } from "@gov/core";
+import { LazyWrap } from "@gov/core";
 import { loadBpaCard, loadBpaStart } from "./widgets";
 import "@gov/styles/modules/bpa/index.scss";
-// small helper: wrap React.lazy with Suspense once
-const lazyWrap = (loader, name = "Loading") => {
-  const Lazy = React.lazy(loader);
-  return function Wrapped(props) {
-    return (
-      <React.Suspense fallback={<div>{name}…</div>}>
-        <Lazy {...props} />
-      </React.Suspense>
-    );
-  };
-};
+
 
 export function register(app) {
   // Register *loaders*, not components.
-  registerComponent("BpaCard",  lazyWrap(loadBpaCard, "BPA Card"));
-  registerComponent("BpaStart", lazyWrap(loadBpaStart, "BPA Start"));
+  registerComponent("BpaCard",  LazyWrap(loadBpaCard, "BPA Card"));
+  registerComponent("BpaStart", LazyWrap(loadBpaStart, "BPA Start"));
 
   // Actions
   registerAction("bpa.start", () => app.history.push("/bpa/start"));

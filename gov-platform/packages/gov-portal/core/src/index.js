@@ -16,6 +16,7 @@ export {
   // Router + factory
   export { default as RouteBuilder } from "./runtime/RouteBuilder";
   export { default as ComponentFactory } from "./runtime/ComponentFactory";
+  export { default as LazyWrap } from "./runtime/LazyWrap";
   
   // IMPORTANT: this file contains JSX; ensure it's named .jsx
   import "./runtime/blocks.jsx";
