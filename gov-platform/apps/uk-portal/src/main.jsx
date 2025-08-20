@@ -47,6 +47,7 @@ start({
     },
     onAuthFail: "/login"
   },
+  publicPaths: ["/register"],
   modules: {
     defaults: {
       list: [
@@ -61,5 +62,5 @@ start({
       }
     }
   },
-  redirects: [{ from: "/", to: "/login" }]
+  redirects: [{ from: "/", to: "/bpa" }]
 });

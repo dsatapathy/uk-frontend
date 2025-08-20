@@ -11,28 +11,27 @@ export function ensureAuthGuard(routes, auth) {
 }
 
 function makeTokenGuard(auth) {
+  const publicPaths = [auth.login?.path || "/login", ...(auth.publicPaths || [])];
   return function TokenGuard({ children }) {
     const history = useHistory();
     const location = useLocation();
 
     // Treat login path as public to avoid redirect loop
-    const loginPath = auth.login?.path || "/login";
-    const isOnLogin = location.pathname === loginPath;
-
-    const [ok, setOk] = React.useState(isOnLogin ? true : null);
+    const isPublic = publicPaths.includes(location.pathname);
+    const [ok, setOk] = React.useState(isPublic ? true : null);
 
     React.useEffect(() => {
-      if (isOnLogin) return; // allow login without token
+      if (isPublic) return; // allow public routes without token
       Promise.resolve(auth.getToken?.()).then((token) => {
         if (token) setOk(true);
         else {
           setOk(false);
-          const fail = auth.onAuthFail || loginPath;
-          if (typeof fail === "string") history.replace(fail); 
+          const fail = auth.onAuthFail || publicPaths[0];
+          if (typeof fail === "string") history.replace(fail);
           else fail?.({ navigate: (to) => history.replace(to) });
         }
       });
-    }, [isOnLogin, history]);
+    }, [isPublic, history]);
 
     if (ok === null) return <div>Checking authentication…</div>;
     return ok ? children : null;
