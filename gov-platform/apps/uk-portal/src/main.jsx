@@ -27,6 +27,7 @@ start({
       fields: ["username", "password"],
       captcha: { provider: "recaptcha", siteKey: "YOUR_PUBLIC_KEY", action: "login" }
     },
+    publicPaths: ["/register", "/forgot", "/otp"],
     endpoints: {
       login: "/api/auth/login",
       refresh: "/api/auth/refresh",

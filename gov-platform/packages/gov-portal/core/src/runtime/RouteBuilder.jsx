@@ -3,9 +3,9 @@ import { Switch, Route, Redirect } from "react-router-dom";
 import ComponentFactory from "./ComponentFactory";
 import { getGuard, getLayout } from "./registry";
 
-function Guarded({ guard, children, context }) {
+function Guarded({ guard, children, context, redirectTo = "/" }) {
   if (!guard) return children;
-  return guard(context) ? children : <Redirect to="/" />;
+  return guard(context) ? children : <Redirect to={redirectTo} />;
 }
 
 export default function RouteBuilder({ routes = [], context }) {
@@ -24,7 +24,7 @@ export default function RouteBuilder({ routes = [], context }) {
         const layoutProps = Layout === React.Fragment ? {} : { context };
         return (
           <Route key={r.path} exact={!!r.exact} path={r.path}>
-            <Guarded guard={GuardFn} context={context}>
+            <Guarded guard={GuardFn} context={context} redirectTo={r.redirectTo}>
               {React.createElement(
                 Layout,
                 layoutProps,
