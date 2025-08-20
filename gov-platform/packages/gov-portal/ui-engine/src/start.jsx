@@ -1,10 +1,10 @@
+// start.jsx
 import React from "react";
 import ReactDOM from "react-dom";
 import { Router } from "react-router-dom";
 import { createBrowserHistory } from "history";
 import { ThemeProvider, createTheme, CssBaseline } from "@mui/material";
 import { RouteBuilder, runtime } from "@gov/core";
-import { getLayout } from "@gov/core";
 import ThemeBridge from "./ThemeBridge";
 import { registerModuleGate, buildLazyModuleRoutes, prefetchModule } from "./modules-orchestrator";
 import { ensureAuthGuard } from "./auth";
@@ -86,6 +86,25 @@ function applySidebarMerge(defaults, fetched, strategy = "replace") {
   return fetched; // replace
 }
 
+function resolveRouteLayouts(routes, fallbackLayout) {
+  return routes.map((r) => {
+    const resolved =
+      typeof r.layout === "string"
+        ? (runtime.getLayout?.(r.layout) || fallbackLayout)
+        : (r.layout || fallbackLayout);
+    return { ...r, layout: resolved };
+  });
+}
+
+function getByPath(obj, path, fallback) {
+  if (!path) return fallback;
+  try {
+    return path.split(".").reduce((o, k) => (o == null ? o : o[k]), obj) ?? fallback;
+  } catch {
+    return fallback;
+  }
+}
+
 // ---------------- Engine entry ----------------
 export function start(config) {
   const {
@@ -101,11 +120,11 @@ export function start(config) {
     layout: {
       sidebar: sidebarCfg = {},
       component: layoutComponent,
-      header: headerCfg,
+      header: headerCfg, // eslint-disable-line no-unused-vars
     } = {},
 
     // modules
-    modules = [], // can be array OR { defaults, source, ... }
+    modules = [], // array OR { defaults, source, ... }
     redirects = [],
 
     // http auth hooks
@@ -115,7 +134,7 @@ export function start(config) {
     context = {},
   } = config;
 
-  // 1) History Theme
+  // 1) History + Theme
   const history = createBrowserHistory({ basename: base });
   const theme = createTheme(
     Object.assign(
@@ -153,16 +172,13 @@ export function start(config) {
   // 3) Layout (resolve string names to actual components)
   let Shell;
   if (!layoutComponent) {
-    // no component provided → use default
     Shell = DefaultShell;
   } else if (typeof layoutComponent === "string") {
-    // a string like "Shell" was provided → look it up, fallback to default
     Shell = runtime.getLayout?.(layoutComponent) || DefaultShell;
   } else {
-    // a real React component was provided
     Shell = layoutComponent;
   }
-  // make sure registries know about "Shell"
+  // Ensure "Shell" is registered for route layout resolution
   runtime.registerLayout?.("Shell", Shell);
 
   // 4) App API
@@ -182,6 +198,8 @@ export function start(config) {
   // 6) Register ModuleGate stub routes
   registerModuleGate(app, initialManifests);
   const initialRoutes = buildLazyModuleRoutes(initialManifests, redirects);
+
+  // 7) Auth guard + resolve layouts
   const guardedInitialRoutes = ensureAuthGuard(
     resolveRouteLayouts(initialRoutes, Shell),
     auth
@@ -191,7 +209,7 @@ export function start(config) {
   hooks.onBootstrap?.({ app, manifests: initialManifests, appName: appInfo?.name, logo: appInfo?.logo });
 
   function EngineApp() {
-    // route manifest state (so dynamic modules can replace the defaults)
+    // state that can be replaced by fetched module manifests/routes
     const [manifests, setManifests] = React.useState(initialManifests);
     const [routes, _setRoutes] = React.useState(guardedInitialRoutes);
     setRoutes = _setRoutes;
@@ -205,8 +223,15 @@ export function start(config) {
       return unlisten;
     }, []);
 
-    // -------- Sidebar: source defaults mergeStrategy ----------
+    // single-run refs (React 17 compatible, avoids multiple API hits)
+    const sidebarRanRef = React.useRef(false);
+    const modulesRanRef = React.useRef(false);
+
+    // -------- Sidebar: source + defaults + mergeStrategy ----------
     React.useEffect(() => {
+      if (sidebarRanRef.current) return;
+      sidebarRanRef.current = true;
+
       const s = sidebarCfg?.source;
       const defaults = sidebarCfg?.defaults || sidebarCfg?.nav || [];
       const mergeStrategy = sidebarCfg?.mergeStrategy || "replace";
@@ -218,7 +243,7 @@ export function start(config) {
           return;
         }
         try {
-          // endpoint or url params
+          // endpoint or url + params
           const url = s.endpoint ? config.http?.endpoints?.[s.endpoint]?.url : s.url || s.endpoint;
           const params = Object.assign(
             {},
@@ -229,14 +254,18 @@ export function start(config) {
               role: config.auth?.currentUser?.role, // optional, in case host passes
             }
           );
-          const { data } = await http.get(url, { params });
+
+          // ⬇ ensure we don't retry this bootstrap call
+          const { data } = await http.get(url, { params, retry: false });
+
           const listPath = s.mapping?.list || "items";
-          const serverItems = (data && (listPath.split(".").reduce((o, k) => (o ? o[k] : undefined), data) || data.items)) || [];
+          const serverItems =
+            (data && (listPath.split(".").reduce((o, k) => (o ? o[k] : undefined), data) || data.items)) || [];
+
           // map fields if mapping is provided
           const map = s.mapping?.fields;
-          const mapped =
-            map
-              ? serverItems.map((it) => ({
+          const mapped = map
+            ? serverItems.map((it) => ({
                 key: getByPath(it, map.key, it.code),
                 text: getByPath(it, map.text, it.label),
                 to: getByPath(it, map.to, it.route),
@@ -247,7 +276,7 @@ export function start(config) {
                   expr: getByPath(it, map?.visibleWhen?.expr, it.expr),
                 },
               }))
-              : serverItems;
+            : serverItems;
 
           const finalNav = applySidebarMerge(defaults, mapped, mergeStrategy);
           if (finalNav?.length) app.addNav?.(finalNav);
@@ -260,11 +289,14 @@ export function start(config) {
       }
 
       loadSidebar();
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [JSON.stringify(sidebarCfg), JSON.stringify(headerCfg), appInfo?.tenant]);
+      // empty deps: intentionally run once per mount
+    }, []);
 
     // -------- Modules: fetch from API and merge with defaults -----
     React.useEffect(() => {
+      if (modulesRanRef.current) return;
+      modulesRanRef.current = true;
+
       if (Array.isArray(modules)) return; // nothing to load
       const src = modules?.source;
       if (!src) return;
@@ -273,10 +305,12 @@ export function start(config) {
         try {
           const url = src.endpoint ? config.http?.endpoints?.[src.endpoint]?.url : src.url || src.endpoint;
           const params = Object.assign({ tenant: appInfo?.tenant }, src.params || {});
-          const { data } = await http.get(url, { params });
+          // ⬇ ensure we don't retry this bootstrap call
+          const { data } = await http.get(url, { params, retry: false });
 
           const listPath = src.mapping?.list || "modules";
-          const apiModules = (data && (listPath.split(".").reduce((o, k) => (o ? o[k] : undefined), data) || data.modules)) || [];
+          const apiModules =
+            (data && (listPath.split(".").reduce((o, k) => (o ? o[k] : undefined), data) || data.modules)) || [];
 
           // normalize into { key, basePath } then attach loader via defaults.registry
           const normalized = apiModules.map((m) => ({
@@ -298,13 +332,17 @@ export function start(config) {
             resolveRouteLayouts(buildLazyModuleRoutes(merged, redirects), Shell),
             auth
           );
+
           setManifests(merged);
           _setRoutes(newRoutes);
         } catch (e) {
           if (modules?.onErrorFallback === "defaults") {
             const merged = buildManifestsFromConfig(modules);
             registerModuleGate(app, merged);
-            const newRoutes = ensureAuthGuard(buildLazyModuleRoutes(merged, redirects), auth);
+            const newRoutes = ensureAuthGuard(
+              resolveRouteLayouts(buildLazyModuleRoutes(merged, redirects), Shell),
+              auth
+            );
             setManifests(merged);
             _setRoutes(newRoutes);
           }
@@ -312,8 +350,8 @@ export function start(config) {
       }
 
       loadModules();
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [JSON.stringify(modules), appInfo?.tenant]);
+      // empty deps: intentionally run once per mount
+    }, []);
 
     return (
       <Router history={history}>
@@ -326,7 +364,7 @@ export function start(config) {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <ThemeBridge />
-      {/* React Query globally for engine modules */}
+      {/* React Query globally for engine + modules */}
       <QueryProvider>
         <EngineApp />
       </QueryProvider>
@@ -340,24 +378,4 @@ export async function startFromUrl(url) {
   if (!res.ok) throw new Error(`Failed to load config: ${url}`);
   const cfg = await res.json();
   return start(cfg);
-}
-
-// -------------- tiny helper --------------
-function getByPath(obj, path, fallback) {
-  if (!path) return fallback;
-  try {
-    return path.split(".").reduce((o, k) => (o == null ? o : o[k]), obj) ?? fallback;
-  } catch {
-    return fallback;
-  }
-}
-
-function resolveRouteLayouts(routes, fallbackLayout) {
-  return routes.map((r) => {
-    const resolved =
-      typeof r.layout === "string"
-        ? (runtime.getLayout?.(r.layout) || fallbackLayout)
-        : (r.layout || fallbackLayout);
-    return { ...r, layout: resolved };
-  });
 }
