@@ -6,8 +6,9 @@
     "apps/*",
     "packages/gov-portal/*",
     "packages/gov-portal/modules/*",
-    "packages/styles",
-    "packages/ui-engine"
+    "packages/gov-portal/styles",
+    "packages/gov-portal/ui-engine",
+    "packages/gov-portal/data"
   ],
   "engines": {
     "node": ">=20"
@@ -21,6 +22,10 @@
     "dev:ui-engine": "yarn workspace @gov/ui-engine dev",
     "build:ui-engine": "yarn workspace @gov/ui-engine build",
     "clean:ui-engine": "yarn workspace @gov/ui-engine clean",
+    "//---------------- Data ----------------": "────────",
+    "dev:data": "yarn workspace @gov/data dev",
+    "build:data": "yarn workspace @gov/data build",
+    "clean:data": "yarn workspace @gov/data clean",
     "//---------------- BPA -----------------": "────────",
     "dev:bpa": "yarn workspace @gov/mod-bpa dev",
     "build:bpa": "yarn workspace @gov/mod-bpa build",
@@ -49,8 +54,8 @@
     "dev:<key>": "yarn workspace @gov/mod-<key> dev",
     "build:<key>": "yarn workspace @gov/mod-<key> build",
     "//------ Optional combined flows -------": "────────",
-    "dev": "concurrently -k -n core,ui-engine,bpa,tl,wns,app -c auto \"yarn dev:core\" \"yarn dev:ui-engine\" \"yarn dev:bpa\" \"yarn dev:tl\" \"yarn dev:wns\" \"yarn dev:app\"",
-    "build": "yarn build:core && yarn build:ui-engine && yarn build:bpa && yarn build:tl build:wns && yarn build:app",
+    "dev": "concurrently -k -n core,ui-engine,data,bpa,tl,wns,app -c auto \"yarn dev:core\" \"yarn dev:ui-engine\" \"yarn dev:data\" \"yarn dev:bpa\" \"yarn dev:tl\" \"yarn dev:wns\" \"yarn dev:app\"",
+    "build": "yarn build:core && yarn build:ui-engine && yarn build:data && yarn build:bpa && yarn build:tl build:wns && yarn build:app",
     "ci": "yarn --frozen-lockfile && yarn run dedupe && yarn ws:info && yarn build"
   },
   "dependencies": {
@@ -78,6 +83,7 @@
     "@testing-library/react": "^14.2.1",
     "@types/node": "^24.3.0",
     "@vitejs/plugin-react": "^4.3.1",
+    "axios": "^1.11.0",
     "babel-jest": "^29.7.0",
     "concurrently": "^8.2.2",
     "jest": "^29.7.0",

@@ -12,8 +12,15 @@ export default function RouteBuilder({ routes = [], context }) {
   return (
     <Switch>
       {routes.map((r) => {
-        const Layout = (r.layout && getLayout(r.layout)) || React.Fragment;
-        const GuardFn = r.guard && getGuard(r.guard);
+        const Layout =
+          typeof r.layout === "string"
+            ? (getLayout?.(r.layout) /*|| getLocalLayout?.(r.layout)*/ || React.Fragment)
+            : (r.layout || React.Fragment);
+        
+        const GuardFn =
+          typeof r.guard === "string"
+            ? (getGuard?.(r.guard) /*|| getLocalGuard?.(r.guard)*/ )
+            : r.guard;
         const layoutProps = Layout === React.Fragment ? {} : { context };
         return (
           <Route key={r.path} exact={!!r.exact} path={r.path}>

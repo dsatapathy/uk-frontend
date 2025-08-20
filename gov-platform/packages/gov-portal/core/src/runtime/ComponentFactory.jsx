@@ -8,7 +8,11 @@ const Fallback = ({ type }) => (
 export default function ComponentFactory({ node, context }) {
   if (!node) return null;
   const { type, props = {}, children = [] } = node;
-  const Comp = getComponent(type) || Fallback;
+  // allow passing a real React component directly in config
+  const Comp =
+    typeof type === "string"
+      ? (getComponent?.(type) /*|| getLocalComponent?.(type)*/ || Fallback)
+      : (type || Fallback);
 
   return (
     <Comp {...props} context={context}>

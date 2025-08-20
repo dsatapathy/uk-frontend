@@ -7,7 +7,7 @@ export default defineConfig({
     lib: { entry: "src/index.js", formats: ["es"] },
     rollupOptions: {
       // never bundle these
-      external: ["react", "react-dom", "react-router-dom", "@gov/core", "@gov/mod-bpa"],
+      external: ["react", "react-dom", "react-router-dom", "@gov/core", "@gov/data"],
       output: {
         preserveModules: true,
         preserveModulesRoot: "src",
