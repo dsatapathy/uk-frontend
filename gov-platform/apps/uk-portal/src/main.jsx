@@ -21,10 +21,12 @@ start({
   modules: {
     defaults: {
       list: [
+        { key: "auth", basePath: "/" },
         { key: "bpa", basePath: "/bpa" },
         { key: "tl",  basePath: "/tl"  },
       ],
       registry: {
+        auth: () => import("@gov/mod-auth"),
         bpa: () => import("@gov/mod-bpa"),
         tl:  () => import("@gov/mod-tl"),
       }

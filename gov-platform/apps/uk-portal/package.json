@@ -22,6 +22,7 @@
       "@gov/mod-bpa": "0.1.0",
       "@gov/mod-tl": "0.1.0",
       "@gov/mod-wns": "0.1.0",
+      "@gov/mod-auth": "0.1.0",
       "@gov/ui-engine": "0.1.0"
     }
   }

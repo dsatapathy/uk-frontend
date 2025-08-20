@@ -25,3 +25,12 @@ export function useLogin() {
     },
   });
 }
+
+export function useRegister() {
+  return useMutation({
+    mutationFn: async (payload) => {
+      const res = await http().post("/auth/register", payload);
+      return res.data;
+    },
+  });
+}

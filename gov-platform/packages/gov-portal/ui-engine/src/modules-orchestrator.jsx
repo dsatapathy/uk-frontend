@@ -83,12 +83,19 @@ export function makeModuleGate({ app, manifests }) {
 }
 
 export function buildLazyModuleRoutes(manifests = [], redirects = []) {
-  const gates = manifests.map((m) => ({
-    path: m.basePath,
-    exact: false,
-    layout: "Shell",
-    page: { type: "ModuleGate", props: { moduleKey: m.key } },
-  }));
+  const gates = manifests
+    .map((m) => ({
+      path: m.basePath,
+      exact: false,
+      layout: "Shell",
+      page: { type: "ModuleGate", props: { moduleKey: m.key } },
+    }))
+    // longer path first; keep "/" at the very end
+    .sort((a, b) => {
+      if (a.path === "/" && b.path !== "/") return 1;
+      if (b.path === "/" && a.path !== "/") return -1;
+      return b.path.length - a.path.length;
+    });
   const rds = redirects.map((r) => ({ path: r.from, exact: true, redirect: r.to }));
   return [...rds, ...gates];
 }

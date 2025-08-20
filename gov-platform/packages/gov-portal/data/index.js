@@ -7,7 +7,7 @@ export { QueryProvider } from "./query/Provider.jsx";
 
 // ---- services ----
 export { setHttp, http } from "./services/bootstrap.js";
-export { useMe, useLogin } from "./services/auth/index.js";
+export { useMe, useLogin, useRegister  } from "./services/auth/index.js";
 export { useSidebar, useModules } from "./services/masters/index.js";
 
 // ---- cache keys ----

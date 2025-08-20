@@ -38,6 +38,10 @@
     "dev:wns": "yarn workspace @gov/mod-wns dev",
     "build:wns": "yarn workspace @gov/mod-wns build",
     "clean:wns": "yarn workspace @gov/mod-wns clean",
+    "//---------------- Auth -----------------": "────────",
+    "dev:auth": "yarn workspace @gov/mod-auth dev",
+    "build:auth": "yarn workspace @gov/mod-auth build",
+    "clean:auth": "yarn workspace @gov/mod-auth clean",
     "//---------------- App -----------------": "────────",
     "dev:app": "yarn workspace uk-portal dev",
     "build:app": "yarn workspace uk-portal build",
@@ -54,8 +58,8 @@
     "dev:<key>": "yarn workspace @gov/mod-<key> dev",
     "build:<key>": "yarn workspace @gov/mod-<key> build",
     "//------ Optional combined flows -------": "────────",
-    "dev": "concurrently -k -n core,ui-engine,data,bpa,tl,wns,app -c auto \"yarn dev:core\" \"yarn dev:ui-engine\" \"yarn dev:data\" \"yarn dev:bpa\" \"yarn dev:tl\" \"yarn dev:wns\" \"yarn dev:app\"",
-    "build": "yarn build:core && yarn build:ui-engine && yarn build:data && yarn build:bpa && yarn build:tl build:wns && yarn build:app",
+    "dev": "concurrently -k -n core,ui-engine,data,bpa,tl,wns,auth,app -c auto \"yarn dev:core\" \"yarn dev:ui-engine\" \"yarn dev:data\" \"yarn dev:bpa\" \"yarn dev:tl\" \"yarn dev:wns\" \"yarn dev:auth\" \"yarn dev:app\"",
+    "build": "yarn build:core && yarn build:ui-engine && yarn build:data && yarn build:bpa && yarn build:tl && build:wns && build:auth && yarn build:app",
     "ci": "yarn --frozen-lockfile && yarn run dedupe && yarn ws:info && yarn build"
   },
   "dependencies": {
