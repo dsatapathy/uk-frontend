@@ -78,7 +78,7 @@ export function start(rawConfig) {
         externalSetRoutes = setRoutes;
 
         // prefetch on hover/idle
-        useModulePrefetch(manifests);
+        useModulePrefetch();
 
         // route change hook
         React.useEffect(() => {
