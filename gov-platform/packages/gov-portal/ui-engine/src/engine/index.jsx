@@ -16,12 +16,21 @@ import { registerGateAndBuildRoutes } from "./routes";
 import { buildInitialManifests, bootstrapModules } from "./modules";
 import { bootstrapSidebar } from "./sidebar";
 import { buildManifestsFromConfig } from "./utils";
+import { configSchema } from "./config-schema";
 
-export function start(config) {
+export function start(rawConfig) {
+    const validated = configSchema.safeParse(rawConfig);
+
+    if (!validated.success) {
+        console.error("Invalid engine config:", validated.error.flatten().fieldErrors);
+        throw new Error("Engine configuration validation failed");
+    }
+
+    const cfg = validated.data;
     const {
-        target = "#root",
-        base = "/uk-portal",
-        app: appInfo = {},
+        target,
+        base,
+        app: appInfo,
         theme: themeOverrides,
         layout,
         layout: {
@@ -34,7 +43,7 @@ export function start(config) {
         auth = { strategy: "none" },
         hooks = {},
         context = {},
-    } = config;
+    } = cfg;
 
     const history = createBrowserHistory({ basename: base });
     const theme = createTheme(Object.assign({}, DEFAULT_THEME, themeOverrides || {}));
@@ -47,7 +56,7 @@ export function start(config) {
     let externalSetRoutes;
     const app = {
         history,
-        config,
+        config: cfg,
         addRoutes: (r) => externalSetRoutes((prev) => [...r, ...prev]), // prepend real routes
         addNav: (items) => runtime.registerNav?.(items),
         actions: hooks.provideActions?.() || {},
@@ -55,7 +64,7 @@ export function start(config) {
     };
 
     // HTTP client (engine-owned)
-    const http = initHttp(config, appInfo, history);
+    const http = initHttp(cfg, appInfo, history);
 
     // Initial manifests & stub routes
     const initialManifests = buildInitialManifests(modules);
@@ -79,7 +88,7 @@ export function start(config) {
 
         // Sidebar bootstrap (once)
         React.useEffect(() => {
-            bootstrapSidebar({ config, http, app, sidebarCfg, appInfo });
+            bootstrapSidebar({ config : cfg, http, app, sidebarCfg, appInfo });
         }, []);
 
         // Modules bootstrap/merge (once)
@@ -93,7 +102,7 @@ export function start(config) {
             };
 
             bootstrapModules({
-                config,
+                config: cfg,
                 http,
                 modules,
                 app,

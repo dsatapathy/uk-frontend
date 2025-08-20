@@ -1,10 +1,10 @@
 // src/engine/sidebar.js
 import { applySidebarMerge, getByPath } from "./utils";
-import { bootstrapFlags } from "./constants";
+// import { bootstrapFlags } from "./constants";
 
 export async function bootstrapSidebar({ config, http, app, sidebarCfg, appInfo }) {
-  if (bootstrapFlags.sidebar) return;
-  bootstrapFlags.sidebar = true;
+  // if (bootstrapFlags.sidebar) return;
+  // bootstrapFlags.sidebar = true;
 
   const s = sidebarCfg?.source;
   const defaults = sidebarCfg?.defaults || sidebarCfg?.nav || [];

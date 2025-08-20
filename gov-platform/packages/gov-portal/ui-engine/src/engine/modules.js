@@ -1,7 +1,7 @@
 // src/engine/modules.js
 import { buildManifestsFromConfig, getByPath, mergeModuleLists } from "./utils";
 import { registerGateAndBuildRoutes } from "./routes";
-import { bootstrapFlags } from "./constants";
+// import { bootstrapFlags } from "./constants";
 
 export function buildInitialManifests(modules) {
   return buildManifestsFromConfig(modules);
@@ -20,8 +20,8 @@ export async function bootstrapModules({
   onFallback,
   appInfo,
 }) {
-  if (bootstrapFlags.modules) return;
-  bootstrapFlags.modules = true;
+  // if (bootstrapFlags.modules) return;
+  // bootstrapFlags.modules = true;
 
   if (Array.isArray(modules)) return; // no remote source
 
