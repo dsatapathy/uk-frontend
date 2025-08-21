@@ -1,6 +1,21 @@
-export { FieldRenderer } from "./form/FieldRenderer.jsx";
-export { AuthLayout } from "./components/AuthLayout.jsx";
-export { AuthCard } from "./components/AuthCard.jsx";
-export { Brand } from "./components/Brand.jsx";
-export { CaptchaBox } from "./components/CaptchaBox.jsx";
+// utils (tiny)
 export { buildSchema } from "./utils/schema.js";
+import { asDefault } from "@gov/core";
+import { LazyWrap } from "@gov/core";
+import { registerComponent, getComponent } from "@gov/core";
+
+// Lazy loaders (no component code pulled yet)
+export const loadAuthLayout = asDefault(() => import("./components/AuthLayout.jsx"), "AuthLayout");
+export const loadAuthCard = asDefault(() => import("./components/AuthCard.jsx"), "AuthCard");
+export const loadBrand = asDefault(() => import("./components/Brand.jsx"), "Brand");
+export const loadCaptchaBox = asDefault(() => import("./components/CaptchaBox.jsx"), "CaptchaBox");
+export const loadFieldRenderer = asDefault(() => import("./form/FieldRenderer.jsx"), "FieldRenderer");
+
+// Call this once from the host (bootstrap), not here.
+export function registerLibraryDefaults() {
+    registerComponent("AuthLayout", LazyWrap(loadAuthLayout, "AuthLayout"));
+    registerComponent("AuthCard", LazyWrap(loadAuthCard, "AuthCard"));
+    registerComponent("Brand", LazyWrap(loadBrand, "Brand"));
+    registerComponent("CaptchaBox", LazyWrap(loadCaptchaBox, "CaptchaBox"));
+    registerComponent("FieldRenderer", LazyWrap(loadFieldRenderer, "FieldRenderer"));
+}

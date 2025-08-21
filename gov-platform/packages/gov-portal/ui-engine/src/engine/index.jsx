@@ -5,6 +5,7 @@ import { Router } from "react-router-dom";
 import { createBrowserHistory } from "history";
 import { ThemeProvider, createTheme, CssBaseline } from "@mui/material";
 import { RouteBuilder, runtime } from "@gov/core";
+import { registerLibraryDefaults } from "@gov/library";
 import { QueryProvider } from "@gov/data";
 import ThemeBridge from "../ThemeBridge";
 import { DEFAULT_THEME } from "./constants";
@@ -51,7 +52,8 @@ export function start(rawConfig) {
     // Layout/Shell
     const Shell = resolveShell(layoutComponent);
     registerShellAsLayout(Shell);
-
+    // 🔽 Register library components lazily (no code is fetched until rendered)
+    registerLibraryDefaults();
     // Engine API surface
     let externalSetRoutes;
     const app = {
@@ -88,7 +90,7 @@ export function start(rawConfig) {
 
         // Sidebar bootstrap (once)
         React.useEffect(() => {
-            bootstrapSidebar({ config : cfg, http, app, sidebarCfg, appInfo });
+            bootstrapSidebar({ config: cfg, http, app, sidebarCfg, appInfo });
         }, []);
 
         // Modules bootstrap/merge (once)

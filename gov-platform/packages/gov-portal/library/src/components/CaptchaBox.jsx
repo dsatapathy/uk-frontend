@@ -2,10 +2,9 @@ import * as React from "react";
 import { TextField, Button, InputAdornment } from "@mui/material";
 import { Controller } from "react-hook-form";
 import RefreshIcon from "@mui/icons-material/Refresh";
-import defaultS from "@gov/styles/modules/auth/Auth.module.scss";
 
 export function CaptchaBox({ control, cfg = {}, errors, classes }) {
-  const s = classes || defaultS;
+  const s = classes || {};
   const name = cfg.name || "captcha";
   const length = cfg.length || 6;
   const [code, setCode] = React.useState(make(length));

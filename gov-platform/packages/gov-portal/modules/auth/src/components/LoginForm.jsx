@@ -2,11 +2,17 @@ import * as React from "react";
 import { Button } from "@mui/material";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { buildSchema, AuthLayout, AuthCard, Brand, FieldRenderer, CaptchaBox } from "@gov/library";
+import { buildSchema } from "@gov/library";
 import defaultS from "@gov/styles/modules/auth/Auth.module.scss";
+import { getComponent } from "@gov/core";
 
 export default function LoginForm({ config, onSubmit, onSuccess, components = {}, classes  }) {
   const s = classes || defaultS;
+  const AuthLayout = getComponent("AuthLayout");
+  const AuthCard = getComponent("AuthCard");
+  const Brand = getComponent("Brand");
+  const FieldRenderer = getComponent("FieldRenderer");
+  const CaptchaBox = getComponent("CaptchaBox");
   const C = {
     AuthLayout: components.AuthLayout || AuthLayout,
     AuthCard: components.AuthCard || AuthCard,
@@ -55,27 +61,27 @@ export default function LoginForm({ config, onSubmit, onSuccess, components = {}
   const submitFn = onSubmit || defaultSubmit;
 
   return (
-    <C.AuthLayout place={place} styleVars={styleVars} >
+    <C.AuthLayout place={place} styleVars={styleVars} classes={s} >
       <form className="login-form" onSubmit={handleSubmit(async (payload) => {
         await submitFn(payload);
         onSuccess ? onSuccess(payload) : (config.onSuccessRoute && (window.location.href = config.onSuccessRoute));
       })} noValidate>
-        <C.AuthCard variant={config.layout?.variant || "card"} elevation={elevation}>
+        <C.AuthCard variant={config.layout?.variant || "card"} elevation={elevation} classes={s} >
           {(config.brand && (config.brand.logo || config.brand.title || config.brand.subtitle)) ? (
             <C.Brand {...config.brand} />
           ) : null}
 
           <div className="login-grid">
             {(config.fields || []).map((f) => (
-              <C.FieldRenderer key={f.name} control={control} field={f} errors={errors} />
+              <C.FieldRenderer key={f.name} control={control} field={f} errors={errors} classes={s} />
             ))}
             {config.captcha?.provider === "dev" ? (
-              <C.CaptchaBox control={control} cfg={config.captcha} errors={errors} />
+              <C.CaptchaBox control={control} cfg={config.captcha} errors={errors} classes={s} />
             ) : null}
           </div>
 
           <div className={`submit-row align-${config.style?.button?.align || "left"}`}>
-            <Button type="submit" variant="contained" size="large" disabled={isSubmitting} className="submit-btn">
+            <Button type="submit" variant="contained" size="large" disabled={isSubmitting} className="submit-btn" classes={s} >
               {config.submit?.label || "Sign In"}
             </Button>
           </div>
