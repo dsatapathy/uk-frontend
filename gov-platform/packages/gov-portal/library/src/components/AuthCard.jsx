@@ -1,7 +1,9 @@
 import * as React from "react";
 import { Card, CardContent, Paper } from "@mui/material";
-import s from "@gov/styles/modules/auth/Auth.module.scss";
-export function AuthCard({ children, variant="card", className="", elevation=2 }) {
+import defaultS from "@gov/styles/modules/auth/Auth.module.scss";
+
+export function AuthCard({ children, variant="card", className="", elevation=2, classes }) {
+  const s = classes || defaultS;
   if (variant === "paper") {
     return (
       <Paper elevation={elevation} className={`${s.authCard} ${className}`}>
@@ -15,4 +17,3 @@ export function AuthCard({ children, variant="card", className="", elevation=2 }
     </Card>
   );
 }
-

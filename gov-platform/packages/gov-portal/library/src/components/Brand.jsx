@@ -1,6 +1,8 @@
 import * as React from "react";
-import s from "@gov/styles/modules/auth/Auth.module.scss";
-export function Brand({ logo, title, subtitle, className = "" }) {
+import defaultS from "@gov/styles/modules/auth/Auth.module.scss";
+
+export function Brand({ logo, title, subtitle, className = "", classes }) {
+  const s = classes || defaultS;
   return (
     <div className={`${s.brand} ${className}`}>
       {logo && <img className={s.brandLogo} src={logo} alt={title || "logo"} />}
@@ -9,4 +11,3 @@ export function Brand({ logo, title, subtitle, className = "" }) {
     </div>
   );
 }
-

@@ -8,9 +8,10 @@ import { AuthCard } from "./AuthCard.jsx";
 import { Brand } from "./Brand.jsx";
 import { FieldRenderer } from "../form/FieldRenderer.jsx";
 import { CaptchaBox } from "./CaptchaBox.jsx";
-import s from "@gov/styles/modules/auth/Auth.module.scss";
+import defaultS from "@gov/styles/modules/auth/Auth.module.scss";
 
-export function LoginForm({ config, onSubmit, onSuccess, components = {} }) {
+export function LoginForm({ config, onSubmit, onSuccess, components = {}, classes  }) {
+  const s = classes || defaultS;
   const C = {
     AuthLayout: components.AuthLayout || AuthLayout,
     AuthCard: components.AuthCard || AuthCard,
