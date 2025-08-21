@@ -12,7 +12,7 @@ const loginConfig = {
       paddingPx: 24,
       background: "linear-gradient(180deg,#f8fafc,#fff)", // fallback if image fails
       // NEW ↓
-      backgroundImage: bgImg,
+      backgroundImage: '',
       backgroundFit: "cover",        // cover | contain
       backgroundPosition: "center",  // css background-position
       overlay: "rgba(255,255,255,.6)",  // glass overlay on top of bg
@@ -21,7 +21,7 @@ const loginConfig = {
     card: { widthPx: 520, paddingPx: 28, radiusPx: 12, border: "1px solid #e5e7eb", elevation: 2 },
     grid: { cols: 12, gapPx: 12 },
     field: { size: "small" },
-    button: { align: "right", marginTopPx: 12 },
+    button: { align: "center", marginTopPx: 12 },
   },
 
   // optional animated decorations (rendered by AuthLayout)
@@ -49,6 +49,7 @@ const loginConfig = {
   captcha: { provider: "dev", name: "captcha", length: 6 },
 
   submit: { label: "Sign In", endpoint: "/api/auth/login", method: "POST" },
+  register: { label: "Register", endpoint: "/api/auth/register", method: "POST" },
   onSuccessRoute: "/"
 };
 

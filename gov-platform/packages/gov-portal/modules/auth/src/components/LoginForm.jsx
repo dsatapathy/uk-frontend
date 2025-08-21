@@ -52,6 +52,9 @@ export default function LoginForm({ config, onSubmit, onSuccess, components = {}
     "login-grid-cols":      String(config.style?.grid?.cols ?? 12),
     "login-grid-gap":       (config.style?.grid?.gapPx ?? 16) + "px",
     "login-button-mt":      (config.style?.button?.marginTopPx ?? 8) + "px",
+    "field-bg":            config.style?.field?.bg || "#fff",
+    "field-error":         config.style?.field?.errorColor  || "#ef4444",
+    "field-focus":         config.style?.field?.focusColor  || "#0b5fff",
   };
   const elevation = config.style?.card?.elevation ?? 2;
   const place = config.style?.layout?.place || "center";// center|left|right|top-left|top-right|bottom-left|bottom-right
@@ -103,8 +106,21 @@ export default function LoginForm({ config, onSubmit, onSuccess, components = {}
               fullWidth={!!config.style?.button?.fullWidth}
               loading={isSubmitting}
               className={s.submitBtn}
+              buttonGap={1}
             >
               {config.submit?.label || "Sign In"}
+            </AppButton>
+            <AppButton
+              type="submit"
+              variant={config.style?.button?.variant || "contained"}
+              tone={config.style?.button?.tone || "secondary"}
+              size={config.style?.button?.size || "large"}
+              fullWidth={!!config.style?.button?.fullWidth}
+              loading={isSubmitting}
+              className={s.submitBtn}
+              buttonGap={1}
+            >
+              {config.register?.label || "Register"}
             </AppButton>
           </div>
         </C.AuthCard>

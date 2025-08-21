@@ -19,6 +19,7 @@ const AppButton = React.forwardRef(function AppButton(
     endIcon,
     className,
     classes,
+    buttonGap = 1,
     sx,
     ...rest
   },
@@ -36,7 +37,26 @@ const AppButton = React.forwardRef(function AppButton(
   const color = colorMap[tone] || "primary";
   const muiVariant = variant === "soft" ? "text" : variant;
   const content = children ?? label;
+  const marginStyles = (theme) => {
+    const g = typeof buttonGap === "number" ? theme.spacing(buttonGap) : buttonGap;
+    // If fullWidth, only vertical margin. Otherwise margin all around and
+    // ensure spacing between adjacent AppButtons.
+    return fullWidth
+      ? { my: g }
+      : { m: g, "& + &": { ml: g, mt: g } };
+  };
 
+  const softVariantStyles = (theme) => {
+    if (variant !== "soft") return {};
+    const key = color === "inherit" ? "primary" : color;
+    const main = theme.palette[key].main;
+    const on = theme.palette.getContrastText(main);
+    return {
+      color: color === "inherit" ? theme.palette.text.primary : on,
+      backgroundColor: alpha(main, 0.12),
+      "&:hover": { backgroundColor: alpha(main, 0.2) },
+    };
+  };
   return (
     <MuiButton
       ref={ref}
@@ -55,20 +75,11 @@ const AppButton = React.forwardRef(function AppButton(
       }
       aria-busy={loading || undefined}
       sx={[
-        { borderRadius: "var(--g-radius)" }, // from your token bridge
-        variant === "soft" &&
-          ((theme) => {
-            const key = color === "inherit" ? "primary" : color;
-            const main = theme.palette[key].main;
-            const on = theme.palette.getContrastText(main);
-            return {
-              color: color === "inherit" ? theme.palette.text.primary : on,
-              backgroundColor: alpha(main, 0.12),
-              "&:hover": { backgroundColor: alpha(main, 0.2) },
-            };
-          }),
+        (theme) => marginStyles(theme),
+        { borderRadius: "var(--g-radius)" },
+        (theme) => softVariantStyles(theme),
         loading && { pointerEvents: "none" },
-        sx,
+        ...(Array.isArray(sx) ? sx : sx ? [sx] : []),
       ]}
       {...rest}
     >
