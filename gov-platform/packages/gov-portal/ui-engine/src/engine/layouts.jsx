@@ -6,7 +6,7 @@ export function DefaultShell({ children }) {
   return (
     <div >
       {/* <aside style={{ borderRight: "1px solid #eee", padding: 12 }}>Sidebar</aside> */}
-      <main style={{ padding: 16 }}>{children}</main>
+      <main>{children}</main>
     </div>
   );
 }
