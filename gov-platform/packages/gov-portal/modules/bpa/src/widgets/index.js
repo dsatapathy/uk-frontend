@@ -1,3 +1,11 @@
 // widgets/index.js (optional)
-export const loadBpaCard  = () => import("./BpaCard.jsx");
-export const loadBpaStart = () => import("./BpaStart.jsx");
+import { asDefault } from "@gov/core";
+
+export const loadBpaCard = asDefault(
+    () => import("./BpaCard.jsx"),
+    "BpaCard"
+);
+export const loadBpaStart = asDefault(
+    () => import("./BpaStart.jsx"),
+    "BpaStart"
+);

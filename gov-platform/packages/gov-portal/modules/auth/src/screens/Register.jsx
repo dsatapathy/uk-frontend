@@ -1,11 +1,9 @@
-import React from "react";
-
+import * as React from "react";
+import {registerConfig} from "@gov/ui";
+import { getComponent } from "@gov/core";
+import s from "@gov/styles/modules/auth/Auth.module.scss";
 export default function Register() {
-  return (
-    <div className="register-page">
-      <h1>Register Page</h1>
-      <p>Please register to continue.</p>
-      {/* Add your login form or components here */}
-    </div>
-  );
+  const LoginForm = getComponent("LoginForm");          // resolve from registry
+  if (!LoginForm) return <div>LoginForm is not registered</div>;
+  return <LoginForm config={registerConfig} />; 
 }

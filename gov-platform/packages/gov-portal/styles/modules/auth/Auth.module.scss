@@ -142,7 +142,7 @@
   --grid-cols: var(--login-grid-cols, 12);
   --grid-gap: var(--login-grid-gap, 16px);
   @extend %grid;
-  flex: 1 1 auto; min-height: var(--login-grid-min-h, 420px);
+  flex: 1 1 auto;
 }
 
 .gridItem {
