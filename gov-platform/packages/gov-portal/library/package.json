@@ -12,6 +12,9 @@
         "./*": "./src/*"
     },
     "sideEffects": false,
+    "dependencies": {
+        "@gov/styles": "0.0.0"
+    },
     "peerDependencies": {
         "react": "^17.0.2",
         "react-dom": "^17.0.2",

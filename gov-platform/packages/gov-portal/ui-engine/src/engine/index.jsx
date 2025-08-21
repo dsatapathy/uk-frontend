@@ -6,7 +6,6 @@ import { createBrowserHistory } from "history";
 import { ThemeProvider, createTheme, CssBaseline } from "@mui/material";
 import { RouteBuilder, runtime } from "@gov/core";
 import { QueryProvider } from "@gov/data";
-
 import ThemeBridge from "../ThemeBridge";
 import { DEFAULT_THEME } from "./constants";
 import { useModulePrefetch } from "./prefetch";
@@ -17,6 +16,7 @@ import { buildInitialManifests, bootstrapModules } from "./modules";
 import { bootstrapSidebar } from "./sidebar";
 import { buildManifestsFromConfig } from "./utils";
 import { configSchema } from "./config-schema";
+import "@gov/styles/core/index.scss";
 
 export function start(rawConfig) {
     const validated = configSchema.safeParse(rawConfig);

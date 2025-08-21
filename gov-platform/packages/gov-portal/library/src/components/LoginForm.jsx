@@ -8,6 +8,7 @@ import { AuthCard } from "./AuthCard.jsx";
 import { Brand } from "./Brand.jsx";
 import { FieldRenderer } from "../form/FieldRenderer.jsx";
 import { CaptchaBox } from "./CaptchaBox.jsx";
+import s from "@gov/styles/modules/auth/Auth.module.scss";
 
 export function LoginForm({ config, onSubmit, onSuccess, components = {} }) {
   const C = {
@@ -58,7 +59,7 @@ export function LoginForm({ config, onSubmit, onSuccess, components = {} }) {
   const submitFn = onSubmit || defaultSubmit;
 
   return (
-    <C.AuthLayout place={place} styleVars={styleVars}>
+    <C.AuthLayout place={place} styleVars={styleVars} >
       <form className="login-form" onSubmit={handleSubmit(async (payload) => {
         await submitFn(payload);
         onSuccess ? onSuccess(payload) : (config.onSuccessRoute && (window.location.href = config.onSuccessRoute));

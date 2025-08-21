@@ -1,8 +1,2 @@
-@use "../core/tokens" as *;
-.gcard {
-    border: 1px solid var(--g-border);
-    border-radius: calc(var(--g-radius) + 4px);
-    padding: var(--g-s4);
-    background: #fff;
-  }
-  
+%cardRoot    { width: 100%; max-width: var(--card-w, 480px); border-radius: var(--card-radius, 12px); border: var(--card-border, 1px solid #e5e7eb); }
+%cardContent { padding: var(--card-p, 24px) !important; }

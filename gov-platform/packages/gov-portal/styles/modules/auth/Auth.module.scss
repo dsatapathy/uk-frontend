@@ -1,0 +1,43 @@
+@use "../../core/index" as *;
+@use "../../layout/grid" as grid;
+@use "../../components/brand";
+@use "../../components/card";
+@use "../../components/form-helpers";
+
+// …
+
+/* Card */
+.authCard {
+  --card-w:      var(--login-card-w);
+  --card-p:      var(--login-card-p);
+  --card-radius: var(--login-card-radius);
+  --card-border: var(--login-card-border);
+  @extend %cardRoot;
+}
+.authCardContent { @extend %cardContent; }
+
+/* Brand */
+.brand         { @extend %brand; }          
+.brandLogo     { @extend %brandLogo; }      
+.brandTitle    { @extend %brandTitle; }     
+.brandSubtitle { @extend %brandSubtitle; }  
+
+/* Grid */
+.loginGrid {
+  --grid-cols: var(--login-grid-cols);
+  --grid-gap:  var(--login-grid-gap);
+  @extend %grid;
+}
+.gridItem { @extend %gridItem; }  
+@include grid.gridResponsive();
+
+/* Rows / Buttons / Errors */
+.captchaRow { @extend %inlineRow; }
+
+.submitRow              { --btn-mt: var(--login-button-mt); @extend %submitRow; }  
+.align-left             { @extend %submitLeft; }   
+.align-center           { @extend %submitCenter; } 
+.align-right            { @extend %submitRight; }  
+.submitBtn              { @extend %submitBtn; }    
+
+.fieldError { @extend %fieldError; }        

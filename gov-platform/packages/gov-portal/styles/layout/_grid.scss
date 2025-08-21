@@ -1,0 +1,17 @@
+@use "../core/mixins" as *;
+
+/* Placeholders publish reusable shapes */
+%grid {
+  display: grid;
+  grid-template-columns: repeat(var(--grid-cols, 12), minmax(0, 1fr));
+  gap: var(--grid-gap, 16px);
+}
+
+%gridItem {
+  grid-column: span var(--span-xs, 12);
+}
+
+@mixin gridResponsive() {
+  @include media(sm) { .grid-item { grid-column: span var(--span-sm, 12); } }
+  @include media(md) { .grid-item { grid-column: span var(--span-md, 12); } }
+}

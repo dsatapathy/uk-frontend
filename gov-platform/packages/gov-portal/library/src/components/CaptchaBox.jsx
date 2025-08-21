@@ -2,7 +2,7 @@ import * as React from "react";
 import { TextField, Button, InputAdornment } from "@mui/material";
 import { Controller } from "react-hook-form";
 import RefreshIcon from "@mui/icons-material/Refresh";
-
+import s from "@gov/styles/modules/auth/Auth.module.scss";
 export function CaptchaBox({ control, cfg = {}, errors }) {
   const name = cfg.name || "captcha";
   const length = cfg.length || 6;
@@ -16,8 +16,8 @@ export function CaptchaBox({ control, cfg = {}, errors }) {
   const refresh = () => setCode(make(length));
 
   return (
-    <div className="grid-item" style={{ "--span-xs": 12 }}>
-      <div className="captcha-row">
+    <div className={s.gridItem} style={{ "--span-xs": 12 }}>
+      <div className={s.captchaRow}>
         <TextField
           value={code}
           label="Captcha"

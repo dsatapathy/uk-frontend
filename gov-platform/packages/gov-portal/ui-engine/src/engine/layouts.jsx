@@ -4,8 +4,8 @@ import { runtime } from "@gov/core";
 
 export function DefaultShell({ children }) {
   return (
-    <div style={{ display: "grid", gridTemplateColumns: "216px 1fr" }}>
-      <aside style={{ borderRight: "1px solid #eee", padding: 12 }}>Sidebar</aside>
+    <div >
+      {/* <aside style={{ borderRight: "1px solid #eee", padding: 12 }}>Sidebar</aside> */}
       <main style={{ padding: 16 }}>{children}</main>
     </div>
   );

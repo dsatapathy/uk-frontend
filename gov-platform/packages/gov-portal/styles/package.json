@@ -2,7 +2,7 @@
   "name": "@gov/styles",
   "version": "0.0.0",
   "private": true,
-  "files": ["core", "components", "modules", "themes"],
+  "files": ["core", "components", "modules", "themes", "layout"],
   "sideEffects": ["**/*.scss", "**/*.css"],
   "type": "module"
 }

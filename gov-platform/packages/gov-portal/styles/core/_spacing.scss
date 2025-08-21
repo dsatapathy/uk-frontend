@@ -1,0 +1,42 @@
+/* styles/core/_spacing.scss */
+
+/* 
+   Spacing scale (base = 4px)
+   You can adjust the base unit (4px → 8px if you prefer bigger increments).
+*/
+
+:root {
+    --g-s0: 0;          // 0px
+    --g-s1: 0.25rem;    // 4px
+    --g-s2: 0.5rem;     // 8px
+    --g-s3: 0.75rem;    // 12px
+    --g-s4: 1rem;       // 16px
+    --g-s5: 1.25rem;    // 20px
+    --g-s6: 1.5rem;     // 24px
+    --g-s7: 2rem;       // 32px
+    --g-s8: 2.5rem;     // 40px
+    --g-s9: 3rem;       // 48px
+    --g-s10: 4rem;      // 64px
+  }
+  
+  /* Utility mixin if you want quick spacing helpers */
+  @mixin margin-x($n) {
+    margin-left: var(--g-s#{$n});
+    margin-right: var(--g-s#{$n});
+  }
+  
+  @mixin margin-y($n) {
+    margin-top: var(--g-s#{$n});
+    margin-bottom: var(--g-s#{$n});
+  }
+  
+  @mixin padding-x($n) {
+    padding-left: var(--g-s#{$n});
+    padding-right: var(--g-s#{$n});
+  }
+  
+  @mixin padding-y($n) {
+    padding-top: var(--g-s#{$n});
+    padding-bottom: var(--g-s#{$n});
+  }
+  

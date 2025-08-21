@@ -1,0 +1,8 @@
+%inlineRow  { display: flex; gap: 16px; flex-wrap: wrap; }
+%submitRow  { margin-top: var(--btn-mt, 8px); display: flex; }
+%submitLeft   { justify-content: flex-start; }
+%submitCenter { justify-content: center; }
+%submitRight  { justify-content: flex-end; }
+%submitBtn  { min-width: 140px; }
+
+%fieldError { color: #d32f2f; font-size: 12px; margin-top: 4px; }
