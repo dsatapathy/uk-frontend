@@ -7,7 +7,7 @@ export default defineConfig({
   build: {
     lib: { entry: "src/index.js", formats: ["es"] },
     rollupOptions: {
-      external: ["react", "react-dom", "react-router-dom", "@gov/core"],
+      external: ["react", "react-dom", "react-router-dom", "@gov/core", "@gov/ui", "@gov/library"],
       output: {
         preserveModules: true,
         preserveModulesRoot: "src",

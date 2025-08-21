@@ -1,18 +1,13 @@
 {
-    "name": "@gov/ui",
-    "private": true,
-    "version": "0.0.0",
-    "main": "dist/index.js",
-    "types": "",
-    "scripts": {
-      "build": "echo \"(PR1 stub) build ui\"",
-      "test": "echo \"(PR2) ui tests\" && exit 0",
-      "clean": "rimraf dist || true"
-    },
-    "peerDependencies": {
-      "react": "^17",
-      "react-dom": "^17",
-      "lodash": "^4"
-    }
+  "name": "@gov/ui",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Gov Portal app configs (e.g., login.config.js).",
+  "files": ["config"],
+  "exports": {
+    ".": "./config/index.js",
+    "./login.config": "./config/login.config.js",
+    "./config/*": "./config/*"
   }
-  
+}
