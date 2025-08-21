@@ -1,4 +1,5 @@
 import React, { Suspense } from "react";
+import CircularProgress from "@mui/material/CircularProgress";
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -32,7 +33,7 @@ export default function LazyWrap(loader, name = "Loading") {
   return function Wrapped(props) {
     return (
       <ErrorBoundary name={name}>
-        <Suspense fallback={<div>{name}…</div>}>
+        <Suspense fallback={<CircularProgress />}>
           <Lazy {...props} />
         </Suspense>
       </ErrorBoundary>
