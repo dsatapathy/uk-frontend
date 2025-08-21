@@ -12,6 +12,7 @@ export default defineConfig({
         "react-router-dom",
         "@gov/core",
         "@gov/data",
+        "@gov/library",
         "@mui/material",
         "@hookform/resolvers",
         "react-hook-form",

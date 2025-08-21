@@ -1,11 +1,9 @@
 import * as React from "react";
-import { LoginForm } from "@gov/library";
 import {loginConfig} from "@gov/ui";
+import { getComponent } from "@gov/core";
 import s from "@gov/styles/modules/auth/Auth.module.scss";
 export default function Login() {
-  return (
-    <div className={s.page}>
-      <LoginForm config={loginConfig} />
-    </div>
-  );
+  const LoginForm = getComponent("LoginForm");          // resolve from registry
+  if (!LoginForm) return <div>LoginForm is not registered</div>;
+  return <LoginForm config={loginConfig} />; 
 }

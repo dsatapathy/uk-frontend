@@ -2,15 +2,10 @@ import * as React from "react";
 import { Button } from "@mui/material";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { buildSchema } from "../utils/schema";
-import { AuthLayout } from "./AuthLayout.jsx";
-import { AuthCard } from "./AuthCard.jsx";
-import { Brand } from "./Brand.jsx";
-import { FieldRenderer } from "../form/FieldRenderer.jsx";
-import { CaptchaBox } from "./CaptchaBox.jsx";
+import { buildSchema, AuthLayout, AuthCard, Brand, FieldRenderer, CaptchaBox } from "@gov/library";
 import defaultS from "@gov/styles/modules/auth/Auth.module.scss";
 
-export function LoginForm({ config, onSubmit, onSuccess, components = {}, classes  }) {
+export default function LoginForm({ config, onSubmit, onSuccess, components = {}, classes  }) {
   const s = classes || defaultS;
   const C = {
     AuthLayout: components.AuthLayout || AuthLayout,

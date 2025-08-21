@@ -9,6 +9,12 @@ export {
     registerLayout,
     getLayout,
   } from "./runtime/registry";
+
+  export {
+    asDefault,
+    asNamed,
+    assertRenderable
+  } from "./runtime/lazy";
   
   // Keep namespace export too (optional, but handy: `import * as core from "@gov/core"`)
   export * as runtime from "./runtime/registry";
