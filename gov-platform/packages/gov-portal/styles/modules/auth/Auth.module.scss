@@ -4,7 +4,22 @@
 @use "../../components/card";
 @use "../../components/form-helpers";
 
-// …
+/* Layout (scoped) */
+.authLayout {
+  min-height: 100vh;
+  background: var(--login-bg);
+  padding: var(--login-pad);
+  position: relative;
+}
+
+/* Position modifiers (scoped) */
+.pos-center      { display: grid; place-items: center; }
+.pos-left        { display: grid; place-items: center start; }
+.pos-right       { display: grid; place-items: center end; }
+.pos-top-left    { display: grid; place-items: start start; }
+.pos-top-right   { display: grid; place-items: start end; }
+.pos-bottom-left { display: grid; place-items: end start; }
+.pos-bottom-right{ display: grid; place-items: end end; }
 
 /* Card */
 .authCard {
@@ -17,10 +32,10 @@
 .authCardContent { @extend %cardContent; }
 
 /* Brand */
-.brand         { @extend %brand; }          
-.brandLogo     { @extend %brandLogo; }      
-.brandTitle    { @extend %brandTitle; }     
-.brandSubtitle { @extend %brandSubtitle; }  
+.brand         { @extend %brand; }
+.brandLogo     { @extend %brandLogo; }
+.brandTitle    { @extend %brandTitle; }
+.brandSubtitle { @extend %brandSubtitle; }
 
 /* Grid */
 .loginGrid {
@@ -28,16 +43,15 @@
   --grid-gap:  var(--login-grid-gap);
   @extend %grid;
 }
-.gridItem { @extend %gridItem; }  
+.gridItem { @extend %gridItem; }
 @include grid.gridResponsive();
 
 /* Rows / Buttons / Errors */
 .captchaRow { @extend %inlineRow; }
+.submitRow  { --btn-mt: var(--login-button-mt); @extend %submitRow; }
+.align-left   { @extend %submitLeft; }
+.align-center { @extend %submitCenter; }
+.align-right  { @extend %submitRight; }
+.submitBtn    { @extend %submitBtn; }
 
-.submitRow              { --btn-mt: var(--login-button-mt); @extend %submitRow; }  
-.align-left             { @extend %submitLeft; }   
-.align-center           { @extend %submitCenter; } 
-.align-right            { @extend %submitRight; }  
-.submitBtn              { @extend %submitBtn; }    
-
-.fieldError { @extend %fieldError; }        
+.fieldError { @extend %fieldError; }

@@ -19,35 +19,35 @@ start({
     shape: { borderRadius: 8 }
   },
   // --- Authentication ---
-  // auth: {
-  //   strategy: "jwt",
-  //   login: {
-  //     path: "/login",
-  //     title: "Employee Sign-in",
-  //     fields: ["username", "password"],
-  //     captcha: { provider: "recaptcha", siteKey: "YOUR_PUBLIC_KEY", action: "login" }
-  //   },
-  //   publicPaths: ["/register", "/forgot", "/otp"],
-  //   endpoints: {
-  //     login: "/api/auth/login",
-  //     refresh: "/api/auth/refresh",
-  //     logout: "/api/auth/logout",
-  //     me: "/api/auth/me"
-  //   },
-  //   tokens: {
-  //     storage: "localStorage",
-  //     accessKey: "uk.access",
-  //     refreshKey: "uk.refresh",
-  //     prefix: "uk-portal::"
-  //   },
-  //   claims: { rolePath: "user.role", permsPath: "user.permissions" },
-  //   guards: {
-  //     isAuthenticated: (ctx) => !!ctx.tokens.access,
-  //     hasAnyRole: (ctx, roles) => roles.includes(ctx.user.role),
-  //     hasAllPerms: (ctx, perms) => perms.every(p => ctx.user.permissions?.includes(p))
-  //   },
-  //   onAuthFail: "/login"
-  // },
+  auth: {
+    strategy: "jwt",
+    login: {
+      path: "/login",
+      title: "Employee Sign-in",
+      fields: ["username", "password"],
+      captcha: { provider: "recaptcha", siteKey: "YOUR_PUBLIC_KEY", action: "login" }
+    },
+    publicPaths: ["/register", "/forgot", "/otp"],
+    endpoints: {
+      login: "/api/auth/login",
+      refresh: "/api/auth/refresh",
+      logout: "/api/auth/logout",
+      me: "/api/auth/me"
+    },
+    tokens: {
+      storage: "localStorage",
+      accessKey: "uk.access",
+      refreshKey: "uk.refresh",
+      prefix: "uk-portal::"
+    },
+    claims: { rolePath: "user.role", permsPath: "user.permissions" },
+    guards: {
+      isAuthenticated: (ctx) => !!ctx.tokens.access,
+      hasAnyRole: (ctx, roles) => roles.includes(ctx.user.role),
+      hasAllPerms: (ctx, perms) => perms.every(p => ctx.user.permissions?.includes(p))
+    },
+    onAuthFail: "/login"
+  },
   publicPaths: ["/register"],
   modules: {
     defaults: {

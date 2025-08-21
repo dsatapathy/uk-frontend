@@ -1,5 +1,6 @@
+import ukLogo from "../../assets/images/Logo.png";
 const loginConfig = {
-    brand: { logo: "/assets/uk-logo.svg", title: "UK Portal", subtitle: "Employee Sign-in" },
+    brand: { logo: ukLogo, title: "UK Portal", subtitle: "UGVS-REAP : MIS" },
   
     layout: { variant: "card" },
   
