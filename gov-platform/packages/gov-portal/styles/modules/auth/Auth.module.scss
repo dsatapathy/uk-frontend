@@ -7,10 +7,10 @@
 /* Layout (scoped) */
 .authLayout {
   min-height: 100vh;
-  background: var(--login-bg);
-  padding: var(--login-pad);
-  position: relative;
+  background: var(--login-bg, linear-gradient(180deg,#f8fafc,#fff));
+  padding: var(--login-pad, 24px);
 }
+
 
 /* Position modifiers (scoped) */
 .pos-center      { display: grid; place-items: center; }
@@ -23,35 +23,43 @@
 
 /* Card */
 .authCard {
-  --card-w:      var(--login-card-w);
-  --card-p:      var(--login-card-p);
-  --card-radius: var(--login-card-radius);
-  --card-border: var(--login-card-border);
+  --card-w:      var(--login-card-w, 520px);
+  --card-p:      var(--login-card-p, 28px);
+  --card-radius: var(--login-card-radius, 12px);
+  --card-border: var(--login-card-border, 1px solid #e5e7eb);
   @extend %cardRoot;
 }
 .authCardContent { @extend %cardContent; }
 
 /* Brand */
 .brand         { @extend %brand; }
-.brandLogo     { @extend %brandLogo; }
+.brandLogo {
+  width: var(--login-logo-w, 120px);
+  height: var(--login-logo-h, 64px);
+  display: inline-block;
+}
+.brandLogo img { width: 100%; height: 100%; object-fit: contain; }
 .brandTitle    { @extend %brandTitle; }
 .brandSubtitle { @extend %brandSubtitle; }
 
 /* Grid */
 .loginGrid {
-  --grid-cols: var(--login-grid-cols);
-  --grid-gap:  var(--login-grid-gap);
+  --grid-cols: var(--login-grid-cols, 12);
+  --grid-gap:  var(--login-grid-gap, 16px);
   @extend %grid;
+  min-height: var(--login-grid-min-h, 420px); // enough for all rows on login
 }
 .gridItem { @extend %gridItem; }
 @include grid.gridResponsive();
 
 /* Rows / Buttons / Errors */
-.captchaRow { @extend %inlineRow; }
-.submitRow  { --btn-mt: var(--login-button-mt); @extend %submitRow; }
+.captchaRow {
+  @extend %inlineRow;
+  min-height: var(--captcha-h, 56px);
+}
+.submitRow  { min-height: 56px; --btn-mt: var(--login-button-mt); @extend %submitRow; }
 .align-left   { @extend %submitLeft; }
 .align-center { @extend %submitCenter; }
 .align-right  { @extend %submitRight; }
-.submitBtn    { @extend %submitBtn; }
-
+.submitBtn { width: 160px; @extend %submitBtn; }
 .fieldError { @extend %fieldError; }

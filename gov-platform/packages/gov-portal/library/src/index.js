@@ -2,7 +2,10 @@
 export { buildSchema } from "./utils/schema.js";
 import { asDefault } from "@gov/core";
 import { LazyWrap } from "@gov/core";
-import { registerComponent, getComponent } from "@gov/core";
+import { registerComponent } from "@gov/core";
+
+// atoms
+export const loadButton = asDefault(() => import("./atoms/AppButton.jsx"), "AppButton");
 
 // Lazy loaders (no component code pulled yet)
 export const loadAuthLayout = asDefault(() => import("./components/AuthLayout.jsx"), "AuthLayout");
@@ -18,4 +21,6 @@ export function registerLibraryDefaults() {
     registerComponent("Brand", LazyWrap(loadBrand, "Brand"));
     registerComponent("CaptchaBox", LazyWrap(loadCaptchaBox, "CaptchaBox"));
     registerComponent("FieldRenderer", LazyWrap(loadFieldRenderer, "FieldRenderer"));
+    // atoms
+    registerComponent("AppButton", LazyWrap(loadButton, "AppButton"));
 }

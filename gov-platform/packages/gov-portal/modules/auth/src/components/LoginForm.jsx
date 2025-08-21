@@ -1,5 +1,4 @@
 import * as React from "react";
-import { Button } from "@mui/material";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { buildSchema } from "@gov/library";
@@ -13,6 +12,8 @@ export default function LoginForm({ config, onSubmit, onSuccess, components = {}
   const Brand = getComponent("Brand");
   const FieldRenderer = getComponent("FieldRenderer");
   const CaptchaBox = getComponent("CaptchaBox");
+  const AppButton = getComponent("AppButton");
+
   const C = {
     AuthLayout: components.AuthLayout || AuthLayout,
     AuthCard: components.AuthCard || AuthCard,
@@ -68,10 +69,10 @@ export default function LoginForm({ config, onSubmit, onSuccess, components = {}
       })} noValidate>
         <C.AuthCard variant={config.layout?.variant || "card"} elevation={elevation} classes={s} >
           {(config.brand && (config.brand.logo || config.brand.title || config.brand.subtitle)) ? (
-            <C.Brand {...config.brand} />
+            <C.Brand classes={s} {...config.brand} />
           ) : null}
 
-          <div className="login-grid">
+          <div className={s.loginGrid}>
             {(config.fields || []).map((f) => (
               <C.FieldRenderer key={f.name} control={control} field={f} errors={errors} classes={s} />
             ))}
@@ -80,10 +81,18 @@ export default function LoginForm({ config, onSubmit, onSuccess, components = {}
             ) : null}
           </div>
 
-          <div className={`submit-row align-${config.style?.button?.align || "left"}`}>
-            <Button type="submit" variant="contained" size="large" disabled={isSubmitting} className="submit-btn" classes={s} >
+          <div className={`${s.submitRow} ${s[`align-${config.style?.button?.align}`] || ""}`}>
+            <AppButton
+              type="submit"
+              variant={config.style?.button?.variant || "contained"}
+              tone={config.style?.button?.tone || "primary"}
+              size={config.style?.button?.size || "large"}
+              fullWidth={!!config.style?.button?.fullWidth}
+              loading={isSubmitting}
+              className={s.submitBtn}
+            >
               {config.submit?.label || "Sign In"}
-            </Button>
+            </AppButton>
           </div>
         </C.AuthCard>
       </form>

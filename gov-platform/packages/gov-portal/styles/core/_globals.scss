@@ -1,20 +1,23 @@
-/* ---------------------------------------------------
-   Global style helpers
-   Re-exposes tokens + mixins without namespaces
-   --------------------------------------------------- */
-
-/* Bring in tokens and mixins */
+/* styles/core/_globals.scss */
 @use "./reset" as *;
 @use "./tokens" as *;
 @use "./mixins" as *;
 
-/* (Optional) add global CSS variables or utility classes */
+/* Global element defaults that lean on semantic tokens */
 :root {
-  // spacing scale as CSS vars (if not already in _tokens.scss)
-  --g-s1: 4px;
-  --g-s2: 8px;
-  --g-s3: 12px;
-  --g-s4: 16px;
-  --g-s5: 24px;
-  --g-border: #e0e0e0;
+  /* Expose core brand tokens for dev tools */
+  --brand-primary: var(--g-primary);
+  --brand-secondary: var(--g-secondary);
+  --brand-link: var(--g-link);
 }
+
+a { color: var(--g-link); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+hr { border: 0; border-top: 1px solid var(--g-border); }
+
+/* Utility helpers */
+.u-surface-1 { @include surface(1); }
+.u-surface-2 { @include surface(2); }
+.u-surface-3 { @include surface(3); }
+.u-focus     { @include focus-ring(); }

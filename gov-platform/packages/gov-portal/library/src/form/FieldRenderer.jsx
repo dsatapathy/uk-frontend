@@ -11,7 +11,8 @@ import VisibilityOff from "@mui/icons-material/VisibilityOff";
 const ICONS = { person: <PersonIcon fontSize="small" />, lock: <LockIcon fontSize="small" /> };
 
 /** Renders all fields by config; layout spans are applied via CSS vars only. */
-export function FieldRenderer({ control, field, errors }) {
+export function FieldRenderer({ control, field, errors, classes }) {
+  const s = classes || {};
   const { type = "text", name, label, placeholder, icon, required, selectOptions, grid = {}, textFieldProps } = field;
   const adornment = icon ? ICONS[icon] : null;
 
@@ -23,7 +24,7 @@ export function FieldRenderer({ control, field, errors }) {
 
   if (type === "checkbox") {
     return (
-      <div className="grid-item" style={itemStyle}>
+      <div className={s.gridItem} style={itemStyle}>
         <Controller
           name={name}
           control={control}
@@ -38,7 +39,7 @@ export function FieldRenderer({ control, field, errors }) {
 
   if (type === "select") {
     return (
-      <div className="grid-item" style={itemStyle}>
+      <div className={s.gridItem} style={itemStyle}>
         <Controller
           name={name}
           control={control}
@@ -61,7 +62,7 @@ export function FieldRenderer({ control, field, errors }) {
   }
 
   return (
-    <div className="grid-item" style={itemStyle}>
+    <div className={s.gridItem} style={itemStyle}>
       <Controller
         name={name}
         control={control}
