@@ -47,8 +47,8 @@ const registerConfig = {
       grid: { span: { xs: 12, md: 12 } } },
   ],
 
-  submit: { label: "Sign In", endpoint: "/api/auth/login", method: "POST" },
-  back: { label: "Back", endpoint: "/api/auth/register", method: "POST" },
+  submit: { label: "Sign In", endpoint: "/api/auth/register", method: "POST" },
+  back: { label: "Back", redirect: "/uk-portal/login" },
   onSuccessRoute: "/"
 };
 

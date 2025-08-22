@@ -14,7 +14,8 @@ export default defineConfig({
         "@gov/core",
         "@gov/data",
         "@gov/styles",
-        "@gov/library"
+        "@gov/library",
+        "@gov/utils"
       ],
       output: {
         preserveModules: true,

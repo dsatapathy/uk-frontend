@@ -5,14 +5,14 @@ import { buildSchema } from "@gov/library";
 import defaultS from "@gov/styles/modules/auth/Auth.module.scss";
 import { getComponent } from "@gov/core";
 
-export default function LoginForm({ config, onSubmit, onSuccess, components = {}, classes  }) {
+export default function LoginForm({ config, onSubmit, onSuccess, components = {}, classes }) {
   const s = classes || defaultS;
   const AuthLayout = getComponent("AuthLayout");
   const AuthCard = getComponent("AuthCard");
   const Brand = getComponent("Brand");
   const FieldRenderer = getComponent("FieldRenderer");
   const CaptchaBox = getComponent("CaptchaBox");
-  const AppButton = getComponent("AppButton");
+  const RenderButton = getComponent("RenderButton");
 
   const C = {
     AuthLayout: components.AuthLayout || AuthLayout,
@@ -36,25 +36,25 @@ export default function LoginForm({ config, onSubmit, onSuccess, components = {}
 
   // CSS variables from config (all px values supported)
   const styleVars = {
-    "login-pad":            (config.style?.layout?.paddingPx ?? 24) + "px",
-    "login-bg":             config.style?.layout?.background || "transparent",
+    "login-pad": (config.style?.layout?.paddingPx ?? 24) + "px",
+    "login-bg": config.style?.layout?.background || "transparent",
     // NEW ↓ background image/fit/position/overlay/blur
-    "login-bg-img":         config.style?.layout?.backgroundImage ? `url(${config.style.layout.backgroundImage})` : "none",
-    "login-bg-fit":         config.style?.layout?.backgroundFit || "cover",
-    "login-bg-pos":         config.style?.layout?.backgroundPosition || "center",
-    "login-overlay":        config.style?.layout?.overlay || "transparent",
-    "login-blur":           (config.style?.layout?.blurPx ?? 0) + "px",
+    "login-bg-img": config.style?.layout?.backgroundImage ? `url(${config.style.layout.backgroundImage})` : "none",
+    "login-bg-fit": config.style?.layout?.backgroundFit || "cover",
+    "login-bg-pos": config.style?.layout?.backgroundPosition || "center",
+    "login-overlay": config.style?.layout?.overlay || "transparent",
+    "login-blur": (config.style?.layout?.blurPx ?? 0) + "px",
 
-    "login-card-w":         (config.style?.card?.widthPx ?? 480) + "px",
-    "login-card-p":         (config.style?.card?.paddingPx ?? 24) + "px",
-    "login-card-radius":    (config.style?.card?.radiusPx ?? 12) + "px",
-    "login-card-border":    config.style?.card?.border || "1px solid #e5e7eb",
-    "login-grid-cols":      String(config.style?.grid?.cols ?? 12),
-    "login-grid-gap":       (config.style?.grid?.gapPx ?? 16) + "px",
-    "login-button-mt":      (config.style?.button?.marginTopPx ?? 8) + "px",
-    "field-bg":            config.style?.field?.bg || "#fff",
-    "field-error":         config.style?.field?.errorColor  || "#ef4444",
-    "field-focus":         config.style?.field?.focusColor  || "#0b5fff",
+    "login-card-w": (config.style?.card?.widthPx ?? 480) + "px",
+    "login-card-p": (config.style?.card?.paddingPx ?? 24) + "px",
+    "login-card-radius": (config.style?.card?.radiusPx ?? 12) + "px",
+    "login-card-border": config.style?.card?.border || "1px solid #e5e7eb",
+    "login-grid-cols": String(config.style?.grid?.cols ?? 12),
+    "login-grid-gap": (config.style?.grid?.gapPx ?? 16) + "px",
+    "login-button-mt": (config.style?.button?.marginTopPx ?? 8) + "px",
+    "field-bg": config.style?.field?.bg || "#fff",
+    "field-error": config.style?.field?.errorColor || "#ef4444",
+    "field-focus": config.style?.field?.focusColor || "#0b5fff",
   };
   const elevation = config.style?.card?.elevation ?? 2;
   const place = config.style?.layout?.place || "center";// center|left|right|top-left|top-right|bottom-left|bottom-right
@@ -98,30 +98,10 @@ export default function LoginForm({ config, onSubmit, onSuccess, components = {}
           </div>
 
           <div className={`${s.submitRow} ${s[`align-${config.style?.button?.align}`] || ""}`}>
-            <AppButton
-              type="submit"
-              variant={config.style?.button?.variant || "contained"}
-              tone={config.style?.button?.tone || "primary"}
-              size={config.style?.button?.size || "large"}
-              fullWidth={!!config.style?.button?.fullWidth}
-              loading={isSubmitting}
-              className={s.submitBtn}
-              buttonGap={1}
-            >
-              {config.submit?.label || "Sign In"}
-            </AppButton>
-            <AppButton
-              type="submit"
-              variant={config.style?.button?.variant || "contained"}
-              tone={config.style?.button?.tone || "secondary"}
-              size={config.style?.button?.size || "large"}
-              fullWidth={!!config.style?.button?.fullWidth}
-              loading={isSubmitting}
-              className={s.submitBtn}
-              buttonGap={1}
-            >
-              {config.register?.label || "Register"}
-            </AppButton>
+            {config.submit && (<RenderButton cfg={config.submit} key={"submit"} isSubmitting={isSubmitting} classes={s} />)}
+            {config.register && (<RenderButton cfg={config.register} key={"register"} isSubmitting={isSubmitting} classes={s} />)}
+            {config.back && (<RenderButton cfg={config.back} key={"back"} isSubmitting={isSubmitting} classes={s} />)}
+
           </div>
         </C.AuthCard>
       </form>

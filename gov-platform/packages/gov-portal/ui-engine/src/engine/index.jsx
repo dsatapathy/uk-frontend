@@ -6,6 +6,7 @@ import { createBrowserHistory } from "history";
 import { ThemeProvider, createTheme, CssBaseline } from "@mui/material";
 import { RouteBuilder, runtime } from "@gov/core";
 import { registerLibraryDefaults } from "@gov/library";
+import { registerUtilsDefaults } from "@gov/utils";
 import { QueryProvider } from "@gov/data";
 import ThemeBridge from "../ThemeBridge";
 import { DEFAULT_THEME } from "./constants";
@@ -54,6 +55,7 @@ export function start(rawConfig) {
     registerShellAsLayout(Shell);
     // 🔽 Register library components lazily (no code is fetched until rendered)
     registerLibraryDefaults();
+    registerUtilsDefaults();
     // Engine API surface
     let externalSetRoutes;
     const app = {

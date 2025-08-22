@@ -49,7 +49,7 @@ const loginConfig = {
   captcha: { provider: "dev", name: "captcha", length: 6 },
 
   submit: { label: "Sign In", endpoint: "/api/auth/login", method: "POST" },
-  register: { label: "Register", endpoint: "/api/auth/register", method: "POST" },
+  register: { label: "Register", redirect: "/uk-portal/register" },
   onSuccessRoute: "/"
 };
 

@@ -1,12 +1,31 @@
 {
-    "name": "@gov/utils",
-    "private": true,
-    "version": "0.0.0",
-    "main": "dist/index.js",
-    "scripts": {
-      "build": "echo \"(PR1 stub) build utils\"",
-      "test": "echo \"(PR2) utils tests\" && exit 0",
-      "clean": "rimraf dist || true"
-    }
+  "name": "@gov/utils",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Gov Portal utility functions and components for React applications.",
+  "files": [
+      "src"
+  ],
+  "exports": {
+      ".": "./src/index.js",
+      "./*": "./src/*"
+  },
+  "sideEffects": false,
+  "dependencies": {
+      "@gov/styles": "0.0.0",
+      "@gov/core": "0.1.0",
+      "@gov/library": "0.0.0"
+  },
+  "peerDependencies": {
+      "react": "^17.0.2",
+      "react-dom": "^17.0.2",
+      "@emotion/react": "^11.14.0",
+      "@emotion/styled": "^11.14.1",
+      "@mui/material": "^5.0.0",
+      "@mui/icons-material": "^5.15.0",
+      "react-hook-form": "^7.52.0",
+      "@hookform/resolvers": "^3.3.4",
+      "zod": "^3.23.8"
   }
-  
+}
