@@ -3,13 +3,9 @@ import React from "react";
 import ReactDOM from "react-dom";
 import { Router } from "react-router-dom";
 import { createBrowserHistory } from "history";
-import { ThemeProvider, createTheme, CssBaseline } from "@mui/material";
 import { RouteBuilder, runtime } from "@gov/core";
 import { registerLibraryDefaults } from "@gov/library";
 import { registerUtilsDefaults } from "@gov/utils";
-import { QueryProvider } from "@gov/data";
-import ThemeBridge from "../ThemeBridge";
-import { DEFAULT_THEME } from "./constants";
 import { useModulePrefetch } from "./prefetch";
 import { initHttp } from "./http";
 import { resolveShell, registerShellAsLayout } from "./layouts";
@@ -18,8 +14,8 @@ import { buildInitialManifests, bootstrapModules } from "./modules";
 import { bootstrapSidebar } from "./sidebar";
 import { buildManifestsFromConfig } from "./utils";
 import { configSchema } from "./config-schema";
-import { AuthProvider } from "../auth-context";
 import "@gov/styles/core/index.scss";
+import { AppProviders } from "./bootstrap-auth";
 
 export function start(rawConfig) {
     const validated = configSchema.safeParse(rawConfig);
@@ -49,7 +45,6 @@ export function start(rawConfig) {
     } = cfg;
 
     const history = createBrowserHistory({ basename: base });
-    const theme = createTheme(Object.assign({}, DEFAULT_THEME, themeOverrides || {}));
 
     // Layout/Shell
     const Shell = resolveShell(layoutComponent);
@@ -129,15 +124,10 @@ export function start(rawConfig) {
     }
 
     ReactDOM.render(
-        <ThemeProvider theme={theme}>
-            <CssBaseline />
-            <ThemeBridge />
-            <QueryProvider>
-                <AuthProvider>
-                    <EngineApp />
-                </AuthProvider>
-            </QueryProvider>
-        </ThemeProvider>,
+        <AppProviders cfg={cfg}>
+            <EngineApp />
+        </AppProviders>
+        ,
         document.querySelector(target)
     );
 }

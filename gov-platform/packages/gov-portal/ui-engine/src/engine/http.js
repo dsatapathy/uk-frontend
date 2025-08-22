@@ -1,26 +1,28 @@
 // src/engine/http.js
-import { createHttp, setHttp } from "@gov/data";
-
+import { createHttp, setHttp, VersionedStorage } from "@gov/data";
 export function initHttp(config, appInfo, history) {
-  const httpCfg = config.http || { baseURL: "/api", timeout: 15000 };
-  const http = createHttp({
-    baseURL: httpCfg.baseURL || "/api",
-    timeout: httpCfg.timeout || 15000,
-    headers: httpCfg.headers || {},
-    retry: httpCfg.retry || { attempts: 2, backoffMs: 300 },
-    getAccessToken: () => {
-      const { tokens = {}, prefix = "" } = config.auth || {};
-      const key = tokens?.accessKey ? `${prefix || ""}${tokens.accessKey}` : null;
-      return key ? localStorage.getItem(key) : null;
-    },
-    getTenant: () => appInfo?.tenant || "default",
-    onAuthError: () => {
-      const failPath = config.auth?.onAuthFail;
-      if (failPath && history.location.pathname !== failPath) {
-        history.push(failPath);
-      }
-    },
+  // Build a versioned, namespaced storage keyed by tenant (mirrors to session if enabled)
+  const storage = new VersionedStorage({
+    version: config?.auth?.storage?.version || "v1",
+    namespace: `${appInfo?.tenant || "default"}-${config?.auth?.storage?.namespace || "uk-portal"}`,
+    mirrorToSession: config?.auth?.storage?.mirrorToSession ?? true,
+    ttlSeconds: config?.auth?.storage?.ttlSeconds,
   });
+
+  // Create the Axios instance with refresh queue + retries
+  const http = createHttp(config, storage);
+
+  // Optional: centralize auth-fail navigation
+  http.interceptors?.response?.use(
+    (r) => r,
+    (err) => {
+      if (err?.response?.status === 401) {
+        const failPath = config?.auth?.onAuthFail || config?.auth?.login?.path || "/login";
+        if (history.location.pathname !== failPath) history.push(failPath);
+      }
+      return Promise.reject(err);
+    }
+  );
   setHttp(http);
   return http;
 }

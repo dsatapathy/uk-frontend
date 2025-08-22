@@ -6,7 +6,7 @@ const loginConfig = {
   brand: { logo: ukLogo, title: "UGVS-REAP : MIS", subtitle: "" },
 
   layout: { variant: "card", place: "center" },
-
+  api: { baseURL: "http://localhost:3001" },
   style: {
     layout: {
       paddingPx: 24,
@@ -50,7 +50,7 @@ const loginConfig = {
 
   submit: { label: "Sign In", endpoint: "/api/auth/login", method: "POST" },
   register: { label: "Register", redirect: "/uk-portal/register" },
-  onSuccessRoute: "/"
+  onSuccessRoute: "/uk-portal/bpa"
 };
 
 export default loginConfig;

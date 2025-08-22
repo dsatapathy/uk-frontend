@@ -1,63 +1,92 @@
 import axios from "axios";
 
-export function createHttp(cfg) {
-  const api = axios.create({
-    baseURL: cfg.baseURL,
-    timeout: cfg.timeout != null ? cfg.timeout : 15000,
-    headers: cfg.headers || {},
-  });
+// Assume these exist in your code:
+let isRefreshing = false;
+let refreshPromise = null;
+const queue = [];
 
-  // Attach Authorization + X-Tenant on every request
-  api.interceptors.request.use((req) => {
-    const token = cfg.getAccessToken && cfg.getAccessToken();
-    if (token) req.headers["Authorization"] = `Bearer ${token}`;
-    const tenant = cfg.getTenant && cfg.getTenant();
-    if (tenant) req.headers["X-Tenant"] = tenant;
-    return req;
-  });
+function getAccessToken() {
+  // Retrieve stored token (localStorage/sessionStorage/custom logic)
+}
 
-  const attempts = cfg.retry?.attempts || 0;
-  const backoff = cfg.retry?.backoffMs || 0;
+function setTokens(tokens) {
+  // Save tokens to storage (or clear if undefined)
+}
 
-  api.interceptors.response.use(
-    (res) => res,
-    async (error) => {
-      const config = error.config || {};
-      const status = error.response && error.response.status;
-      const method = (config.method || "get").toLowerCase();
-      const isGet = method === "get";
+function queueRequest(fn) {
+  queue.push(fn);
+}
 
-      // auth errors → let engine/router decide
-      if (status === 401 || status === 403) {
-        if (cfg.onAuthError) cfg.onAuthError(error);
+function flushQueue(token) {
+  while (queue.length) {
+    const fn = queue.shift();
+    fn(token);
+  }
+}
+
+// Assume cfg is your config object with auth endpoints
+// Example: const cfg = { auth: { endpoints: { baseURL: "http://localhost:3001", refresh: "/api/auth/refresh" } } };
+
+const createHttp = axios.create();
+
+createHttp.interceptors.request.use((req) => {
+  const token = getAccessToken();
+  if (token) {
+    req.headers = { ...(req.headers || {}), Authorization: `Bearer ${token}` };
+  }
+  return req;
+});
+
+createHttp.interceptors.response.use(
+  (res) => res,
+  async (error) => {
+    const status = error.response?.status;
+    const isAuthHost = (error.config?.baseURL ?? "").includes(cfg.auth.endpoints.baseURL);
+
+    if (status === 401 && isAuthHost) {
+      if (!isRefreshing) {
+        isRefreshing = true;
+        refreshPromise = (async () => {
+          try {
+            const { data } = await axios.post(
+              new URL(cfg.auth.endpoints.refresh, cfg.auth.endpoints.baseURL).toString(),
+              {},
+              { withCredentials: true }
+            );
+            const token = data?.accessToken || data?.token;
+            const refreshToken = data?.refreshToken;
+            if (token) setTokens({ accessToken: token, refreshToken });
+            return token;
+          } catch (e) {
+            setTokens(undefined);
+            throw e;
+          } finally {
+            isRefreshing = false;
+          }
+        })();
       }
 
-      const shouldRetry =
-        isGet && attempts > 0 && (!status || (status >= 500 && status < 600));
-
-      const retryCount = config.__retryCount || 0;
-      if (shouldRetry && retryCount < attempts) {
-        config.__retryCount = retryCount + 1;
-        if (backoff) {
-          await new Promise((r) => setTimeout(r, backoff * (retryCount + 1)));
-        }
-        return api(config);
-      }
-
-      return Promise.reject(normalizeError(error));
+      const token = await refreshPromise.catch(() => undefined);
+      return new Promise((resolve, reject) => {
+        queueRequest(async (t) => {
+          if (!t) return reject(error);
+          try {
+            const cfgRetry = {
+              ...error.config,
+              headers: { ...(error.config.headers || {}), Authorization: `Bearer ${t}` }
+            };
+            const resp = await axios(cfgRetry);
+            resolve(resp);
+          } catch (e) {
+            reject(e);
+          }
+        });
+        flushQueue(token);
+      });
     }
-  );
 
-  return api;
-}
+    return Promise.reject(error);
+  }
+);
 
-function normalizeError(err) {
-  const status = err.response && err.response.status;
-  const data = err.response && err.response.data;
-  const message =
-    (data && (data.message || (data.error && data.error.message))) ||
-    err.message ||
-    "Request failed";
-  const code = (data && data.code) || status || err.code;
-  return { message, code, status, details: data };
-}
+export default createHttp;
