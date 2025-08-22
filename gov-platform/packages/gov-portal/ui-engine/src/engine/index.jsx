@@ -18,6 +18,7 @@ import { buildInitialManifests, bootstrapModules } from "./modules";
 import { bootstrapSidebar } from "./sidebar";
 import { buildManifestsFromConfig } from "./utils";
 import { configSchema } from "./config-schema";
+import { AuthProvider } from "../auth-context";
 import "@gov/styles/core/index.scss";
 
 export function start(rawConfig) {
@@ -132,7 +133,9 @@ export function start(rawConfig) {
             <CssBaseline />
             <ThemeBridge />
             <QueryProvider>
-                <EngineApp />
+                <AuthProvider>
+                    <EngineApp />
+                </AuthProvider>
             </QueryProvider>
         </ThemeProvider>,
         document.querySelector(target)

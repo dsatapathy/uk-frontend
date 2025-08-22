@@ -80,8 +80,8 @@ export default function LoginForm({ config, onSubmit, onSuccess, components = {}
       animation={config.animation}
     >
       <form className="login-form" onSubmit={handleSubmit(async (payload) => {
-        await submitFn(payload);
-        onSuccess ? onSuccess(payload) : (config.onSuccessRoute && (window.location.href = config.onSuccessRoute));
+        const res = await submitFn(payload);
+        onSuccess ? onSuccess(res, payload) : (config.onSuccessRoute && (window.location.href = config.onSuccessRoute));
       })} noValidate>
         <C.AuthCard variant={config.layout?.variant || "card"} elevation={elevation} classes={s} >
           {(config.brand && (config.brand.logo || config.brand.title || config.brand.subtitle)) ? (

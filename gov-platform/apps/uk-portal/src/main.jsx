@@ -19,6 +19,7 @@ start({
     shape: { borderRadius: 8 }
   },
   // --- Authentication ---
+  http: { baseURL: "http://localhost:3001/api" },
   auth: {
     strategy: "jwt",
     login: {
