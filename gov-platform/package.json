@@ -59,8 +59,10 @@
     "build:<key>": "yarn workspace @gov/mod-<key> build",
     "//------ Optional combined flows -------": "────────",
     "dev": "concurrently -k -n core,ui-engine,data,bpa,tl,wns,auth,app -c auto \"yarn dev:core\" \"yarn dev:ui-engine\" \"yarn dev:data\" \"yarn dev:bpa\" \"yarn dev:tl\" \"yarn dev:wns\" \"yarn dev:auth\" \"yarn dev:app\"",
-    "build": "yarn build:core && yarn build:ui-engine && yarn build:data && yarn build:bpa && yarn build:tl && build:wns && build:auth && yarn build:app",
-    "ci": "yarn --frozen-lockfile && yarn run dedupe && yarn ws:info && yarn build"
+    "build": "yarn build:core && yarn build:ui-engine && yarn build:data && yarn build:bpa && yarn build:tl && yarn build:wns && yarn build:auth && yarn build:app",
+    "ci": "yarn --frozen-lockfile && yarn run dedupe && yarn ws:info && yarn build",
+    "trace:resolve": "node scripts/trace-ui-engine-resolve.cjs",
+    "build:auth:trace": "cd packages/gov-portal/modules/auth && yarn build"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.3.4",

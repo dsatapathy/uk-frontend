@@ -1,7 +1,7 @@
 // packages/gov-portal/store/src/index.js
 
 // Store + reducer manager
-export { createAppStore, StoreProvider, injectReducer } from "./store.jsx";
+export { createAppStore } from "./store-core.js";
 export { createReducerManager } from "./reducer/reducerManager.js";
 
 // Hooks
@@ -10,11 +10,10 @@ export {
   useAppSelector,
   useIsAuthenticated,
   useUser,
-} from "./hooks";
+} from "./hooks/index.js";
 
 // Auth slice (actions + reducer)
 export {
-  default as authReducer,
   setAuth,
   setUser,
   clearAuth,

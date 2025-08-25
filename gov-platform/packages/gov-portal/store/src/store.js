@@ -1,8 +1,8 @@
 import React, { useMemo, useEffect } from "react";
 import { configureStore } from "@reduxjs/toolkit";
 import { Provider, useStore } from "react-redux";
-import auth from "./slices/authSlice";
-import { createReducerManager } from "./reducer/reducerManager";
+import auth from "./slices/authSlice.js";
+import { createReducerManager } from "./reducer/reducerManager.js";
 
 // Create a store with a reducer manager
 export function createAppStore() {

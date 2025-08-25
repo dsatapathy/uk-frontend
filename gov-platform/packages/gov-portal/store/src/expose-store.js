@@ -1,4 +1,4 @@
-import { createAppStore } from "./store.jsx";
+import { createAppStore } from "./store-core.js";
 
 export const appStore = createAppStore();
 

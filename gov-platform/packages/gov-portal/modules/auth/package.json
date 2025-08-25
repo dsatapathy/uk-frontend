@@ -15,6 +15,7 @@
     "peerDependencies": {
       "@gov/core": "0.1.0",
       "@gov/data": "0.0.0",
+      "@gov/store": "0.0.0",
       "@gov/library": "0.0.0",
       "@hookform/resolvers": "^3.3.4",
       "@mui/material": "^5.0.0",
