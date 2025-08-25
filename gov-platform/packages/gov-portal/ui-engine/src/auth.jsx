@@ -19,7 +19,8 @@ export function ensureAuthGuard(routes, auth, { loginPath = "/login", base = "" 
     if (!p) return p;
     // if already base-prefixed or is absolute http(s) path, keep as-is
     if (base && p.startsWith(base)) return p;
-    return base && p.startsWith("/") ? base + p : p;
+    // return base && p.startsWith("/") ? base + p : p;
+    return base && p.startsWith("/") ? p : p;
   };
 
   // Build public set (login + declared public paths), normalized with base

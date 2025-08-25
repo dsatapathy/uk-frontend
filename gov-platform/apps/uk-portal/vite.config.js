@@ -15,6 +15,7 @@ const bpaSrc = toFs(path.resolve(repoRoot, "packages/gov-portal/modules/bpa/src"
 const tlSrc = toFs(path.resolve(repoRoot, "packages/gov-portal/modules/tl/src"));
 const wnsSrc = toFs(path.resolve(repoRoot, "packages/gov-portal/modules/wns/src"));
 const authSrc = toFs(path.resolve(repoRoot, "packages/gov-portal/modules/auth/src"));
+const landingSrc = toFs(path.resolve(repoRoot, "packages/gov-portal/modules/landing/src"));
 const engineSrc = toFs(path.resolve(repoRoot, "packages/gov-portal/ui-engine/src"));
 export default defineConfig(({ command }) => {
   const isServe = command === "serve";
@@ -33,6 +34,7 @@ export default defineConfig(({ command }) => {
           "@gov/mod-tl": tlSrc,
           "@gov/mod-wns": wnsSrc,
           "@gov/mod-auth": authSrc,
+          "@gov/mod-landing": landingSrc,
           "@gov/ui-engine": engineSrc,
         }
         : {}

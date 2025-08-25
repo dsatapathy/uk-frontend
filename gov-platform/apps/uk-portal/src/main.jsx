@@ -4,7 +4,7 @@ import { start } from "@gov/ui-engine";
 start({
   target: "#root",
   base: "/uk-portal",
-  layout: { component: "Shell" },
+  layout: { component: "AuthBlank" },
   app: {
     name: "UK Portal",
     logo: "/assets/uk-logo.svg",
@@ -54,10 +54,12 @@ start({
     defaults: {
       list: [
         { key: "auth", basePath: "/" },
+        { key: "landing", basePath: "/landing" },
         { key: "bpa", basePath: "/bpa" },
         { key: "tl",  basePath: "/tl"  },
       ],
       registry: {
+        landing: () => import("@gov/mod-landing"),
         auth: () => import("@gov/mod-auth"),
         bpa: () => import("@gov/mod-bpa"),
         tl:  () => import("@gov/mod-tl"),

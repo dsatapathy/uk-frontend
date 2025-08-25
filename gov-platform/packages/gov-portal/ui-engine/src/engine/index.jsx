@@ -55,6 +55,7 @@ export function start(rawConfig) {
     // Engine API surface
     let externalSetRoutes;
     const app = {
+        base,
         history,
         config: cfg,
         addRoutes: (r) => externalSetRoutes((prev) => [...r, ...prev]), // prepend real routes

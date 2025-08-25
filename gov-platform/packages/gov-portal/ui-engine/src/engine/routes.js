@@ -15,7 +15,8 @@ export function registerGateAndBuildRoutes(app, manifests, redirects, Shell, aut
     // already base-prefixed or an absolute http(s) url → keep as-is
     if (base && p.startsWith(base)) return p;
     // make "/login" -> "/uk-portal/login"
-    return base && p.startsWith("/") ? base + p : p;
+    // return base && p.startsWith("/") ? base + p : p;
+    return base && p.startsWith("/") ? p : p;
   };
 
   const loginPathRaw = auth?.login?.path || "/login";
@@ -30,7 +31,7 @@ export function registerGateAndBuildRoutes(app, manifests, redirects, Shell, aut
     baseRoutes.unshift({
       path: p,
       exact: true,               // react-router-dom v5
-      layout: "Shell",
+      layout: "AutoShell",
       meta: { public: true },
       page: { type: "ModuleGate", props: { moduleKey: "auth" } },
     });
