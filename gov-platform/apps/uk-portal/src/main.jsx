@@ -1,5 +1,19 @@
 import { start } from "@gov/ui-engine";
-
+const defaultModules = [
+  { key: "auth", basePath: "/" },
+  { key: "landing", basePath: "/landing" },
+  { key: "bpa", basePath: "/bpa" },
+  { key: "tl", basePath: "/tl" },
+];
+const moduleImports = {
+  landing: () => import("@gov/mod-landing"),
+  auth: () => import("@gov/mod-auth"),
+  bpa: () => import("@gov/mod-bpa"),
+  tl:  () => import("@gov/mod-tl"),
+}
+const moduleRegistry = Object.fromEntries(
+  defaultModules.map((m) => [m.key, moduleImports[m.key]])
+);
 // Only defaults/registry are used; source/endpoints are ignored here.
 start({
   target: "#root",
@@ -45,25 +59,14 @@ start({
     guards: {
       isAuthenticated: (ctx) => !!ctx.tokens.access,
       hasAnyRole: (ctx, roles) => roles.includes(ctx.user.role),
-      hasAllPerms: (ctx, perms) => perms.every(p => ctx.user.permissions?.includes(p))
-    },
+      hasAllPerms: (ctx, perms) => perms.every((p) => ctx.user.permissions?.includes(p))    },
     onAuthFail: "/login"
   },
   publicPaths: ["/register"],
   modules: {
     defaults: {
-      list: [
-        { key: "auth", basePath: "/" },
-        { key: "landing", basePath: "/landing" },
-        { key: "bpa", basePath: "/bpa" },
-        { key: "tl",  basePath: "/tl"  },
-      ],
-      registry: {
-        landing: () => import("@gov/mod-landing"),
-        auth: () => import("@gov/mod-auth"),
-        bpa: () => import("@gov/mod-bpa"),
-        tl:  () => import("@gov/mod-tl"),
-      }
+      list: defaultModules,
+      registry: moduleRegistry
     }
   },
   redirects: [{ from: "/", to: "/bpa" }]
