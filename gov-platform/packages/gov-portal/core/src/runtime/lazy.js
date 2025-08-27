@@ -26,3 +26,8 @@ export const assertRenderable = (Comp, name = "Component") => {
   }
   return Comp;
 };
+
+export const lazyModule = (loader) => {
+  let modPromise; // memoize so we import only once
+  return () => (modPromise ??= loader());
+};

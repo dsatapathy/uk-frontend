@@ -13,7 +13,8 @@ export {
   export {
     asDefault,
     asNamed,
-    assertRenderable
+    assertRenderable,
+    lazyModule,
   } from "./runtime/lazy";
   
   // Keep namespace export too (optional, but handy: `import * as core from "@gov/core"`)

@@ -1,50 +1,58 @@
 import * as React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { buildSchema } from "@gov/library";
+import { buildSchemaLazy } from "@gov/library";
 import defaultS from "@gov/styles/modules/auth/Auth.module.scss";
 import { getComponent } from "@gov/core";
 
-export default function LoginForm({ config, onSubmit, onSuccess, components = {}, classes }) {
+function LoginFormInner({ config, onSubmit, onSuccess, components, classes, schema }) {
   const s = classes || defaultS;
-  const AuthLayout = getComponent("AuthLayout");
-  const AuthCard = getComponent("AuthCard");
-  const Brand = getComponent("Brand");
+  const AuthLayout    = getComponent("AuthLayout");
+  const AuthCard      = getComponent("AuthCard");
+  const Brand         = getComponent("Brand");
   const FieldRenderer = getComponent("FieldRenderer");
-  const CaptchaBox = getComponent("CaptchaBox");
-  const RenderButton = getComponent("RenderButton");
+  const CaptchaBox    = getComponent("CaptchaBox");
+  const RenderButton  = getComponent("RenderButton");
 
   const C = {
-    AuthLayout: components.AuthLayout || AuthLayout,
-    AuthCard: components.AuthCard || AuthCard,
-    Brand: components.Brand || Brand,
-    FieldRenderer: components.FieldRenderer || FieldRenderer,
-    CaptchaBox: components.CaptchaBox || CaptchaBox,
+    AuthLayout:    components?.AuthLayout    || AuthLayout,
+    AuthCard:      components?.AuthCard      || AuthCard,
+    Brand:         components?.Brand         || Brand,
+    FieldRenderer: components?.FieldRenderer || FieldRenderer,
+    CaptchaBox:    components?.CaptchaBox    || CaptchaBox,
   };
 
-  const schema = React.useMemo(() => buildSchema(config.fields || [], config.captcha), [config]);
+  // default values (pure)
+  const defaultValues = React.useMemo(() => {
+    const dv = {};
+    (config.fields || []).forEach((f) => {
+      dv[f.name] = f.initialValue ?? (f.type === "checkbox" ? false : "");
+    });
+    if (config.captcha?.provider === "dev") {
+      dv[config.captcha.name || "captcha"] = "";
+    }
+    return dv;
+  }, [config.fields, config.captcha]);
 
-  const defaultValues = {};
-  (config.fields || []).forEach((f) => (defaultValues[f.name] = f.initialValue ?? (f.type === "checkbox" ? false : "")));
-  if (config.captcha?.provider === "dev") defaultValues[config.captcha.name || "captcha"] = "";
-
-  const { control, handleSubmit, formState: { errors, isSubmitting } } = useForm({
+  const {
+    control,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm({
     resolver: zodResolver(schema),
     defaultValues,
     mode: "onBlur",
   });
 
-  // CSS variables from config (all px values supported)
+  // CSS vars from config
   const styleVars = {
     "login-pad": (config.style?.layout?.paddingPx ?? 24) + "px",
     "login-bg": config.style?.layout?.background || "transparent",
-    // NEW ↓ background image/fit/position/overlay/blur
     "login-bg-img": config.style?.layout?.backgroundImage ? `url(${config.style.layout.backgroundImage})` : "none",
     "login-bg-fit": config.style?.layout?.backgroundFit || "cover",
     "login-bg-pos": config.style?.layout?.backgroundPosition || "center",
     "login-overlay": config.style?.layout?.overlay || "transparent",
     "login-blur": (config.style?.layout?.blurPx ?? 0) + "px",
-
     "login-card-w": (config.style?.card?.widthPx ?? 480) + "px",
     "login-card-p": (config.style?.card?.paddingPx ?? 24) + "px",
     "login-card-radius": (config.style?.card?.radiusPx ?? 12) + "px",
@@ -57,7 +65,7 @@ export default function LoginForm({ config, onSubmit, onSuccess, components = {}
     "field-focus": config.style?.field?.focusColor || "#0b5fff",
   };
   const elevation = config.style?.card?.elevation ?? 2;
-  const place = config.style?.layout?.place || "center";// center|left|right|top-left|top-right|bottom-left|bottom-right
+  const place = config.style?.layout?.place || "center";
 
   async function defaultSubmit(payload) {
     if (!config?.submit?.endpoint) return { ok: true };
@@ -79,11 +87,17 @@ export default function LoginForm({ config, onSubmit, onSuccess, components = {}
       decorations={config.visual?.decorations}
       animation={config.animation}
     >
-      <form className="login-form" onSubmit={handleSubmit(async (payload) => {
-        const res = await submitFn(payload);
-        onSuccess ? onSuccess(res, payload) : (config.onSuccessRoute && (window.location.href = config.onSuccessRoute));
-      })} noValidate>
-        <C.AuthCard variant={config.layout?.variant || "card"} elevation={elevation} classes={s} >
+      <form
+        className="login-form"
+        onSubmit={handleSubmit(async (payload) => {
+          const res = await submitFn(payload);
+          onSuccess
+            ? onSuccess(res, payload)
+            : (config.onSuccessRoute && (window.location.href = config.onSuccessRoute));
+        })}
+        noValidate
+      >
+        <C.AuthCard variant={config.layout?.variant || "card"} elevation={elevation} classes={s}>
           {(config.brand && (config.brand.logo || config.brand.title || config.brand.subtitle)) ? (
             <C.Brand classes={s} {...config.brand} />
           ) : null}
@@ -98,13 +112,37 @@ export default function LoginForm({ config, onSubmit, onSuccess, components = {}
           </div>
 
           <div className={`${s.submitRow} ${s[`align-${config.style?.button?.align}`] || ""}`}>
-            {config.submit && (<RenderButton cfg={config.submit} key={"submit"} isSubmitting={isSubmitting} classes={s} />)}
-            {config.register && (<RenderButton cfg={config.register} key={"register"} isSubmitting={isSubmitting} classes={s} />)}
-            {config.back && (<RenderButton cfg={config.back} key={"back"} isSubmitting={isSubmitting} classes={s} />)}
-
+            {config.submit   && (<RenderButton cfg={config.submit}   key="submit"   isSubmitting={isSubmitting} classes={s} />)}
+            {config.register && (<RenderButton cfg={config.register} key="register" isSubmitting={isSubmitting} classes={s} />)}
+            {config.back     && (<RenderButton cfg={config.back}     key="back"     isSubmitting={isSubmitting} classes={s} />)}
           </div>
         </C.AuthCard>
       </form>
     </C.AuthLayout>
   );
+}
+
+export default function LoginForm(props) {
+  const { config } = props;
+
+  // Load schema lazily in the shell
+  const [schema, setSchema] = React.useState(null);
+
+  React.useEffect(() => {
+    let alive = true;
+    (async () => {
+      try {
+        const sc = await buildSchemaLazy(config.fields || [], config.captcha);
+        if (alive) setSchema(sc);
+      } catch (e) {
+        console.error("[LoginForm] Failed to build schema:", e);
+        if (alive) setSchema(null);
+      }
+    })();
+    return () => { alive = false; };
+  }, [config.fields, config.captcha]);
+
+  if (!schema) return null; // or a spinner
+
+  return <LoginFormInner {...props} schema={schema} />;
 }

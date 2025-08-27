@@ -1,10 +1,8 @@
-// utils (tiny)
-export { buildSchema } from "./utils/schema.js";
-export { findAncestorsByPath, DRAWER_WIDTH } from "./utils/menu-utils.js";
+
 import { asDefault } from "@gov/core";
 import { LazyWrap } from "@gov/core";
 import { registerComponent } from "@gov/core";
-
+import { lazyModule } from "@gov/core";
 // atoms
 export const loadButton = asDefault(() => import("./atoms/AppButton.jsx"), "AppButton");
 
@@ -16,6 +14,24 @@ export const loadCaptchaBox = asDefault(() => import("./components/CaptchaBox.js
 export const loadFieldRenderer = asDefault(() => import("./form/FieldRenderer.jsx"), "FieldRenderer");
 export const loadNavLayout = asDefault(() => import("./components/NavLayout.jsx"), "NavLayout");
 
+const getSchemaMod = lazyModule(() => import("./utils/schema.js"));
+const getMenuMod   = lazyModule(() => import("./utils/menu-utils.js"));
+
+// Lazy function wrappers (async). Usage: await buildSchemaLazy(args)
+export const buildSchemaLazy = async (...args) => {
+  const { buildSchema } = await getSchemaMod();
+  return buildSchema(...args);
+};
+export const findAncestorsByPathLazy = async (...args) => {
+    const { findAncestorsByPath } = await getMenuMod();
+    return findAncestorsByPath(...args);
+  };
+  
+  // Lazy “constants” must be accessed via a function since import() is async
+  export const getDRAWER_WIDTH = async () => {
+    const { DRAWER_WIDTH } = await getMenuMod();
+    return DRAWER_WIDTH;
+  };
 // Call this once from the host (bootstrap), not here.
 export function registerLibraryDefaults() {
     registerComponent("AuthLayout", LazyWrap(loadAuthLayout, "AuthLayout"));
