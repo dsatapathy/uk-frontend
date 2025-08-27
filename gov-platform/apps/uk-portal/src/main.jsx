@@ -1,23 +1,14 @@
 import { start } from "@gov/ui-engine";
-const defaultModules = [
-  { key: "auth", basePath: "/" },
-  { key: "landing", basePath: "/landing" },
-  { key: "bpa", basePath: "/bpa" },
-  { key: "tl", basePath: "/tl" },
-];
-const moduleImports = {
-  landing: () => import("@gov/mod-landing"),
-  auth: () => import("@gov/mod-auth"),
-  bpa: () => import("@gov/mod-bpa"),
-  tl:  () => import("@gov/mod-tl"),
-}
-const moduleRegistry = Object.fromEntries(
-  defaultModules.map((m) => [m.key, moduleImports[m.key]])
-);
+import { moduleMap } from "./moduleRegistry";
+// build the route list to match enabled modules
+const enabled = Object.keys(moduleMap);
+const basePaths = { auth: "/", landing: "/landing", bpa: "/bpa", tl: "/tl", wns: "/wns" };
+const defaultModules = enabled.map(k => ({ key: k, basePath: basePaths[k] || `/${k}` }));
+const moduleRegistry = Object.fromEntries(defaultModules.map((m) => [m.key, moduleMap[m.key]]));
 // Only defaults/registry are used; source/endpoints are ignored here.
 start({
   target: "#root",
-  base: "/uk-portal",
+  base: "/uk-portal/",
   layout: { component: "AuthBlank" },
   app: {
     name: "UK Portal",

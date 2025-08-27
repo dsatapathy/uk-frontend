@@ -1,4 +1,4 @@
-import { defineConfig } from "vite";
+import { defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -6,49 +6,59 @@ import { fileURLToPath } from "url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const repoRoot = path.resolve(__dirname, "..", "..");
-
-// Normalize Windows backslashes to forward slashes for Vite/esbuild
 const toFs = (p) => p.replace(/\\/g, "/");
 
-const coreSrc = toFs(path.resolve(repoRoot, "packages/gov-portal/core/src"));
-const bpaSrc = toFs(path.resolve(repoRoot, "packages/gov-portal/modules/bpa/src"));
-const tlSrc = toFs(path.resolve(repoRoot, "packages/gov-portal/modules/tl/src"));
-const wnsSrc = toFs(path.resolve(repoRoot, "packages/gov-portal/modules/wns/src"));
-const authSrc = toFs(path.resolve(repoRoot, "packages/gov-portal/modules/auth/src"));
-const landingSrc = toFs(path.resolve(repoRoot, "packages/gov-portal/modules/landing/src"));
-const engineSrc = toFs(path.resolve(repoRoot, "packages/gov-portal/ui-engine/src"));
-export default defineConfig(({ command }) => {
+// dev-only source aliases
+const src = {
+  "@gov/core":        toFs(path.resolve(repoRoot, "packages/gov-portal/core/src")),
+  "@gov/mod-bpa":     toFs(path.resolve(repoRoot, "packages/gov-portal/modules/bpa/src")),
+  "@gov/mod-tl":      toFs(path.resolve(repoRoot, "packages/gov-portal/modules/tl/src")),
+  "@gov/mod-wns":     toFs(path.resolve(repoRoot, "packages/gov-portal/modules/wns/src")),
+  "@gov/mod-auth":    toFs(path.resolve(repoRoot, "packages/gov-portal/modules/auth/src")),
+  "@gov/mod-landing": toFs(path.resolve(repoRoot, "packages/gov-portal/modules/landing/src")),
+  "@gov/ui-engine":   toFs(path.resolve(repoRoot, "packages/gov-portal/ui-engine/src")),
+};
+
+export default defineConfig(({ command, mode }) => {
   const isServe = command === "serve";
+  const env = loadEnv(mode, process.cwd(), "VITE_"); // read VITE_ENABLED_MODULES at build time
+  const enabled = (env.VITE_ENABLED_MODULES || "").split(",").map(s => s.trim()).filter(Boolean);
+
+  // build a quick predicate: only treat *enabled* modules as "gov" chunk
+  const isEnabledGovModule = (id) =>
+    enabled.length > 0 &&
+    id.includes("/packages/gov-portal/modules/") &&
+    enabled.some(mk => id.includes(`/modules/${mk}/`));
+
+  // dev: pick which packages to read from source (HMR)
+  const devAliases = isServe ? src : {};
+
   return {
+    base: "/uk-portal/",
     plugins: [react()],
-    css: {
-      preprocessorOptions: {
-        scss: {}
-      }
-    },
-    resolve: {
-      alias: isServe
-        ? {
-          "@gov/core": coreSrc,
-          "@gov/mod-bpa": bpaSrc,
-          "@gov/mod-tl": tlSrc,
-          "@gov/mod-wns": wnsSrc,
-          "@gov/mod-auth": authSrc,
-          "@gov/mod-landing": landingSrc,
-          "@gov/ui-engine": engineSrc,
+    resolve: { alias: devAliases },
+    optimizeDeps: { exclude: isServe ? Object.keys(devAliases) : [] },
+    server: { fs: { allow: [repoRoot] }, port: 5173 },
+    css: { preprocessorOptions: { scss: {} } },
+    build: {
+      outDir: "dist",
+      emptyOutDir: true,
+      sourcemap: true,
+      rollupOptions: {
+        output: {
+          manualChunks(id) {
+            if (id.includes("node_modules")) {
+              if (/react|react-dom/.test(id)) return "react";
+              if (/react-router|history/.test(id)) return "router";
+              if (/@mui\/(material|icons-material|system)/.test(id)) return "mui";
+              if (/dayjs/.test(id)) return "day";
+            }
+            // put only the *enabled* modules' source into a "gov" chunk
+            if (isEnabledGovModule(id)) return "gov";
+          }
         }
-        : {}
-    },
-    optimizeDeps: {
-      exclude: isServe ? ["@gov/ui-engine",
-        "@gov/core",
-        "@gov/mod-bpa",
-        "@gov/mod-tl",
-        "@gov/mod-wns",
-        "@gov/mod-auth"
-      ] : []
-    },
-    server: { fs: { allow: [repoRoot] } },
-    build: { outDir: "dist", emptyOutDir: true }
+      },
+      chunkSizeWarningLimit: 900
+    }
   };
 });

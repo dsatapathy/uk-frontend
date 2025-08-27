@@ -1,12 +1,26 @@
 <!doctype html>
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
     <title>UK Portal</title>
+
+    <!-- Put favicon (and any static assets) in apps/uk-portal/public -->
+    <!-- Use a relative URL so it works in dev (/) and prod (/uk-portal/) -->
+    <link rel="icon" href="./uk-fav.ico" />
+    <meta name="theme-color" content="#0b5fff" />
   </head>
   <body>
+    <noscript>This app requires JavaScript to run.</noscript>
     <div id="root"></div>
-    <script type="module" src="./src/main.jsx"></script>
-   </body>
+
+    <!-- IMPORTANT:
+         Use an ABSOLUTE path (starts with `/`) to the entry during dev.
+         Vite will replace this with hashed assets on build, honoring base:'/uk-portal/'.
+    -->
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
 </html>

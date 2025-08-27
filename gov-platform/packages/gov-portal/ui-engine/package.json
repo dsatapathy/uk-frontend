@@ -4,13 +4,14 @@
   "private": true,
   "type": "module",
   "main": "./dist/index.cjs",
-  "module": "./dist/index.js",
+  "module": "./dist/index.mjs",
   "exports": {
     ".": {
-      "import": "./dist/index.js",
+      "import": "./dist/index.mjs",
       "require": "./dist/index.cjs"
     }
-  },  "files": ["dist"],
+  },
+  "files": ["dist"],
   "sideEffects": false,
   "peerDependencies": {
     "@gov/core": "0.1.0",
