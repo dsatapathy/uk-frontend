@@ -29,7 +29,8 @@
     "preview": "node -e \"require('child_process').spawn('vite', ['preview','--strictPort'], { cwd: 'apps/uk-portal', stdio: 'inherit', shell: true })\"",
 
     "//---------------- Utilities -----------------------": "────────",
-    "clean": "rimraf **/dist **/.vite",
+    "clean": "node tools/cli/clean.mjs",
+    "clean:portal": "rimraf apps/*/dist packages/gov-portal/*/dist packages/gov-portal/modules/*/dist",
     "dedupe": "yarn yarn-deduplicate -s fewer yarn.lock",
     "postinstall": "yarn run dedupe",
     "ws:info": "yarn workspaces info",

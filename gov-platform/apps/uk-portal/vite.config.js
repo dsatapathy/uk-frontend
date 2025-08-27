@@ -11,6 +11,7 @@ const toFs = (p) => p.replace(/\\/g, "/");
 // dev-only source aliases
 const src = {
   "@gov/core":        toFs(path.resolve(repoRoot, "packages/gov-portal/core/src")),
+  "@gov/data":        toFs(path.resolve(repoRoot, "packages/gov-portal/data/index.js")),
   "@gov/mod-bpa":     toFs(path.resolve(repoRoot, "packages/gov-portal/modules/bpa/src")),
   "@gov/mod-tl":      toFs(path.resolve(repoRoot, "packages/gov-portal/modules/tl/src")),
   "@gov/mod-wns":     toFs(path.resolve(repoRoot, "packages/gov-portal/modules/wns/src")),
