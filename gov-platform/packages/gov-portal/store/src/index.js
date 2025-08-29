@@ -1,6 +1,20 @@
-// packages/gov-portal/store/src/index.js
-
-// Store + reducer manager
+/**
+ * Central exports for the store layer.  The store is built with a
+ * `reducerManager` which enables **dynamic reducer registration**.
+ * Modules can inject their own slices at runtime without rebuilding
+ * the entire store.
+ *
+ * ```js
+ * import { appStore } from "@gov/store";
+ * import mySlice from "./slice";
+ *
+ * // Register the slice under a unique key
+ * appStore.reducerManager.add("mySlice", mySlice.reducer);
+ *
+ * // Optional cleanup
+ * // appStore.reducerManager.remove("mySlice");
+ * ```
+ */
 export { createAppStore } from "./store-core.js";
 export { createReducerManager } from "./reducer/reducerManager.js";
 
