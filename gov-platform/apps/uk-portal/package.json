@@ -25,6 +25,7 @@
     "@gov/mod-wns": "0.1.0",
     "@gov/mod-auth": "0.1.0",
     "@gov/mod-landing": "0.1.0",
-    "@gov/ui-engine": "0.1.0"
+    "@gov/ui-engine": "0.1.0",
+    "@gov/form-engine": "0.1.0"
   }
 }

@@ -1,10 +1,10 @@
 import React, { useEffect, useMemo, useRef } from "react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClient } from "@tanstack/react-query";
 import { ThemeProvider, createTheme, CssBaseline } from "@mui/material";
 
 import { Provider as ReduxProvider } from "react-redux";
-import { appStore } from "@gov/store"; // make sure your store package exports this singleton
-import { VersionedStorage } from "@gov/data";
+import { appStore, FormEngineProvider } from "@gov/store"; // make sure your store package exports this singleton
+import { VersionedStorage, QueryProvider } from "@gov/data";
 import { createHttp } from "@gov/data";
 import { setAuth, setUser, clearAuth } from "@gov/store";
 import ThemeBridge from "../ThemeBridge";
@@ -120,9 +120,11 @@ export function AppProviders({ cfg, children }) {
       <CssBaseline />
       <ThemeBridge />
       <ReduxProvider store={appStore}>
-        <QueryClientProvider client={qc}>
-          <AuthHydrator>{children}</AuthHydrator>
-        </QueryClientProvider>
+        <QueryProvider client={qc}>
+          <FormEngineProvider>
+            <AuthHydrator>{children}</AuthHydrator>
+          </FormEngineProvider>
+        </QueryProvider>
       </ReduxProvider>
     </ThemeProvider>
   );

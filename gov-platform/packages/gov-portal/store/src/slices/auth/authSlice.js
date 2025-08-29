@@ -2,7 +2,7 @@ import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = { status: "idle" };
 
-const slice = createSlice({
+const auth = createSlice({
   name: "auth",
   initialState,
   reducers: {
@@ -20,5 +20,5 @@ const slice = createSlice({
   },
 });
 
-export const { setAuth, setUser, clearAuth } = slice.actions;
-export default slice.reducer;
+export const { setAuth, setUser, clearAuth } = auth.actions;
+export default auth.reducer;

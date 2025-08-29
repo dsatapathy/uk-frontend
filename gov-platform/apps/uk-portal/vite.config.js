@@ -18,6 +18,7 @@ const src = {
   "@gov/mod-auth":    toFs(path.resolve(repoRoot, "packages/gov-portal/modules/auth/src")),
   "@gov/mod-landing": toFs(path.resolve(repoRoot, "packages/gov-portal/modules/landing/src")),
   "@gov/ui-engine":   toFs(path.resolve(repoRoot, "packages/gov-portal/ui-engine/src")),
+  "@gov/form-engine": toFs(path.resolve(repoRoot, "packages/gov-portal/formengine/src"))
 };
 
 export default defineConfig(({ command, mode }) => {

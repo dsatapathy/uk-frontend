@@ -1,6 +1,6 @@
 import React, { useMemo, useEffect } from "react";
 import { Provider, useStore } from "react-redux";
-import { createAppStore } from "./store-core.js";
+import { createAppStore } from "../store-core.js";
 
 export function StoreProvider({ children }) {
   const store = useMemo(() => createAppStore(), []);
