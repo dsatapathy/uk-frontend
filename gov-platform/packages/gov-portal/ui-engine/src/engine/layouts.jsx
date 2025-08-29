@@ -1,8 +1,6 @@
-// src/engine/layouts.jsx
 import React from "react";
 import { useSelector } from "react-redux";
-import { useHistory, useLocation } from "react-router-dom";
-
+import { useHistory } from "react-router-dom";
 import { runtime } from "@gov/core";
 
 export function AuthBlank({ children }) {
@@ -11,11 +9,8 @@ export function AuthBlank({ children }) {
 
 export function DefaultShell({ children }) {
   const history = useHistory();
-
-  // get registered component once
   const NavLayout = React.useMemo(() => runtime.getComponent?.("NavLayout"), []);
 
-  // HARD-CODED for now — memoize so refs are stable (no re-renders/loops)
   const logo = React.useMemo(
     () => <div style={{ width: 28, height: 28, borderRadius: 6, background: "#1976d2" }} />,
     []
@@ -50,15 +45,16 @@ export function DefaultShell({ children }) {
 
   const handleSearch = React.useCallback((q) => {
     console.log("Search query:", q);
-    // TODO: hit your search endpoint or dispatch an action
   }, []);
 
-  const handleNavigate = React.useCallback((target, item) => {
-    if (item?.url && !item?.path) window.open(target, item.target || "_blank");
-    else history.push(target);
-  }, [history]);
+  const handleNavigate = React.useCallback(
+    (target, item) => {
+      if (item?.url && !item?.path) window.open(target, item.target || "_blank");
+      else history.push(target);
+    },
+    [history]
+  );
 
-  // simple fallback if NavLayout isn’t registered yet
   if (!NavLayout) {
     return <div style={{ padding: 16 }}>{children}</div>;
   }
@@ -81,32 +77,54 @@ export function DefaultShell({ children }) {
 export function AutoShell({ children }) {
   const isAuthed = useSelector((s) => s?.auth?.status === "authenticated");
   const Layout = isAuthed ? DefaultShell : AuthBlank;
-  console.log("Resolving layout component:", Layout)
-
   return <Layout>{children}</Layout>;
 }
 
-export function resolveShell(layoutComponent) {
-  if (!layoutComponent) return AutoShell;
-  if (typeof layoutComponent === "string") {
-    return runtime.getLayout?.(layoutComponent) || AutoShell;
+// Ensure built-ins are registered once before any resolution
+function ensureBuiltinsRegistered() {
+  try {
+    runtime.getLayout?.("AuthBlank");
+  } catch {
+    runtime.registerLayout?.("AuthBlank", AuthBlank);
+    runtime.registerLayout?.("AutoShell", AutoShell);
   }
-  return layoutComponent;
+}
+
+export function resolveShell(layout, authCfg) {
+  ensureBuiltinsRegistered();
+
+  const lc = typeof layout === "string" ? { component: layout } : (layout || {});
+  const comp = lc.component;
+  const forceBlank = !!lc.forceAuthBlank;
+  const authEnabled = authCfg && authCfg.strategy && authCfg.strategy !== "none";
+
+  // Explicitly forced blank
+  if (forceBlank) return AuthBlank;
+
+  // Legacy host default: treat "AuthBlank" as AutoShell if auth is enabled
+  if (authEnabled && (!comp || comp === "AuthBlank")) return AutoShell;
+
+  if (!comp) return AutoShell;
+  if (typeof comp === "string") {
+    if (comp === "AuthBlank") return AuthBlank;
+    if (comp === "AutoShell" || comp === "Shell") return AutoShell;
+    return runtime.getLayout?.(comp) || AutoShell;
+  }
+  return comp;
 }
 
 export function registerShellAsLayout(Shell) {
-  // Register to BOTH registries so RouteBuilder (local) can resolve it.
-  runtime.registerLayout?.("Shell", Shell);
-  runtime.registerLayout?.("AuthBlank", AuthBlank);
-  runtime.registerLayout?.("AutoShell", AutoShell);
+  ensureBuiltinsRegistered();
+  if (Shell) runtime.registerLayout?.("Shell", Shell);
 }
 
 export function resolveRouteLayouts(routes, fallbackLayout) {
+  ensureBuiltinsRegistered();
   return routes.map((r) => {
     const resolved =
       typeof r.layout === "string"
-        ? (runtime.getLayout?.(r.layout) || fallbackLayout)
-        : (r.layout || fallbackLayout);
+        ? runtime.getLayout?.(r.layout) || fallbackLayout
+        : r.layout || fallbackLayout;
     return { ...r, layout: resolved };
   });
 }

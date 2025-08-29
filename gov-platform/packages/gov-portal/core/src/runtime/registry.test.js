@@ -47,11 +47,20 @@ const cases = [
 ];
 
 for (const { kind, register, get, map, value1, value2 } of cases) {
+  test(`${kind} get without name throws`, () => {
+    assert.throws(() => get(), /name is required/);
+    map.clear();
+  });
+
+  test(`${kind} get unregistered name throws`, () => {
+    assert.throws(() => get('missing'), /not found/);
+    map.clear();
+  });
   test(`${kind} duplicate registration warns and skips by default`, () => {
     const originalWarn = console.warn;
-    let warned = false;
-    console.warn = () => {
-      warned = true;
+    let warned;
+    console.warn = (msg) => {
+      warned = msg;
     };
 
     const first = value1();
@@ -60,6 +69,8 @@ for (const { kind, register, get, map, value1, value2 } of cases) {
     register('X', second);
 
     assert.strictEqual(get('X'), first);
+    assert.ok(warned.includes('already registered'));
+    assert.ok(warned.includes('https://docs.gov-portal.dev/registry'));
     assert.ok(warned);
 
     console.warn = originalWarn;
@@ -68,9 +79,9 @@ for (const { kind, register, get, map, value1, value2 } of cases) {
 
   test(`${kind} duplicate registration can overwrite`, () => {
     const originalWarn = console.warn;
-    let warned = false;
-    console.warn = () => {
-      warned = true;
+    let warned;
+    console.warn = (msg) => {
+      warned = msg;
     };
 
     const first = value1();
@@ -79,6 +90,8 @@ for (const { kind, register, get, map, value1, value2 } of cases) {
     register('Y', second, true);
 
     assert.strictEqual(get('Y'), second);
+    assert.ok(warned.includes('already registered'));
+    assert.ok(warned.includes('https://docs.gov-portal.dev/registry'));
     assert.ok(warned);
 
     console.warn = originalWarn;

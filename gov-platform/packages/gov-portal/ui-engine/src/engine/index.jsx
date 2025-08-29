@@ -45,9 +45,12 @@ export function start(rawConfig) {
     } = cfg;
 
     const history = createBrowserHistory({ basename: base });
-
     // Layout/Shell
-    const Shell = resolveShell(layoutComponent);
+    // 1) Seed built-ins (AuthBlank, AutoShell) without importing them here
+    registerShellAsLayout(); // seeds only
+    // 2) Resolve requested shell with auth-aware behavior
+    const Shell = resolveShell(layout, auth);
+    // 3) Register chosen shell name for RouteBuilder as "Shell"
     registerShellAsLayout(Shell);
     // 🔽 Register library components lazily (no code is fetched until rendered)
     registerLibraryDefaults();
