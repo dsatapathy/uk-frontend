@@ -1,38 +1,97 @@
-import React, { useMemo, useState } from 'react';
-import { TextField, Autocomplete, CircularProgress } from '@mui/material';
-import { useQuery } from '@tanstack/react-query';
-import { debounce } from '../utils/debounce.js';
-// import { fetchOptions } from '../../data/options.service.js';
+// packages/bpa/src/molecules/AsyncAutocomplete.jsx
+import React, { useMemo, useState, useEffect } from "react";
+import { TextField, Autocomplete, CircularProgress } from "@mui/material";
+import { debounce } from "../utils/debounce.js";
+import { useOptions } from "@gov/data";
 
-export default function AsyncAutocomplete({ field, rhf, label, error, disabled, hidden, contextDeps }) {
-  const [query, setQuery] = useState('');
+function depsReady(deps = {}) {
+  const ks = Object.keys(deps || {});
+  if (ks.length === 0) return true;
+  return ks.every((k) => {
+    const v = deps[k];
+    if (v === null || v === undefined) return false;
+    if (typeof v === "string") return v.trim() !== "";
+    return true;
+  });
+}
+
+export default function AsyncAutocomplete({
+  field,
+  rhf,
+  label,
+  error,
+  disabled,
+  hidden,
+  contextDeps,
+}) {
+  const [query, setQuery] = useState("");
+  const [open, setOpen] = useState(false);        // 👈 only fetch when open
   const deps = contextDeps || {};
+  const ready = depsReady(deps);
 
-  const { data = [], isFetching } = useQuery({
-    queryKey: ['options', field.options?.endpointKey, query, deps],
-    // queryFn: () => fetchOptions({ endpointKey: field.options?.endpointKey, q: query, deps }),
-    enabled: !!field.options?.endpointKey && !hidden && !disabled,
-    staleTime: 10 * 60 * 1000,
+  const valueKey = field?.options?.valueKey || "value";
+  const labelKey = field?.options?.labelKey || "label";
+  const endpointKey = field?.options?.endpointKey;
+  const endpointOverride = field?.options?.endpoint;
+
+  // Only update search query when user types (ignore 'reset', 'selectOption', etc.)
+  const onInputChange = useMemo(
+    () =>
+      debounce((_, v, reason) => {
+        if (reason === "input") setQuery(v || "");
+      }, 300),
+    []
+  );
+
+  const { data = [], isLoading, isFetching } = useOptions(endpointKey, {
+    query,
+    deps,
+    endpoint: endpointOverride,
+    enabled: open && !hidden && !disabled && ready, // 👈 gate by open + deps
   });
 
-  const onInputChange = useMemo(() => debounce((_, v) => setQuery(v || ''), 300), []);
+  // Optional: clear stale value when parent cleared
+  useEffect(() => {
+    if (!ready && rhf.value != null) rhf.onChange(null);
+  }, [ready]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const selected = data.find((o) => o?.[valueKey] === rhf?.value) || null;
   if (hidden) return null;
+
   return (
     <Autocomplete
-      loading={isFetching}
+      open={open}
+      onOpen={() => setOpen(true)}
+      onClose={() => setOpen(false)}
       options={data}
-      value={null}
-      onChange={(_, v) => rhf.onChange(v ? v[field.options?.valueKey] : null)}
-      getOptionLabel={(o) => (o?.[field.options?.labelKey] ?? '')}
+      value={selected}
+      onChange={(_, v) => rhf.onChange(v ? v[valueKey] : null)}
+      onInputChange={onInputChange}
+      loading={(isLoading || isFetching) && open && ready}
+      disabled={disabled || !ready}
+      getOptionLabel={(o) => o?.[labelKey] ?? ""}
+      isOptionEqualToValue={(opt, val) => opt?.[valueKey] === val?.[valueKey]}
       renderInput={(params) => (
         <TextField
           {...params}
           label={label}
           error={!!error}
-          helperText={error?.message}
-          onInput={onInputChange}
-          InputProps={{ ...params.InputProps, endAdornment: (<>{isFetching ? <CircularProgress size={18} /> : null}{params.InputProps.endAdornment}</>) }}
+          helperText={
+            !ready
+              ? field?.options?.dependsOnHint || "Please select the parent field first"
+              : error?.message
+          }
+          InputProps={{
+            ...params.InputProps,
+            endAdornment: (
+              <>
+                {(isLoading || isFetching) && open && ready ? (
+                  <CircularProgress size={18} />
+                ) : null}
+                {params.InputProps.endAdornment}
+              </>
+            ),
+          }}
         />
       )}
     />

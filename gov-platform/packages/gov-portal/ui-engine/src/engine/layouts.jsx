@@ -24,7 +24,7 @@ export function DefaultShell({ children }) {
         icon: "layers",
         path: "/bpa",
         children: [
-          { label: "New Application", path: "/bpa/start" },
+          { label: "New Application", path: "/bpa/apply" },
           { label: "My Applications", path: "/bpa/list" },
           {
             label: "Reports",

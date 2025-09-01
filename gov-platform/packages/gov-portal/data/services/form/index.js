@@ -2,18 +2,40 @@
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { http } from "../bootstrap";
 
-// 1. Fetch dropdown/autocomplete options
-export function useOptions(endpointKey, { query, page = 1, deps = {} } = {}) {
+// deps must be present (non-empty strings ok; allow 0/false if valid)
+function depsReady(deps = {}) {
+  const ks = Object.keys(deps || {});
+  if (ks.length === 0) return true;
+  return ks.every((k) => {
+    const v = deps[k];
+    if (v === null || v === undefined) return false;
+    if (typeof v === "string") return v.trim() !== "";
+    return true;
+  });
+}
+
+export function useOptions(
+  endpointKey,
+  { query, page = 1, deps = {}, endpoint, enabled = true, staleTime = 10 * 60 * 1000 } = {}
+) {
+  const url = endpoint || (endpointKey ? `/api/options/${endpointKey}` : undefined);
+  const ready = depsReady(deps);
+  const isEnabled = enabled && !!url && ready;
+
   return useQuery({
-    queryKey: ["options", endpointKey, query, page, deps],
+    queryKey: ["options", endpointKey, query ?? "", page, JSON.stringify(deps || {})],
     queryFn: async () => {
-      const { data } = await http().get(`/options/${endpointKey}`, {
-        params: { q: query, page, ...deps },
-      });
+      const { data } = await http().get(url, { params: { q: query, page, ...deps } });
       return data || [];
     },
-    enabled: !!endpointKey,
-    staleTime: 5 * 60 * 1000,
+    enabled: isEnabled,
+    // 👇 prevent refetch “just because” when revisiting/ focusing
+    staleTime,
+    gcTime: 30 * 60 * 1000,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    keepPreviousData: true,
   });
 }
 

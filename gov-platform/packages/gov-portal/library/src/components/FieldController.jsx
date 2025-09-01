@@ -49,7 +49,16 @@ function switchByType(field, { rhf, fieldState, ruleState, values, user }) {
 
 function pickDeps(depList = [], values, user) {
   const out = {};
-  depList.forEach((d) => { if (d.startsWith('values.')) out[d] = getVal(values, d.replace('values.', '')); else if (d.startsWith('user.')) out[d] = getVal(user, d.replace('user.', '')); });
-  return out;
+  depList.forEach((d) => {
+      if (d.startsWith('values.')) {
+        const key = d.replace('values.', '');          // e.g. "state"
+        const param = key.split('.').pop();            // last segment
+        out[param] = getVal(values, key);
+      } else if (d.startsWith('user.')) {
+        const key = d.replace('user.', '');
+        const param = key.split('.').pop();
+        out[param] = getVal(user, key);
+      }
+    });  return out;
 }
 function getVal(obj, path) { return path.split('.').reduce((a, k) => (a ? a[k] : undefined), obj); }
