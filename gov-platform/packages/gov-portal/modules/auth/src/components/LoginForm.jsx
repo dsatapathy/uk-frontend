@@ -4,22 +4,22 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { buildSchemaLazy } from "@gov/library";
 import defaultS from "@gov/styles/modules/auth/Auth.module.scss";
 import { getComponent } from "@gov/core";
-
+import { http } from "@gov/data";
 function LoginFormInner({ config, onSubmit, onSuccess, components, classes, schema }) {
   const s = classes || defaultS;
-  const AuthLayout    = getComponent("AuthLayout");
-  const AuthCard      = getComponent("AuthCard");
-  const Brand         = getComponent("Brand");
+  const AuthLayout = getComponent("AuthLayout");
+  const AuthCard = getComponent("AuthCard");
+  const Brand = getComponent("Brand");
   const FieldRenderer = getComponent("FieldRenderer");
-  const CaptchaBox    = getComponent("CaptchaBox");
-  const RenderButton  = getComponent("RenderButton");
+  const CaptchaBox = getComponent("CaptchaBox");
+  const RenderButton = getComponent("RenderButton");
 
   const C = {
-    AuthLayout:    components?.AuthLayout    || AuthLayout,
-    AuthCard:      components?.AuthCard      || AuthCard,
-    Brand:         components?.Brand         || Brand,
+    AuthLayout: components?.AuthLayout || AuthLayout,
+    AuthCard: components?.AuthCard || AuthCard,
+    Brand: components?.Brand || Brand,
     FieldRenderer: components?.FieldRenderer || FieldRenderer,
-    CaptchaBox:    components?.CaptchaBox    || CaptchaBox,
+    CaptchaBox: components?.CaptchaBox || CaptchaBox,
   };
 
   // default values (pure)
@@ -69,13 +69,19 @@ function LoginFormInner({ config, onSubmit, onSuccess, components, classes, sche
 
   async function defaultSubmit(payload) {
     if (!config?.submit?.endpoint) return { ok: true };
-    const res = await fetch(config.submit.endpoint, {
-      method: config.submit.method || "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-    if (!res.ok) throw new Error("Login failed");
-    return res.json();
+    const baseURL = config?.api?.baseURL || "";
+    const url = baseURL ? new URL(config.submit.endpoint, baseURL).toString() : config.submit.endpoint;
+    try {
+      const { data } = await http().request({
+        url,
+        method: config.submit.method || "POST",
+        headers: { "Content-Type": "application/json" },
+        data: payload,
+      });
+      return data;
+    } catch (e) {
+      throw new Error("Login failed");
+    }
   }
   const submitFn = onSubmit || defaultSubmit;
 
@@ -112,9 +118,9 @@ function LoginFormInner({ config, onSubmit, onSuccess, components, classes, sche
           </div>
 
           <div className={`${s.submitRow} ${s[`align-${config.style?.button?.align}`] || ""}`}>
-            {config.submit   && (<RenderButton cfg={config.submit}   key="submit"   isSubmitting={isSubmitting} classes={s} />)}
+            {config.submit && (<RenderButton cfg={config.submit} key="submit" isSubmitting={isSubmitting} classes={s} />)}
             {config.register && (<RenderButton cfg={config.register} key="register" isSubmitting={isSubmitting} classes={s} />)}
-            {config.back     && (<RenderButton cfg={config.back}     key="back"     isSubmitting={isSubmitting} classes={s} />)}
+            {config.back && (<RenderButton cfg={config.back} key="back" isSubmitting={isSubmitting} classes={s} />)}
           </div>
         </C.AuthCard>
       </form>

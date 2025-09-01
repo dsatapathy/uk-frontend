@@ -3,7 +3,7 @@ import { useMemo } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { useAppDispatch } from "@gov/store";
 import { setAuth } from "@gov/store";
-import { VersionedStorage } from "@gov/data";
+import { VersionedStorage, http  } from "@gov/data";
 
 export function useLoginFlow(loginCfg, storagePolicyOverride) {
     const dispatch = useAppDispatch();
@@ -29,15 +29,14 @@ export function useLoginFlow(loginCfg, storagePolicyOverride) {
 
     const mutation = useMutation({
         mutationFn: async (vars) => {
-            const res = await fetch(url, {
+            const { data } = await http().request({
+                url,
                 method,
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ username: vars.username, password: vars.password }),
-                credentials: "include",         // if your API sets cookies
-                mode: "cors",
+                data: { username: vars.username, password: vars.password },
+                withCredentials: true,
             });
-            if (!res.ok) throw new Error(await res.text().catch(() => "") || `Login failed (${res.status})`);
-            return res.json();
+            return data;
         },
         onSuccess: (data, vars) => {
             const tokens = {
