@@ -7,7 +7,7 @@ export const defaultAuthConfig = {
       refresh: "/api/auth/refresh", // optional
     },
     withCredentials: true,
-    storageNamespace: "gov-portal",
+    storageNamespace: "uk-portal",
     installInterceptors: true,
   
     // Decide local vs session based on login payload

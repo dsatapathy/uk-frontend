@@ -1,59 +1,108 @@
-// packages/gov-portal/features/auth/useLoginFlow.js
 import { useMemo } from "react";
-import { useMutation } from "@tanstack/react-query";
 import { useAppDispatch } from "@gov/store";
 import { setAuth } from "@gov/store";
-import { VersionedStorage, http  } from "@gov/data";
+import { http, makeAuthApi } from "@gov/data";
 
-export function useLoginFlow(loginCfg, storagePolicyOverride) {
-    const dispatch = useAppDispatch();
+/**
+ * loginCfg shape (same as your current config):
+ * {
+ *   api: { baseURL: "http://localhost:3001" },
+ *   submit: {
+ *     endpoint: "/api/auth/login",
+ *     method: "POST",
+ *     headers?: {...},                 // optional extra headers
+ *     mapVars?: (vars) => ({...})      // optional payload mapper
+ *   },
+ *   onSuccessRoute?: "/uk-portal/landing",
+ *   responseAdapter?: (raw) => ({ tokens, user }),   // optional
+ *   rememberSelector?: (vars) => boolean,            // optional
+ *   storage?: { namespace?: string, ttlSeconds?: number, mirrorToSession?: boolean } // optional (if using global storage, you can ignore)
+ * }
+ */
 
-    const storage = useMemo(() => {
-        // prefer provided storage, else the shared one, else fallback (rarely used)
-        // if (storageOverride) return storageOverride;
-        if (typeof window !== "undefined" && window.__auth_storage__) return window.__auth_storage__;
-        // Fallback ONLY if absolutely needed (best to avoid this branch)
-        return new VersionedStorage({
-            version: "v1",
-            namespace: "uk-portal",
-            mirrorToSession: true,
-            ttlSeconds: 60 * 60 * 8,
-        });
-    }, [storagePolicyOverride]);
+export function useLoginFlow(loginCfg) {
+  const dispatch = useAppDispatch();
 
-    const endpoint = loginCfg?.submit?.endpoint || "/api/auth/login";
-    const baseURL = loginCfg?.api?.baseURL || "";   // <-- read from config
-    const url = baseURL ? new URL(endpoint, baseURL).toString() : endpoint;
+  const baseURL = loginCfg?.api?.baseURL || "";
+  const endpoint = loginCfg?.submit?.endpoint || "/api/auth/login";
+  const method = (loginCfg?.submit?.method || "POST").toUpperCase();
+  const extraHeaders = loginCfg?.submit?.headers || {};
+  const mapVars =
+    typeof loginCfg?.submit?.mapVars === "function"
+      ? loginCfg.submit.mapVars
+      : (v) => ({ username: v.username, password: v.password, remember: v.remember });
 
-    const method = (loginCfg?.submit?.method || "POST").toUpperCase();
-
-    const mutation = useMutation({
-        mutationFn: async (vars) => {
-            const { data } = await http().request({
-                url,
-                method,
-                headers: { "Content-Type": "application/json" },
-                data: { username: vars.username, password: vars.password },
-                withCredentials: true,
-            });
-            return data;
+  // Build the auth service once for this config
+  const auth = useMemo(() => {
+    // If you set window.__auth_storage__ at app bootstrap, the service will auto-use it
+    return makeAuthApi(http(), {
+      auth: {
+        baseURL,
+        installInterceptors: true,
+        // Endpoints used by the service (we only need login here; others are defaults you can change later)
+        endpoints: {
+          login: endpoint,
+          me: "/api/auth/me",
+          logout: "/api/auth/logout",
+          refresh: "/api/auth/refresh",
         },
-        onSuccess: (data, vars) => {
-            const tokens = {
-                accessToken: data.accessToken || data.token,
-                refreshToken: data.refreshToken,
-                tokenType: data.tokenType,
-            };
-            const user = data.user;
-            const scope = vars?.remember ? "local" : "session";
-            storage.set("auth", { tokens, user }, { scope });
-            dispatch(setAuth({ tokens, user }));
-        },
+        // Decide local vs session from the payload (remember checkbox)
+        rememberSelector:
+          typeof loginCfg?.rememberSelector === "function"
+            ? loginCfg.rememberSelector
+            : (vars) => !!vars?.remember,
+        // Normalize raw backend → { tokens, user }
+        responseAdapter:
+          typeof loginCfg?.responseAdapter === "function"
+            ? loginCfg.responseAdapter
+            : (data) => ({
+                tokens: {
+                  accessToken: data?.accessToken || data?.token,
+                  refreshToken: data?.refreshToken,
+                  tokenType: data?.tokenType || "Bearer",
+                },
+                user: data?.user,
+              }),
+        // Optional storage overrides if you are NOT using a global window.__auth_storage__
+        storage: loginCfg?.storage, // can be omitted to use global
+        // Optional: add headers to login call via client interceptor? We'll pass per-call below instead.
+      },
     });
+  }, [
+    baseURL,
+    endpoint,
+    loginCfg?.rememberSelector,
+    loginCfg?.responseAdapter,
+    loginCfg?.storage,
+  ]);
 
-    return {
-        submit: (username, password, opts) => mutation.mutateAsync({ username, password, remember: !!opts?.remember }),
-        isLoading: mutation.isPending,
-        error: mutation.error,
-    };
+  // Pull the generated hook from the service
+  const { useLogin } = auth;
+
+  // Wrap service’s useLogin so we keep your old return shape
+  const login = useLogin({
+    // onSuccess receives the mapped { tokens, user }
+    onSuccess: (mapped, vars) => {
+      // Keep Redux in sync if your app still reads auth from store
+      dispatch(setAuth(mapped));
+      // Optional route redirect if you use it in config
+      if (loginCfg?.onSuccessRoute) {
+        window.location.href = loginCfg.onSuccessRoute;
+      }
+    },
+  });
+
+  return {
+    submit: (username, password, opts) =>
+      // mapVars lets you rename/request different payload keys if needed
+      login.mutateAsync({
+        ...mapVars({ username, password, remember: !!opts?.remember }),
+        // If you want extra headers for just the login call:
+        // The service uses axios under the hood; pass a hint the core can read:
+        __headers: extraHeaders,
+        __method: method, // core defaults to POST; include if you need to vary
+      }),
+    isLoading: login.isPending,
+    error: login.error,
+  };
 }
