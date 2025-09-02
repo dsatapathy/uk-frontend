@@ -1,0 +1,70 @@
+/* components/form/Label.module.scss */
+@use "../../core/mixins" as *;     // media(), focus-ring(), surface()
+@use "../../core/spacing" as *;    // spacing helpers (if you need mixins)
+@use "../../core/tokens" as *;     // exposes CSS vars like --g-fg, --g-s1, --error-600
+
+.root {
+  display: inline-flex;
+  align-items: center;
+  line-height: 1.2;
+}
+
+/* gap tokens (map sizes → spacing scale) */
+.root.gap--xs { column-gap: var(--g-s1); } /* 4px */
+.root.gap--sm { column-gap: var(--g-s2); } /* 8px */
+.root.gap--md { column-gap: var(--g-s3); } /* 12px */
+.root.gap--lg { column-gap: var(--g-s4); } /* 16px */
+
+.text {
+  display: inline-flex;
+  align-items: center;
+  column-gap: var(--g-s2);
+  color: var(--g-fg);              /* semantic foreground */
+}
+
+/* color tokens */
+.text.color--default { color: var(--g-fg); }
+.text.color--muted   { color: var(--g-fg-muted); }
+
+/* weight tokens */
+.text.weight--regular  { font-weight: 400; }
+.text.weight--medium   { font-weight: 500; }
+.text.weight--semibold { font-weight: 600; }
+
+/* size tokens (fallbacks shown; prefer typography vars if you expose them) */
+.text.size--sm { font-size: var(--g-font-size-sm, 0.8125rem); }
+.text.size--md { font-size: var(--g-font-size-md, 0.875rem); }
+.text.size--lg { font-size: var(--g-font-size-lg, 1rem); }
+
+/* Responsive: example tweak for xs; use your media() mixin */
+@include media(sm) {
+  .text.size--lg { font-size: var(--g-font-size-md, 0.9375rem); }
+}
+
+/* Hide optional text on narrow screens if configured (class added by component) */
+.optional {
+  margin-left: var(--g-s1);
+  color: var(--g-fg-muted);
+  font-weight: 400;
+  font-size: 0.85em;
+}
+.optional.hideOnXs {
+  @media (max-width: 599.98px) { display: none; } /* or build a mixin for max-xs */
+}
+
+/* Required asterisk colors: use semantic/error scale from tokens */
+.asterisk {
+  margin-left: var(--g-s1);
+}
+.asterisk.color--error   { color: var(--error-600, #d32f2f); }
+.asterisk.color--default { color: currentColor; }
+
+/* Tooltip icon button */
+.iconBtn {
+  padding: var(--g-s1);
+  margin-left: var(--g-s1);
+  color: var(--g-fg-muted);
+}
+.iconBtn:hover {
+  color: var(--g-fg);
+}

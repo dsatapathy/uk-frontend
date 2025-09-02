@@ -14,7 +14,7 @@ export const loadCaptchaBox = asDefault(() => import("./components/CaptchaBox.js
 export const loadFieldRenderer = asDefault(() => import("./form/FieldRenderer.jsx"), "FieldRenderer");
 export const loadNavLayout = asDefault(() => import("./components/NavLayout.jsx"), "NavLayout");
 export const ErrorSummary = asDefault(() => import("./components/ErrorSummary.jsx"), "ErrorSummary");
-export const TextFieldAtom = asDefault(() => import("./atoms/TextFieldAtom.jsx"), "TextFieldAtom");
+export const InputText = asDefault(() => import("./atoms/InputText.jsx"), "InputText");
 export const CheckboxAtom = asDefault(() => import("./atoms/CheckboxAtom.jsx"), "CheckboxAtom");
 export const AsyncAutocomplete = asDefault(() => import("./molecules/AsyncAutocomplete.jsx"), "AsyncAutocomplete");
 export const FormShell = asDefault(() => import("./organisms/FormShell.jsx"), "FormShell");
@@ -81,7 +81,7 @@ export function registerLibraryDefaults() {
 
   // atoms
   registerComponent("AppButton", LazyWrap(loadButton, "AppButton"));
-  registerComponent("TextFieldAtom", LazyWrap(TextFieldAtom, "TextFieldAtom"));
+  registerComponent("InputText", LazyWrap(InputText, "InputText"));
   registerComponent("CheckboxAtom", LazyWrap(CheckboxAtom, "CheckboxAtom"));
   registerComponent("AsyncAutocomplete", LazyWrap(AsyncAutocomplete, "AsyncAutocomplete"));
   registerComponent("FormShell", LazyWrap(FormShell, "FormShell"))

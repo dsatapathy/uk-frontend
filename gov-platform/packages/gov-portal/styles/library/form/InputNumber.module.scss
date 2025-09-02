@@ -1,0 +1,37 @@
+/* components/form/InputNumber.module.scss */
+@use "../../core/mixins" as *;
+@use "../../core/tokens" as *;
+
+.root {
+  display: grid;
+  row-gap: var(--g-s1);
+  color: var(--g-fg);
+}
+
+.root.my--none { margin-block: 0; }
+.root.my--xs   { margin-block: var(--g-s1); }
+.root.my--sm   { margin-block: var(--g-s2); }
+.root.my--md   { margin-block: var(--g-s3); }
+
+.root.gap--xs { column-gap: var(--g-s1); }
+.root.gap--sm { column-gap: var(--g-s2); }
+.root.gap--md { column-gap: var(--g-s3); }
+.root.gap--lg { column-gap: var(--g-s4); }
+
+.inline { /* MUI TextField wrapper */ }
+
+.stepBtn {
+  padding: var(--g-s1);
+  color: var(--g-fg-muted);
+}
+.stepBtn:hover { color: var(--g-fg); }
+
+.unitSuffix {
+  margin-left: var(--g-s1);
+  color: var(--g-fg-muted);
+  font-size: var(--g-font-size-sm, 0.8125rem);
+}
+
+@include media-down(sm) {
+  .unitSuffix { font-size: 0.75rem; }
+}

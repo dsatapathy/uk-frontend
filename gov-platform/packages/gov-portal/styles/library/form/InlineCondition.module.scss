@@ -1,0 +1,28 @@
+@use "../../core/mixins" as *;
+@use "../../core/tokens" as *;
+
+.root {
+  display: contents; // default: don’t introduce a layout box
+}
+
+/* When you need to collapse space entirely */
+.hiddenCollapse {
+  display: none !important;
+}
+
+/* Keep layout but visually hide (preserve flow for responsive layouts) */
+.hiddenReserve {
+  visibility: hidden;
+}
+
+/* Dim when disabled (value comes from inline style var) */
+.isDisabled {
+  pointer-events: none; // let focus skip disabled group
+}
+
+/* Example: on very narrow screens we could force reserve mode to avoid layout jumps */
+@include media-down(sm) {
+  .hiddenCollapse {
+    /* choose behavior; keeping collapse is often fine */
+  }
+}

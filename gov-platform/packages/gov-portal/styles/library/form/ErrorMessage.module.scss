@@ -1,0 +1,51 @@
+/* components/form/ErrorMessage.module.scss */
+@use "../../core/mixins" as *;  // media(), etc.
+@use "../../core/tokens" as *;  // --g-s1, --g-fg, --error-700, etc.
+
+.root {
+  display: inline-flex;
+  align-items: flex-start;
+  line-height: 1.35;
+}
+
+.root.gap--xs { column-gap: var(--g-s1); }
+.root.gap--sm { column-gap: var(--g-s2); }
+.root.gap--md { column-gap: var(--g-s3); }
+.root.gap--lg { column-gap: var(--g-s4); }
+
+.root.mt--none { margin-top: 0; }
+.root.mt--xs   { margin-top: var(--g-s1); }
+.root.mt--sm   { margin-top: var(--g-s2); }
+.root.mt--md   { margin-top: var(--g-s3); }
+
+/* semantic color variants */
+.root.color--danger  { color: var(--error-700, #c62828); }
+.root.color--warning { color: var(--warning-800, #e65100); }
+.root.color--info    { color: var(--info-700, #01579b); }
+
+/* font size tokens */
+.text.size--sm { font-size: var(--g-font-size-sm, 0.8125rem); }
+.text.size--md { font-size: var(--g-font-size-md, 0.875rem); }
+.text.size--lg { font-size: var(--g-font-size-lg, 1rem); }
+
+.icon {
+  line-height: 0;
+  display: inline-flex;
+  align-items: center;
+  translate: 0 2px; /* optical alignment */
+  font-size: 1rem;
+}
+
+/* optional clamp */
+.clamp--1, .clamp--2, .clamp--3, .clamp--4 {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.clamp--1 { -webkit-line-clamp: 1; }
+.clamp--2 { -webkit-line-clamp: 2; }
+.clamp--3 { -webkit-line-clamp: 3; }
+.clamp--4 { -webkit-line-clamp: 4; }
+
+/* responsive: hide on extra-small if configured */
+.hideOnXs { @include media-down(sm) { display: none; } }

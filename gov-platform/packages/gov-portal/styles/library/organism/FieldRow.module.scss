@@ -1,0 +1,89 @@
+@use "../../core/mixins" as *;  // provides media(sm|md|lg|xl) and media-down()
+@use "../../core/tokens" as *;
+
+/* Root grid */
+.root {
+  display: grid;
+  grid-template-columns: repeat(var(--fr-cols, 1), minmax(0, 1fr));
+  gap: var(--fr-gap, var(--g-s2));
+}
+
+/* bump columns & gap at breakpoints using CSS vars set by the component */
+@include media(sm) {
+  .root {
+    grid-template-columns: repeat(var(--fr-cols-sm, var(--fr-cols, 1)), minmax(0, 1fr));
+    gap: var(--fr-gap-sm, var(--fr-gap, var(--g-s2)));
+  }
+}
+@include media(md) {
+  .root {
+    grid-template-columns: repeat(var(--fr-cols-md, var(--fr-cols-sm, 1)), minmax(0, 1fr));
+    gap: var(--fr-gap-md, var(--fr-gap-sm, var(--g-s2)));
+  }
+}
+@include media(lg) {
+  .root {
+    grid-template-columns: repeat(var(--fr-cols-lg, var(--fr-cols-md, 1)), minmax(0, 1fr));
+    gap: var(--fr-gap-lg, var(--fr-gap-md, var(--g-s2)));
+  }
+}
+@include media(xl) {
+  .root {
+    grid-template-columns: repeat(var(--fr-cols-xl, var(--fr-cols-lg, 1)), minmax(0, 1fr));
+    gap: var(--fr-gap-xl, var(--fr-gap-lg, var(--g-s2)));
+  }
+}
+
+/* Column wrapper with responsive span */
+.col {
+  /* xs */
+  grid-column: var(--_col-xs, auto) / var(--_col-xs-end, span var(--fr-col-span, 1));
+}
+
+/* At each bp, update grid-column with bp-specific CSS vars.
+   We treat "all" via a small trick: when --fr-col-span-* == 'all', we span 1 / -1 */
+.col {
+  /* defaults for xs */
+  --_span-xs: var(--fr-col-span, 1);
+  --_col-xs: auto;
+  --_col-xs-end: span var(--_span-xs);
+
+  /* sm */
+  --_span-sm: var(--fr-col-span-sm, var(--_span-xs));
+  @include media(sm) {
+    grid-column: var(--_col-sm, auto) / var(--_col-sm-end, span var(--_span-sm));
+  }
+
+  /* md */
+  --_span-md: var(--fr-col-span-md, var(--_span-sm));
+  @include media(md) {
+    grid-column: var(--_col-md, auto) / var(--_col-md-end, span var(--_span-md));
+  }
+
+  /* lg */
+  --_span-lg: var(--fr-col-span-lg, var(--_span-md));
+  @include media(lg) {
+    grid-column: var(--_col-lg, auto) / var(--_col-lg-end, span var(--_span-lg));
+  }
+
+  /* xl */
+  --_span-xl: var(--fr-col-span-xl, var(--_span-lg));
+  @include media(xl) {
+    grid-column: var(--_col-xl, auto) / var(--_col-xl-end, span var(--_span-xl));
+  }
+}
+
+/* Support "all" spanning via attribute selector fallback */
+.col[style*="--fr-col-span: all"]        { grid-column: 1 / -1; }
+@include media(sm) {
+  .col[style*="--fr-col-span-sm: all"]   { grid-column: 1 / -1; }
+}
+@include media(md) {
+  .col[style*="--fr-col-span-md: all"]   { grid-column: 1 / -1; }
+}
+@include media(lg) {
+  .col[style*="--fr-col-span-lg: all"]   { grid-column: 1 / -1; }
+}
+@include media(xl) {
+  .col[style*="--fr-col-span-xl: all"]   { grid-column: 1 / -1; }
+}

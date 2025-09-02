@@ -1,0 +1,114 @@
+@use "../../core/mixins" as *;  // media(), media-down()
+@use "../../core/tokens" as *;
+
+/* Grid container */
+.root {
+  display: grid;
+  grid-template-columns: repeat(var(--fgd-cols, 1), minmax(0, 1fr));
+  gap: var(--fgd-gap, var(--g-s2));
+  grid-auto-rows: var(--fgd-auto-rows, minmax(3rem, auto));
+  grid-auto-columns: var(--fgd-auto-cols, auto);
+
+  /* Named areas (optional) */
+  grid-template-areas: var(--fgd-areas, none);
+}
+
+/* Separate row/col gaps if provided */
+.root {
+  row-gap: var(--fgd-row-gap, var(--fgd-gap, var(--g-s2)));
+  column-gap: var(--fgd-col-gap, var(--fgd-gap, var(--g-s2)));
+}
+
+/* BPs override via vars */
+@include media(sm) {
+  .root {
+    grid-template-columns: repeat(var(--fgd-cols-sm, var(--fgd-cols, 1)), minmax(0, 1fr));
+    gap: var(--fgd-gap-sm, var(--fgd-gap, var(--g-s2)));
+    row-gap: var(--fgd-row-gap-sm, var(--fgd-row-gap, var(--fgd-gap-sm, var(--g-s2))));
+    column-gap: var(--fgd-col-gap-sm, var(--fgd-col-gap, var(--fgd-gap-sm, var(--g-s2))));
+    grid-template-areas: var(--fgd-areas-sm, var(--fgd-areas, none));
+  }
+}
+@include media(md) {
+  .root {
+    grid-template-columns: repeat(var(--fgd-cols-md, var(--fgd-cols-sm, 1)), minmax(0, 1fr));
+    gap: var(--fgd-gap-md, var(--fgd-gap-sm, var(--g-s2)));
+    row-gap: var(--fgd-row-gap-md, var(--fgd-row-gap-sm, var(--fgd-gap-md, var(--g-s2))));
+    column-gap: var(--fgd-col-gap-md, var(--fgd-col-gap-sm, var(--fgd-gap-md, var(--g-s2))));
+    grid-template-areas: var(--fgd-areas-md, var(--fgd-areas-sm, var(--fgd-areas, none)));
+  }
+}
+@include media(lg) {
+  .root {
+    grid-template-columns: repeat(var(--fgd-cols-lg, var(--fgd-cols-md, 1)), minmax(0, 1fr));
+    gap: var(--fgd-gap-lg, var(--fgd-gap-md, var(--g-s2)));
+    row-gap: var(--fgd-row-gap-lg, var(--fgd-row-gap-md, var(--fgd-gap-lg, var(--g-s2))));
+    column-gap: var(--fgd-col-gap-lg, var(--fgd-col-gap-md, var(--fgd-gap-lg, var(--g-s2))));
+    grid-template-areas: var(--fgd-areas-lg, var(--fgd-areas-md, var(--fgd-areas-sm, var(--fgd-areas, none))));
+  }
+}
+@include media(xl) {
+  .root {
+    grid-template-columns: repeat(var(--fgd-cols-xl, var(--fgd-cols-lg, 1)), minmax(0, 1fr));
+    gap: var(--fgd-gap-xl, var(--fgd-gap-lg, var(--g-s2)));
+    row-gap: var(--fgd-row-gap-xl, var(--fgd-row-gap-lg, var(--fgd-gap-xl, var(--g-s2))));
+    column-gap: var(--fgd-col-gap-xl, var(--fgd-col-gap-lg, var(--fgd-gap-xl, var(--g-s2))));
+    grid-template-areas: var(--fgd-areas-xl, var(--fgd-areas-lg, var(--fgd-areas-md, var(--fgd-areas-sm, var(--fgd-areas, none)))));
+  }
+}
+
+/* Grid item */
+.item {
+  /* Default span at xs */
+  --_span: var(--fgd-span, 1);
+  grid-column: auto / span var(--_span);
+  grid-row: auto / span var(--fgd-row-span, 1);
+  /* Area at xs (if provided) */
+  grid-area: var(--fgd-area, auto);
+}
+
+/* “all” spanning → full row/column */
+.item[style*="--fgd-span: all"]     { grid-column: 1 / -1; }
+.item[style*="--fgd-row-span: all"] { grid-row: 1 / -1; }
+
+/* At breakpoints, update spans and area */
+@include media(sm) {
+  .item {
+    --_span-sm: var(--fgd-span-sm, var(--fgd-span, 1));
+    grid-column: auto / span var(--_span-sm);
+    grid-row: auto / span var(--fgd-row-span-sm, var(--fgd-row-span, 1));
+    grid-area: var(--fgd-area-sm, var(--fgd-area, auto));
+  }
+  .item[style*="--fgd-span-sm: all"]     { grid-column: 1 / -1; }
+  .item[style*="--fgd-row-span-sm: all"] { grid-row: 1 / -1; }
+}
+@include media(md) {
+  .item {
+    --_span-md: var(--fgd-span-md, var(--fgd-span-sm, 1));
+    grid-column: auto / span var(--_span-md);
+    grid-row: auto / span var(--fgd-row-span-md, var(--fgd-row-span-sm, 1));
+    grid-area: var(--fgd-area-md, var(--fgd-area-sm, var(--fgd-area, auto)));
+  }
+  .item[style*="--fgd-span-md: all"]     { grid-column: 1 / -1; }
+  .item[style*="--fgd-row-span-md: all"] { grid-row: 1 / -1; }
+}
+@include media(lg) {
+  .item {
+    --_span-lg: var(--fgd-span-lg, var(--fgd-span-md, 1));
+    grid-column: auto / span var(--_span-lg);
+    grid-row: auto / span var(--fgd-row-span-lg, var(--fgd-row-span-md, 1));
+    grid-area: var(--fgd-area-lg, var(--fgd-area-md, var(--fgd-area-sm, var(--fgd-area, auto))));
+  }
+  .item[style*="--fgd-span-lg: all"]     { grid-column: 1 / -1; }
+  .item[style*="--fgd-row-span-lg: all"] { grid-row: 1 / -1; }
+}
+@include media(xl) {
+  .item {
+    --_span-xl: var(--fgd-span-xl, var(--fgd-span-lg, 1));
+    grid-column: auto / span var(--_span-xl);
+    grid-row: auto / span var(--fgd-row-span-xl, var(--fgd-row-span-lg, 1));
+    grid-area: var(--fgd-area-xl, var(--fgd-area-lg, var(--fgd-area-md, var(--fgd-area-sm, var(--fgd-area, auto)))));
+  }
+  .item[style*="--fgd-span-xl: all"]     { grid-column: 1 / -1; }
+  .item[style*="--fgd-row-span-xl: all"] { grid-row: 1 / -1; }
+}

@@ -1,0 +1,58 @@
+@use "../../core/mixins" as *;
+@use "../../core/tokens" as *;
+
+.root { color: var(--g-fg); }
+
+/* vertical margin scale */
+.root.my--none { margin-block: 0; }
+.root.my--xs   { margin-block: var(--g-s1); }
+.root.my--sm   { margin-block: var(--g-s2); }
+.root.my--md   { margin-block: var(--g-s3); }
+
+/* Select All row */
+.selectAllRow {
+  display: flex;
+  margin-top: var(--g-s1);
+}
+
+.selectAllBtn {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--g-s1);
+  cursor: pointer;
+  color: var(--g-fg);
+}
+
+.selectAllBtn[disabled] {
+  opacity: .6;
+  cursor: not-allowed;
+}
+
+.box {
+  width: 16px; height: 16px;
+  border: 1px solid var(--g-border, #d1d5db);
+  border-radius: 3px;
+  background: var(--g-bg, #fff);
+  position: relative;
+}
+
+.box[data-state="checked"]::after,
+.box[data-state="indeterminate"]::after {
+  content: "";
+  position: absolute;
+  inset: 2px;
+  background: var(--g-primary, #0b5fff);
+}
+
+.label {
+  font-size: var(--g-font-size-sm, 0.875rem);
+}
+
+/* small tweak to chip text on very narrow screens */
+@include media-down(sm) {
+  :global(.MuiChip-label) { font-size: 0.8rem; }
+}

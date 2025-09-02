@@ -1,0 +1,52 @@
+/* components/form/InputText.module.scss */
+@use "../../core/mixins" as *;   // media(), media-down()
+@use "../../core/tokens" as *;   // --g-s*, --g-fg, etc.
+
+.root {
+  display: grid;
+  row-gap: var(--g-s1);
+  color: var(--g-fg);
+}
+
+/* vertical margin (outside the field) */
+.root.my--none { margin-block: 0; }
+.root.my--xs   { margin-block: var(--g-s1); }
+.root.my--sm   { margin-block: var(--g-s2); }
+.root.my--md   { margin-block: var(--g-s3); }
+
+/* spacing near custom adornments/counter line if needed */
+.root.gap--xs { column-gap: var(--g-s1); }
+.root.gap--sm { column-gap: var(--g-s2); }
+.root.gap--md { column-gap: var(--g-s3); }
+.root.gap--lg { column-gap: var(--g-s4); }
+
+.inline {
+  /* wrapper for the MUI TextField (kept simple so MUI styles dominate) */
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  column-gap: var(--g-s2);
+}
+
+/* character counter */
+.counter {
+  color: var(--g-fg-muted);
+  font-size: var(--g-font-size-sm, 0.8125rem);
+}
+.counter.align--start { margin-right: auto; }
+.counter.align--end   { margin-left: auto; }
+
+/* clear button */
+.clearBtn {
+  padding: var(--g-s1);
+  color: var(--g-fg-muted);
+}
+.clearBtn:hover { color: var(--g-fg); }
+
+/* responsive tweaks */
+@include media-down(sm) {
+  .counter { font-size: 0.75rem; }
+}

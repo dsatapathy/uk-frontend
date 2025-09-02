@@ -1,0 +1,86 @@
+@use "../../core/mixins" as *;   // media, media-down helpers
+@use "../../core/tokens" as *;   // spacing/typography/css vars
+
+.root {
+  color: var(--g-fg);
+}
+
+/* margin scale */
+.root.my--none { margin-block: 0; }
+.root.my--xs   { margin-block: var(--g-s1); }
+.root.my--sm   { margin-block: var(--g-s2); }
+.root.my--md   { margin-block: var(--g-s3); }
+
+/* variants */
+.variant--plain   {}
+.variant--divider {}
+.variant--accent  { border-inline-start: 3px solid var(--g-primary, #0b5fff); padding-inline-start: var(--g-s2); }
+
+/* sticky header (container needs relative stacking context) */
+.sticky {
+  position: sticky;
+  z-index: 1;
+  background: var(--g-surface, #fff);
+}
+
+/* header layout */
+.header {
+  display: grid;
+  align-items: center;
+  grid-template-columns: auto 1fr auto;
+}
+
+/* gap scale between icon/title/actions */
+.root.gap--xs .header { column-gap: var(--g-s1); row-gap: var(--g-s1); }
+.root.gap--sm .header { column-gap: var(--g-s2); row-gap: var(--g-s1); }
+.root.gap--md .header { column-gap: var(--g-s3); row-gap: var(--g-s2); }
+.root.gap--lg .header { column-gap: var(--g-s4); row-gap: var(--g-s3); }
+
+/* center align variant */
+.align--center .header { justify-items: center; text-align: center; grid-template-columns: 1fr auto; }
+.align--center .titles { justify-self: center; }
+.align--center .actions { justify-self: end; }
+
+/* icon styles */
+.icon {
+  --_size: var(--sec-icon-size, 36px);
+  width: var(--_size);
+  height: var(--_size);
+  display: inline-grid;
+  place-items: center;
+  font-weight: 600;
+  font-size: calc(var(--_size) * 0.45);
+  color: var(--g-on-primary, #fff);
+  background: var(--g-primary, #0b5fff);
+}
+.icon--circle { border-radius: 999px; }
+.icon--square { border-radius: 10px; }
+.tone--neutral { background: var(--g-muted, #e5e7eb); color: var(--g-fg); }
+.iconText { line-height: 1; }
+
+/* text blocks */
+.titles { min-width: 0; }
+.title  { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.description {
+  margin-top: .125rem;
+  color: var(--g-muted-fg, #6b7280);
+}
+
+/* actions */
+.actions { display: inline-flex; align-items: center; gap: var(--g-s1); }
+.caret   { transition: transform .2s ease; }
+.caret.open { transform: rotate(180deg); }
+
+/* divider */
+.divider { margin-top: var(--g-s1); }
+
+/* body (for collapsible use) */
+.body { margin-top: var(--g-s2); }
+
+/* responsive tweaks: stack on narrow screens */
+@include media-down(sm) {
+  .header {
+    grid-template-columns: auto 1fr auto;
+  }
+  .title { white-space: normal; }
+}

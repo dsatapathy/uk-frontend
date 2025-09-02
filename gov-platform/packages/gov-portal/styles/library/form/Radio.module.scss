@@ -1,0 +1,9 @@
+@use "../../core/mixins" as *;
+@use "../../core/tokens" as *;
+
+.root { display: block; color: var(--g-fg); }
+
+.root.my--none { margin-block: 0; }
+.root.my--xs   { margin-block: var(--g-s1); }
+.root.my--sm   { margin-block: var(--g-s2); }
+.root.my--md   { margin-block: var(--g-s3); }

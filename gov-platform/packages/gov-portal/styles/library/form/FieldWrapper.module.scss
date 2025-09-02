@@ -1,0 +1,77 @@
+/* components/form/FieldWrapper.module.scss */
+@use "../../core/mixins" as *;   // expects media(), media-down()
+@use "../../core/tokens" as *;
+
+/* ── Reusable mixin for the TOP (stacked) layout ────────────────── */
+@mixin layout-top() {
+  grid-template-columns: 1fr;
+  grid-template-areas:
+    "header"
+    "control"
+    "assist";
+
+  /* children positions */
+  .header  { grid-area: header; }
+  .control { grid-area: control; }
+  .assist  { grid-area: assist; }
+}
+
+/* ── Root container ─────────────────────────────────────────────── */
+.root {
+  display: grid;
+  /* default stacked layout; overridden by .layout--left */
+  grid-template-columns: 1fr;
+  row-gap: var(--g-s2);
+  color: var(--g-fg);
+}
+
+/* gap modifiers (row gap for stacked; row+column gap for left via combo rules) */
+.root.gap--xs { row-gap: var(--g-s1); }
+.root.gap--sm { row-gap: var(--g-s2); }
+.root.gap--md { row-gap: var(--g-s3); }
+.root.gap--lg { row-gap: var(--g-s4); }
+
+/* outer spacing after the field */
+.root.mb--none { margin-bottom: 0; }
+.root.mb--xs   { margin-bottom: var(--g-s1); }
+.root.mb--sm   { margin-bottom: var(--g-s2); }
+.root.mb--md   { margin-bottom: var(--g-s3); }
+
+/* content areas */
+.header  { /* label container */ }
+.control { /* input/control slot */ }
+.assist  { /* error + helper container */ display: grid; row-gap: var(--g-s1); }
+
+/* density hooks */
+.root.density--xs {}
+.root.density--sm {}
+.root.density--md {}
+.root.density--lg {}
+
+/* ── LEFT layout (label column left; control+assist right) ───────── */
+.layout--left {
+  column-gap: var(--g-s3);
+  grid-template-columns: var(--form-label-col-w, 12rem) 1fr;
+  grid-template-areas:
+    "header control"
+    "header assist";
+}
+.layout--left .header  { grid-area: header; align-self: center; }
+.layout--left .control { grid-area: control; }
+.layout--left .assist  { grid-area: assist; }
+
+/* make gap modifiers affect column gap in left layout too */
+.layout--left.gap--xs { column-gap: var(--g-s1); row-gap: var(--g-s1); }
+.layout--left.gap--sm { column-gap: var(--g-s2); row-gap: var(--g-s2); }
+.layout--left.gap--md { column-gap: var(--g-s3); row-gap: var(--g-s3); }
+.layout--left.gap--lg { column-gap: var(--g-s4); row-gap: var(--g-s4); }
+
+/* ── Collapse helpers: when combined with .layout--left, switch to TOP below bp ─ */
+/* NOTE: no @extend; we re-apply the stacked grid via the mixin so Sass is happy.  */
+.layout--left.collapse--sm { @include media-down(sm) { @include layout-top(); } }
+.layout--left.collapse--md { @include media-down(md) { @include layout-top(); } }
+.layout--left.collapse--lg { @include media-down(lg) { @include layout-top(); } }
+.layout--left.collapse--xl { @include media-down(xl) { @include layout-top(); } }
+
+/* ── TOP layout (stacked) ───────────────────────────────────────── */
+.layout--top { @include layout-top(); }

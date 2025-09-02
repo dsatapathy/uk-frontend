@@ -1,0 +1,86 @@
+@use "../../core/mixins" as *;   // media(), media-down()
+@use "../../core/tokens" as *;   // spacing/color tokens
+
+.root {
+  border-radius: var(--fg-radius, 12px);
+  margin-block-end: var(--fg-mb, var(--g-s3));
+  background: var(--g-surface, #fff);
+  color: var(--g-fg, #0f172a);
+  overflow: hidden; // keep rounded corners for sticky header
+}
+
+/* variants */
+.variant--elevated {}
+.variant--outlined { border: var(--fg-border, 1px solid #e5e7eb); }
+.variant--plain    { box-shadow: none; background: transparent; }
+
+/* sticky header */
+.sticky {
+  position: relative;
+}
+.sticky .header {
+  position: sticky;
+  top: var(--fg-sticky-top, 0px);
+  z-index: 2;
+  background: inherit; /* keep same bg while sticky */
+}
+
+/* header layout */
+.header {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  padding-inline: var(--fg-px-xs, var(--g-s2));
+  padding-block: calc(var(--fg-py-xs, var(--g-s2)) - 2px); /* slightly tighter than body */
+}
+
+.align--center { text-align: center; }
+.align--center .header { grid-template-columns: 1fr; }
+.align--center .actions { justify-self: center; }
+
+.dense .header {
+  padding-block: calc(var(--fg-py-xs, var(--g-s2)) - 6px);
+}
+
+/* responsive header padding */
+@include media(md) {
+  .header {
+    padding-inline: var(--fg-px-md, var(--g-s3));
+    padding-block: calc(var(--fg-py-md, var(--g-s3)) - 2px);
+  }
+}
+
+/* title / description */
+.titles { min-width: 0; }
+.title  { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.description { margin-top: .15rem; }
+
+/* actions */
+.actions { display: inline-flex; align-items: center; gap: var(--g-s1); }
+.caret   { transition: transform .2s ease; }
+.caret.open { transform: rotate(180deg); }
+
+/* divider */
+.divider { margin: 0; }
+
+/* body + footer share same paddings (responsive) */
+.body,
+.footer {
+  display: grid;
+  row-gap: var(--fg-gap-xs, var(--g-s2));
+  padding-inline: var(--fg-px-xs, var(--g-s2));
+  padding-block: var(--fg-py-xs, var(--g-s2));
+}
+@include media(md) {
+  .body,
+  .footer {
+    row-gap: var(--fg-gap-md, var(--g-s3));
+    padding-inline: var(--fg-px-md, var(--g-s3));
+    padding-block: var(--fg-py-md, var(--g-s3));
+  }
+}
+
+/* small screens: allow multi-line titles */
+@include media-down(sm) {
+  .title { white-space: normal; }
+}

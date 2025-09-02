@@ -4,12 +4,34 @@
   outline-offset: $offset;
 }
 
-/* Simple media helpers */
+$breakpoints: (
+  sm: 640px,
+  md: 768px,
+  lg: 1024px,
+  xl: 1280px
+);
+
+/* existing: min-width (up) */
 @mixin media($bp) {
-  @if $bp == sm { @media (min-width: 640px) { @content; } }
-  @else if $bp == md { @media (min-width: 768px) { @content; } }
-  @else if $bp == lg { @media (min-width: 1024px){ @content; } }
-  @else if $bp == xl { @media (min-width: 1280px){ @content; } }
+  $v: map-get($breakpoints, $bp);
+  @if $v == null { @error "Unknown breakpoint `#{$bp}`"; }
+  @media (min-width: $v) { @content; }
+}
+
+/* NEW: max-width (down) */
+@mixin media-down($bp) {
+  $v: map-get($breakpoints, $bp);
+  @if $v == null { @error "Unknown breakpoint `#{$bp}`"; }
+  /* subtract a hair to avoid overlap with the next min-width */
+  @media (max-width: calc(#{$v} - 0.02px)) { @content; }
+}
+
+/* NEW: between two breakpoints (inclusive–exclusive) */
+@mixin media-between($min, $max) {
+  $vmin: map-get($breakpoints, $min);
+  $vmax: map-get($breakpoints, $max);
+  @if $vmin == null or $vmax == null { @error "Unknown breakpoint(s)"; }
+  @media (min-width: $vmin) and (max-width: calc(#{$vmax} - 0.02px)) { @content; }
 }
 
 /* Utility to paint surfaces consistently */
