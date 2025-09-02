@@ -1,31 +1,51 @@
 // components/form/DynamicForm.jsx
 import * as React from "react";
-import { useForm, FormProvider } from "react-hook-form";
+import { useForm, FormProvider, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 
 import FormGrid from "../organisms/FormGrid.jsx";
 import FieldGroup from "../organisms/FieldGroup.jsx";
 import ErrorMessage from "../atoms/ErrorMessage.jsx";
 import FieldController from "../components/FieldController.jsx";
-import { buildZodFromSchema } from "../adapters/zodFactory.js";
-import { saveDraft, setLastSavedAt, setSubmitting } from "@gov/store";
-import { useWatchValue } from "../utils/watchValue.js";
 
+import {
+  startFormSession,
+  setSubmitting,
+  setLastSavedAt,
+  endFormSession,
+  saveDraft,
+  // clearDraft, // ← uncomment if you want to clear after successful submit
+} from "@gov/store";
+
+import { buildZodFromSchema } from "../adapters/zodFactory.js";
+
+/* ---------- helpers ---------- */
 const TYPE_DEFAULTS = { checkbox: false, default: "" };
 
 function defaultsFromSchema(schema) {
   const out = {};
   (schema.sections || []).forEach((sec) => {
     (sec.fields || []).forEach((f) => {
-      out[f.id] = f.defaultValue ?? (TYPE_DEFAULTS[f.type] ?? TYPE_DEFAULTS.default);
+      if (f.defaultValue !== undefined) out[f.id] = f.defaultValue;
+      else out[f.id] = TYPE_DEFAULTS[f.type] ?? TYPE_DEFAULTS.default;
     });
   });
   return out;
 }
 
+/* ---------- DynamicForm ---------- */
+/**
+ * Props:
+ * - schema
+ * - onSubmit(values)
+ * - defaultValues?
+ * - user?, flags?, ui?
+ * - entityId?            : string (default "local-entity")
+ * - autosaveMs?          : number (default 1000ms)
+ */
 export default function DynamicForm({
   schema,
   onSubmit,
@@ -33,8 +53,8 @@ export default function DynamicForm({
   user,
   flags,
   ui,
-  draftKey: draftKeyProp,
   entityId = "local-entity",
+  autosaveMs = 1000,
 }) {
   const dispatch = useDispatch();
 
@@ -43,10 +63,16 @@ export default function DynamicForm({
     [schema]
   );
 
-  const formDefaults = React.useMemo(
-    () => ({ ...defaultsFromSchema(schema), ...(defaultValues || {}) }),
-    [schema, defaultValues]
-  );
+  const formKey = `${schema.id}::${entityId}`;
+
+  // Pull any existing draft from Redux (shape: { values, updatedAt })
+  const draft = useSelector((s) => s?.drafts?.[formKey]);
+
+  const formDefaults = React.useMemo(() => {
+    const base = defaultsFromSchema(schema);
+    // preload order: explicit defaultValues prop > saved draft > schema defaults
+    return { ...base, ...(draft?.values || {}), ...(defaultValues || {}) };
+  }, [schema, defaultValues, draft]);
 
   const methods = useForm({
     resolver: zodSchema ? zodResolver(zodSchema) : undefined,
@@ -55,41 +81,53 @@ export default function DynamicForm({
     defaultValues: formDefaults,
   });
 
-  const { handleSubmit, formState, reset, control, getValues } = methods;
+  const { handleSubmit, formState, reset, control } = methods;
 
-  const fieldNames = React.useMemo(
-    () => (schema.sections || []).flatMap((s) => (s.fields || []).map((f) => f.id)),
-    [schema]
-  );
+  // If a draft arrives later (e.g., async store load), reset once
+  React.useEffect(() => {
+    if (draft?.values) reset((prev) => ({ ...prev, ...draft.values }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [draft?.updatedAt]);
 
-  const draftKey = React.useMemo(
-    () => draftKeyProp || `${schema.id || "form"}::${entityId}`,
-    [draftKeyProp, schema.id, entityId]
-  );
+  // Start / end session
+  React.useEffect(() => {
+    dispatch(
+      startFormSession({
+        formId: schema.id,
+        entityId,
+        schemaVersion: schema.version || "1.0.0",
+      })
+    );
+    return () => {
+      dispatch(endFormSession());
+    };
+  }, [dispatch, schema.id, schema.version, entityId]);
 
-  // ✅ Watch using explicit control/getValues (no need for FormProvider yet)
-  const watchedValues = useWatchValue({
-    names: fieldNames,
-    selector: (base) => base,
-    defaultValue: formDefaults,
-    control,
-    getValues,
-  });
+  // Watch all form values for autosave
+  const values = useWatch({ control });
+  const autosaveTimerRef = React.useRef();
 
   React.useEffect(() => {
-    if (!watchedValues) return;
-    const updatedAt = Date.now();
-    dispatch(saveDraft({ key: draftKey, values: watchedValues, updatedAt }));
-    dispatch(setLastSavedAt(updatedAt));
-    try {
-      localStorage.setItem(`draft::${draftKey}`, JSON.stringify({ values: watchedValues, updatedAt }));
-    } catch {}
-  }, [watchedValues, dispatch, draftKey]);
+    // debounce
+    window.clearTimeout(autosaveTimerRef.current);
+    autosaveTimerRef.current = window.setTimeout(() => {
+      const updatedAt = Date.now();
+      dispatch(saveDraft({ key: formKey, values, updatedAt }));
+      dispatch(setLastSavedAt(updatedAt));
+      // (optional) mirror to localStorage if you want cross-tab persistence
+      // localStorage.setItem(formKey, JSON.stringify({ values, updatedAt }));
+    }, autosaveMs);
 
+    return () => window.clearTimeout(autosaveTimerRef.current);
+  }, [values, autosaveMs, dispatch, formKey]);
+
+  // Submit handler
   const submit = handleSubmit(async (vals) => {
     dispatch(setSubmitting(true));
     try {
       await onSubmit?.(vals);
+      // Optionally clear draft on success:
+      // dispatch(clearDraft(formKey));
     } finally {
       dispatch(setSubmitting(false));
     }
@@ -114,14 +152,20 @@ export default function DynamicForm({
               areas={ui?.grid?.areas?.[sec.id]}
             >
               {(sec.fields || []).map((f) => (
-                <FormGrid.Item key={f.id} span={f.grid?.span} rowSpan={f.grid?.rowSpan} area={f.grid?.area}>
+                <FormGrid.Item
+                  key={f.id}
+                  span={f.grid?.span}
+                  rowSpan={f.grid?.rowSpan}
+                  area={f.grid?.area}
+                >
                   <FieldController
                     field={f}
                     user={user}
                     flags={flags}
                     wrap
                     wrapperProps={{
-                      config: { ...(ui?.fieldWrapper || {}), layout: ui?.fieldLayout ?? "top" },
+                      layout: ui?.fieldLayout ?? "top",
+                      config: ui?.fieldWrapper,
                     }}
                   />
                 </FormGrid.Item>
@@ -131,7 +175,9 @@ export default function DynamicForm({
         ))}
 
         <Box sx={{ display: "flex", gap: 2, mt: 2 }}>
-          <Button type="submit" variant="contained">{ui?.submitLabel || "Submit"}</Button>
+          <Button type="submit" variant="contained">
+            {ui?.submitLabel || "Submit"}
+          </Button>
           {ui?.showReset !== false && (
             <Button type="button" variant="outlined" onClick={() => reset(formDefaults)}>
               {ui?.resetLabel || "Reset"}
