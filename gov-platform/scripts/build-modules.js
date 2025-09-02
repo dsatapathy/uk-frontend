@@ -77,10 +77,14 @@ function run(cmd, cwd) {
 
   order.forEach((p) => {
     const hasBuild = p.json.scripts && p.json.scripts.build;
-    if (hasBuild) {
+    const hasSrcIndex = fs.existsSync(path.join(p.dir, "src", "index.js"));
+
+    if (hasBuild && hasSrcIndex) {
       run("yarn build", p.dir);
-    } else {
+    } else if (!hasBuild) {
       console.log(`(skip) ${p.json.name} – no "build" script`);
+    } else {
+      console.log(`(skip) ${p.json.name} – missing \"src/index.js\"`);
     }
   });
 
