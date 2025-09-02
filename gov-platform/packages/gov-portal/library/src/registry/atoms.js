@@ -14,6 +14,8 @@ export const ErrorMessage  = makeLoader("../atoms/ErrorMessage.jsx", "ErrorMessa
 export const FieldWrapper  = makeLoader("../atoms/FieldWrapper.jsx", "FieldWrapper");
 export const TextFieldAtom = makeLoader("../atoms/TextFieldAtom.jsx","TextFieldAtom");
 export const IconSlot      = makeLoader("../atoms/IconSlot.jsx",     "IconSlot");
+export const TypographyX   = makeLoader("../atoms/TypographyX.jsx",  "TypographyX");
+
 
 const defs = [
   ["AppButton",     loadButton],
@@ -29,6 +31,7 @@ const defs = [
   ["FieldWrapper",  FieldWrapper],
   ["TextFieldAtom", TextFieldAtom],
   ["IconSlot",      IconSlot],
+  ["TypographyX",   TypographyX],
 ];
 
 export const registerAtoms = () => registerAll(defs);
