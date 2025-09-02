@@ -11,6 +11,7 @@ import RadioGroup from "../atoms/RadioGroup.jsx";
 import MultiSelect from "../molecules/MultiSelect.jsx";
 import AsyncAutocomplete from "../molecules/AsyncAutocomplete.jsx";
 import DatePicker from "../atoms/DatePicker.jsx";
+import Repeater from "../organisms/Repeater.jsx";
 
 /** -----------------------------------------------------------------------
  * Small, safe helpers
@@ -118,7 +119,7 @@ export default function FieldController({
 }) {
   const { control, setValue, getValues } = useFormContext();
 
-  // watch only what we need: the field itself + declared dependsOn
+  // watch only what we need: the field itself declared dependsOn
   const depList = field?.options?.dependsOn || [];
   useWatch({
     control,
@@ -139,7 +140,7 @@ export default function FieldController({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ruleState.derived]);
 
-  // compute “required” from rules + validators
+  // compute “required” from rules validators
   const requiredBySchema = (field.validations || []).some((v) => v.type === "required");
   const required = !!ruleState.required || requiredBySchema;
 
@@ -169,8 +170,8 @@ export default function FieldController({
         field.defaultValue !== undefined
           ? field.defaultValue
           : field.type === "checkbox"
-          ? false
-          : ""
+            ? false
+            : ""
       }
       control={control}
       render={({ field: rhf, fieldState }) => {
@@ -203,6 +204,35 @@ export default function FieldController({
     />
   );
 }
+
+function replaceIndexTokens(str, idx) {
+  if (typeof str !== "string") return str;
+  return str.replaceAll("$index", String(idx)).replaceAll("$n", String(idx + 1));
+}
+
+function materializeNestedField(child, idx, parentPath) {
+  // nested field id: owners.0.name
+  const id = `${parentPath}.${child.id}`;
+
+  // rewrite rules (when/value) to resolve $index / $n
+  const rules = (child.rules || []).map((r) => ({
+    ...r,
+    when: replaceIndexTokens(r.when, idx),
+    value: replaceIndexTokens(r.value, idx),
+  }));
+
+  // rewrite dependsOn paths
+  const dependsOn = (child.options?.dependsOn || []).map((d) =>
+    replaceIndexTokens(d, idx)
+  );
+  const options =
+    child.options && dependsOn.length
+      ? { ...child.options, dependsOn }
+      : child.options;
+
+  return { ...child, id, rules, options };
+}
+
 
 /** choose the right atom/molecule for this field */
 function renderFieldByType(field, { rhf, error, disabled, required, hidden, ctxDeps, depsReady }) {
@@ -291,6 +321,47 @@ function renderFieldByType(field, { rhf, error, disabled, required, hidden, ctxD
           placeholder={field.props?.placeholder}
           config={field.config}
           {...inputCommon}
+        />
+      );
+
+    case "repeater":
+      // Default row shape for “Add”
+      const makeDefaultRow = () => {
+        const o = {};
+        (field.item?.fields || []).forEach((c) => {
+          o[c.id] =
+            c.defaultValue !== undefined
+              ? c.defaultValue
+              : c.type === "checkbox"
+                ? false
+                : "";
+        });
+        return o;
+      };
+      return (
+        <Repeater
+          name={rhf.name} 
+          min={field.min ?? 0}
+          max={field.max ?? 99}
+          addLabel={field.addLabel || "Add"}
+          removeLabel={field.removeLabel || "Remove"}
+          itemDefault={field.itemDefault || makeDefaultRow}
+          // Render the nested fields of each row
+          renderItem={({ index, path }) => (
+            <div style={{ display: "grid", gap: "var(--g-s2)" }}>
+              {(field.item?.fields || []).map((child) => {
+                const childField = materializeNestedField(child, index, path);
+                return (
+                  <FieldController
+                    key={childField.id}
+                    field={childField}
+                    wrap
+                    wrapperProps={{ layout: childField.layout || "top" }}
+                  />
+                );
+              })}
+            </div>
+          )}
         />
       );
 

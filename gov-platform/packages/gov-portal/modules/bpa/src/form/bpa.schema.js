@@ -75,10 +75,10 @@ export const bpaSchema = {
           label: "Amenities",
           options: {
             items: [
-              { value: "water",      label: "Water" },
-              { value: "electricity",label: "Electricity" },
-              { value: "sewage",     label: "Sewage Connection" },
-              { value: "parking",    label: "Parking" }
+              { value: "water", label: "Water" },
+              { value: "electricity", label: "Electricity" },
+              { value: "sewage", label: "Sewage Connection" },
+              { value: "parking", label: "Parking" }
             ]
           },
           defaultValue: ["water"],
@@ -224,8 +224,38 @@ export const bpaSchema = {
       id: "attachments",
       title: "Documents",
       fields: [
-        { id: "ownershipDoc", type: "text", label: "Ownership Document (URL or ref)", grid: { span: { xs: 12 } } }
-      ]
+        { id: "ownershipDoc", type: "text", label: "Ownership Document (URL or ref)", grid: { span: { xs: 12 } } },
+        {
+      id: "owners",
+      type: "repeater",
+      label: "Owners",
+      min: 1,
+      max: 5,
+      addLabel: "Add another owner",
+      item: {
+        title: "Owner #$n",                     // $n => 1-based row number
+        description: "Provide details for each owner.",
+        fields: [
+          { id: "name", type: "text", label: "Full Name", validations: [{ type: "required" }] },
+          { id: "mobile", type: "text", label: "Mobile", validations: [{ type: "pattern", value: "^[6-9]\\d{9}$" }] },
+          { id: "email", type: "text", label: "Email", validations: [{ type: "email" }] },
+          {
+            id: "share",
+            type: "number",
+            label: "Ownership Share (%)",
+            props: { min: 0, max: 100, step: 0.01, format: "decimal" }
+          },
+          // Example of using index in rules/dependsOn:
+          // rules: [{ action: "disable", when: "!values.owners[$index].name" }]
+        ]
+      },
+      // Optional: dynamic header per row
+      getItemLabel: (row, idx) => row?.name ? `${row.name} (Owner #${idx + 1})` : `Owner #${idx + 1}`,
+      defaultValue: []   // important: RHF expects an array for repeaters
     }
+      ]
+    },
+    
+
   ]
 };

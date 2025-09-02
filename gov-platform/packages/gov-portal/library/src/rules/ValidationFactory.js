@@ -135,6 +135,14 @@ function baseForField(field, opts) {
       s = allowEmpty ? s.optional() : s;
       return s;
     }
+    case "repeater": {
+      const childShape = z.object(
+        Object.fromEntries(
+          field.item.fields.map((f) => [f.id, zodForField(f)])
+        )
+      );
+      shape[field.id] = z.array(childShape).min(field.min ?? 0).max(field.max ?? 99);
+    }
     case "tel":
     case "url":
     case "password":
@@ -322,16 +330,16 @@ export function buildZodFromSchema(schema, options) {
         let condition = false;
         switch (op) {
           case "filled": condition = !isEmpty(left); break;
-          case "empty":  condition = isEmpty(left); break;
-          case "==":     condition = String(left) === String(rhs); break;
-          case "!=":     condition = String(left) !== String(rhs); break;
-          case ">":      condition = Number(left) >  Number(rhs); break;
-          case ">=":     condition = Number(left) >= Number(rhs); break;
-          case "<":      condition = Number(left) <  Number(rhs); break;
-          case "<=":     condition = Number(left) <= Number(rhs); break;
-          case "in":     condition = Array.isArray(rhs) && rhs.includes(left); break;
+          case "empty": condition = isEmpty(left); break;
+          case "==": condition = String(left) === String(rhs); break;
+          case "!=": condition = String(left) !== String(rhs); break;
+          case ">": condition = Number(left) > Number(rhs); break;
+          case ">=": condition = Number(left) >= Number(rhs); break;
+          case "<": condition = Number(left) < Number(rhs); break;
+          case "<=": condition = Number(left) <= Number(rhs); break;
+          case "in": condition = Array.isArray(rhs) && rhs.includes(left); break;
           case "not-in": condition = Array.isArray(rhs) && !rhs.includes(left); break;
-          default:       condition = !isEmpty(left);
+          default: condition = !isEmpty(left);
         }
 
         if (condition) {

@@ -17,7 +17,6 @@ export const ErrorSummary = asDefault(() => import("./components/ErrorSummary.js
 export const InputText = asDefault(() => import("./atoms/InputText.jsx"), "InputText");
 export const CheckboxAtom = asDefault(() => import("./atoms/CheckboxAtom.jsx"), "CheckboxAtom");
 export const AsyncAutocomplete = asDefault(() => import("./molecules/AsyncAutocomplete.jsx"), "AsyncAutocomplete");
-export const FormShell = asDefault(() => import("./organisms/FormShell.jsx"), "FormShell");
 export const DynamicForm = asDefault(() => import("./organisms/DynamicForm.jsx"), "DynamicForm");
 const getSchemaMod = lazyModule(() => import("./utils/schema.js"));
 const getMenuMod = lazyModule(() => import("./utils/menu-utils.js"));
@@ -84,6 +83,5 @@ export function registerLibraryDefaults() {
   registerComponent("InputText", LazyWrap(InputText, "InputText"));
   registerComponent("CheckboxAtom", LazyWrap(CheckboxAtom, "CheckboxAtom"));
   registerComponent("AsyncAutocomplete", LazyWrap(AsyncAutocomplete, "AsyncAutocomplete"));
-  registerComponent("FormShell", LazyWrap(FormShell, "FormShell"));
   registerComponent("DynamicForm", LazyWrap(DynamicForm, "DynamicForm"));
 }
