@@ -5,85 +5,62 @@ import HelperText from "./HelperText";
 import ErrorMessage from "./ErrorMessage";
 import s from "@gov/styles/library/form/FieldWrapper.module.scss";
 
+// Pull a readable string (or node) out of whatever we get
+function normalizeError(err) {
+  if (!err) return "";
+  if (typeof err === "string") return err;
+  if (React.isValidElement(err)) return err;
+  if (typeof err.message === "string") return err.message;
+  // Guard: if message is an object/array, stringify briefly
+  if (err.message && typeof err.message === "object") {
+    try { return JSON.stringify(err.message); } catch { /* noop */ }
+  }
+  return "";
+}
+
 /**
  * FieldWrapper — Standard spacing with label / control / helper-error slots.
  *
  * Props:
- * - label     : string | node
- * - required  : boolean
- * - error     : string | node   (rendered via ErrorMessage)
- * - helper    : string | node   (rendered via HelperText)
- * - htmlFor   : string (optional) — passed to Label for a11y
- * - idBase    : string (optional) — generates `${idBase}-error`, `${idBase}-help`
- * - config    : partial overrides (see DEFAULT_CFG)
- * - children  : the input/control (single element recommended)
+ * - label, required, error, helper, htmlFor, idBase, config, children
+ *   NOTE: `error` can be a string OR an RHF error object.
  */
-
-const DEFAULT_CFG = {
-  layout: "top",            // "top" | "left"
-  gap: "sm",                // "xs" | "sm" | "md" | "lg"
-  marginBottom: "sm",       // "none" | "xs" | "sm" | "md"
-  density: "md",            // "xs" | "sm" | "md" | "lg"
-  showHelperWhenError: false,
-};
-
 export default function FieldWrapper({
   label,
   required = false,
-  error,
+  error,          // can be string | RHF error object
   helper,
   htmlFor,
   idBase,
   config,
   children,
 }) {
-  const cfg = React.useMemo(() => ({ ...DEFAULT_CFG, ...(config || {}) }), [config]);
-
   const rootClass = [
     s.root,
-    s[`layout--${cfg.layout}`],
-    s[`gap--${cfg.gap}`],
-    s[`mb--${cfg.marginBottom}`],
-    s[`density--${cfg.density}`],
-  ]
-    .filter(Boolean)
-    .join(" ");
-
-  const headerEl = label ? (
-    <div className={s.header}>
-      <Label htmlFor={htmlFor} required={required}>
-        {label}
-      </Label>
-    </div>
-  ) : null;
+    s[`layout--${config?.layout || "top"}`],
+    s[`gap--${config?.gap || "sm"}`],
+    s[`mb--${config?.marginBottom || "sm"}`],
+    s[`density--${config?.density || "md"}`],
+  ].filter(Boolean).join(" ");
 
   const errorId = idBase ? `${idBase}-error` : undefined;
   const helpId  = idBase ? `${idBase}-help`  : undefined;
 
-  // Inject a11y props into the single child if possible
-  let controlEl = children;
-  if (React.isValidElement(children)) {
-    const prevDescribed = children.props?.["aria-describedby"];
-    const includeHelp = cfg.showHelperWhenError || !error;
-    const describedBy = [prevDescribed, error ? errorId : null, includeHelp ? helpId : null]
-      .filter(Boolean)
-      .join(" ")
-      .trim();
-
-    controlEl = React.cloneElement(children, {
-      "aria-describedby": describedBy || undefined,
-      "aria-invalid": !!error || undefined,
-      id: htmlFor || children.props.id, // keep association with Label if provided
-    });
-  }
+  const message = normalizeError(error);
 
   return (
     <div className={rootClass}>
-      {headerEl}
-      <div className={s.control}>{controlEl}</div>
+      {label ? (
+        <div className={s.header}>
+          <Label htmlFor={htmlFor} required={required}>{label}</Label>
+        </div>
+      ) : null}
+
+      <div className={s.control}>{children}</div>
+
       <div className={s.assist}>
-        <ErrorMessage id={errorId} message={error} />
-        {(cfg.showHelperWhenError || !error) && helper ? (
+        {message ? <ErrorMessage id={errorId} message={message} /> : null}
+        {(!message || config?.showHelperWhenError) && helper ? (
           <HelperText id={helpId}>{helper}</HelperText>
         ) : null}
       </div>

@@ -6,7 +6,7 @@ import FieldWrapper from "../atoms/FieldWrapper.jsx";
 import InputText from "../atoms/InputText.jsx";
 import InputNumber from "../atoms/InputNumber.jsx";
 import TextArea from "../atoms/TextArea.jsx";
-import CheckboxAtom from "../atoms/CheckboxAtom.jsx";
+import Checkbox from "../atoms/Checkbox.jsx";
 import RadioGroup from "../atoms/RadioGroup.jsx";
 import MultiSelect from "../molecules/MultiSelect.jsx";
 import AsyncAutocomplete from "../molecules/AsyncAutocomplete.jsx";
@@ -102,7 +102,7 @@ function evaluateRules(field, { values }) {
  * Props:
  * - field: a field node from your JSON schema
  * - wrap?: boolean = true                 // wrap with FieldWrapper
- * - wrapperProps?: object                 // extra props for FieldWrapper
+ * - wrapperProps?: object                 // extra props for FieldWrapper { config?, ...rest }
  * - user?: any, flags?: any               // optional context
  * - ruleEngine?: (field, ctx)=>{hidden,disabled,required,derived}
  * - mountWhenHidden?: boolean = true      // keep mounted when hidden
@@ -120,19 +120,18 @@ export default function FieldController({
 
   // watch only what we need: the field itself + declared dependsOn
   const depList = field?.options?.dependsOn || [];
-  useWatch({ control, name: [field.id, ...depList.map((d) => d.replace(/^values\./, ""))] });
+  useWatch({
+    control,
+    name: [field.id, ...depList.map((d) => d.replace(/^values\./, ""))],
+  });
 
   const values = getValues(); // RHF snapshot for rules/derive
   const ruleState = React.useMemo(
-    () => evaluateRules(field.rules, values),
-    [field.rules, values, user, flags]
+    () => (typeof ruleEngine === "function" ? ruleEngine(field, { values, user, flags }) : evaluateRules(field, { values })),
+    [field, values, user, flags, ruleEngine]
   );
-  
-  // ruleState = { hidden, disabled, required, derived }
-  if (ruleState.derived !== undefined) {
-    setValue(field.id, ruleState.derived, { shouldValidate: true, shouldDirty: true });
-  }
-  // apply derived value (formula) when present
+
+  // apply derived value (formula) when present (in effect only; not during render)
   React.useEffect(() => {
     if (ruleState.derived !== undefined) {
       setValue(field.id, ruleState.derived, { shouldValidate: true, shouldDirty: true });
@@ -144,7 +143,7 @@ export default function FieldController({
   const requiredBySchema = (field.validations || []).some((v) => v.type === "required");
   const required = !!ruleState.required || requiredBySchema;
 
-  // common
+  // common flags
   const disabled = !!ruleState.disabled || !!field.props?.disabled;
   const hidden = !!ruleState.hidden || !!field.props?.hidden;
 
@@ -154,6 +153,13 @@ export default function FieldController({
 
   // If not mounting hidden fields, bail out entirely
   if (hidden && !mountWhenHidden) return null;
+
+  // Wrapper config merge (layout can come from field or wrapperProps.config)
+  const { config: wrapperCfgIn, ...wrapperRest } = wrapperProps || {};
+  const wrapperCfg = {
+    ...(wrapperCfgIn || {}),
+    layout: (wrapperCfgIn && wrapperCfgIn.layout) || field.layout || "top",
+  };
 
   // render with RHF Controller
   return (
@@ -168,10 +174,10 @@ export default function FieldController({
       }
       control={control}
       render={({ field: rhf, fieldState }) => {
-        const error = fieldState.error;
+        const errorObj = fieldState.error;              // RHF error object (for wrapper)
         const body = renderFieldByType(field, {
           rhf,
-          error,
+          error: errorObj,
           disabled,
           required,
           hidden,
@@ -183,12 +189,12 @@ export default function FieldController({
 
         return (
           <FieldWrapper
+            {...wrapperRest}
             label={field.label}
             required={required}
-            error={error}
+            error={errorObj}                // pass the OBJECT to wrapper (it normalizes to string)
             helper={field.helperText}
-            layout={field.layout || "top"}
-            {...(wrapperProps || {})}
+            config={wrapperCfg}
           >
             {body}
           </FieldWrapper>
@@ -202,12 +208,13 @@ export default function FieldController({
 function renderFieldByType(field, { rhf, error, disabled, required, hidden, ctxDeps, depsReady }) {
   if (hidden) return null;
 
-  const common = { disabled, required, error };
+  // Inputs expect boolean error; wrapper receives the object.
+  const inputCommon = { disabled, required, error: !!error };
 
   switch (field.type) {
     case "checkbox":
       return (
-        <CheckboxAtom
+        <Checkbox
           name={rhf.name}
           checked={!!rhf.value}
           onChange={(ev) => rhf.onChange(ev.target.checked)}
@@ -215,7 +222,7 @@ function renderFieldByType(field, { rhf, error, disabled, required, hidden, ctxD
           inputRef={rhf.ref}
           label={field.inlineLabel || field.label}
           indeterminate={field.props?.indeterminate}
-          {...common}
+          {...inputCommon}
         />
       );
 
@@ -232,7 +239,7 @@ function renderFieldByType(field, { rhf, error, disabled, required, hidden, ctxD
           optionLabelKey={field.options?.labelKey || "label"}
           optionValueKey={field.options?.valueKey || "value"}
           row={field.props?.row ?? false}
-          {...common}
+          {...inputCommon}
         />
       );
 
@@ -244,18 +251,16 @@ function renderFieldByType(field, { rhf, error, disabled, required, hidden, ctxD
           onChange={(v) => rhf.onChange(v)}
           onBlur={rhf.onBlur}
           inputRef={rhf.ref}
-          options={field.options?.items || []} // if static
-          // if async is needed later, you can add serviceKey/etc in your molecule
+          options={field.options?.items || []} // static options
           maxSelected={field.props?.maxSelected}
           chipColor={field.props?.chipColor}
-          {...common}
+          {...inputCommon}
         />
       );
 
     case "autocomplete":
       return (
         <AsyncAutocomplete
-          // molecule expects full field for options config + deps
           field={field}
           rhf={{
             value: rhf.value ?? null,
@@ -266,7 +271,7 @@ function renderFieldByType(field, { rhf, error, disabled, required, hidden, ctxD
           }}
           contextDeps={ctxDeps}
           enabled={depsReady && !disabled}
-          {...common}
+          {...inputCommon}
         />
       );
 
@@ -285,7 +290,7 @@ function renderFieldByType(field, { rhf, error, disabled, required, hidden, ctxD
           format={field.props?.format ?? "decimal"}
           placeholder={field.props?.placeholder}
           config={field.config}
-          {...common}
+          {...inputCommon}
         />
       );
 
@@ -299,7 +304,7 @@ function renderFieldByType(field, { rhf, error, disabled, required, hidden, ctxD
           maxDate={field.props?.maxDate}
           format={field.props?.format || "DD/MM/YYYY"}
           config={field.config}
-          {...common}
+          {...inputCommon}
         />
       );
 
@@ -317,7 +322,7 @@ function renderFieldByType(field, { rhf, error, disabled, required, hidden, ctxD
           autoResize={field.props?.autoResize ?? true}
           placeholder={field.props?.placeholder}
           config={field.config}
-          {...common}
+          {...inputCommon}
         />
       );
 
@@ -341,7 +346,7 @@ function renderFieldByType(field, { rhf, error, disabled, required, hidden, ctxD
           prefix={field.props?.prefix}
           suffix={field.props?.suffix}
           config={field.config}
-          {...common}
+          {...inputCommon}
         />
       );
   }
