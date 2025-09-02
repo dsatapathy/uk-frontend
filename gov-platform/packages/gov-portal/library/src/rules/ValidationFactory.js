@@ -3,50 +3,13 @@ import { z } from "zod";
 
 /**
  * Build a Zod schema from your JSON form schema.
- *
- * Usage:
- *   const zodSchema = buildZodFromSchema(schema);
- *   const methods = useForm({ resolver: zodResolver(zodSchema) })
- *
- * Supported field types (base):
- *  - text | password | email | tel | url | textarea   -> string()
- *  - number                                           -> number() (coerces from text)
- *  - checkbox                                        -> boolean()
- *  - autocomplete                                    -> string() (selected value code)
- *  - date                                            -> date() (coerces from ISO/date)
- *
- * Supported validators in field.validations[]:
- *  - { type: "required", message? }
- *  - { type: "minLength", value, message? }
- *  - { type: "maxLength", value, message? }
- *  - { type: "pattern", value: "regex", flags?, message? }
- *  - { type: "email", message? }
- *  - { type: "url", message? }
- *  - { type: "min", value, message? }        // number/date
- *  - { type: "max", value, message? }        // number/date
- *  - { type: "integer", message? }           // number
- *  - { type: "positive" | "nonnegative", message? } // number
- *  - { type: "enum", values: [...], message? } // string/number
- *  - { type: "equals", value, message? }
- *  - { type: "notEquals", value, message? }
- *  - { type: "requiredIf", when: "values.foo", op?: "filled"|"=="|... , value?, message? }
- *  - { type: "sameAs", other: "values.bar", message? } // e.g., confirm password
- *
- * Options:
- *  buildZodFromSchema(schema, {
- *    trimStrings: true,
- *    coerceNumbers: true,
- *    allowEmptyWhenNotRequired: true,
- *    dateCoerce: "iso", // "iso"|"date"
- *    messages: { required: "...", invalidEmail: "...", ... }
- *  })
+ * Supports field types: text|password|email|tel|url|textarea|autocomplete (string),
+ * number (coerced), checkbox (boolean), date|datepicker (Date), repeater (array of objects).
  */
 
 const DEFAULT_OPTS = {
   trimStrings: true,
-  coerceNumbers: true,
   allowEmptyWhenNotRequired: true,
-  dateCoerce: "iso", // "iso" | "date"
   messages: {
     required: "This field is required",
     invalidEmail: "Enter a valid email",
@@ -69,7 +32,7 @@ const DEFAULT_OPTS = {
   },
 };
 
-/** ---------- helpers ---------- */
+/* ---------------- helpers ---------------- */
 
 function isEmpty(v) {
   return (
@@ -79,92 +42,67 @@ function isEmpty(v) {
     (Array.isArray(v) && v.length === 0)
   );
 }
-
 function toNumber(v) {
   if (v === "" || v === null || v === undefined) return undefined;
   const n = Number(v);
   return Number.isFinite(n) ? n : NaN;
 }
-
 function toDate(v) {
   if (v === "" || v === null || v === undefined) return undefined;
   if (v instanceof Date) return v;
   const d = new Date(v);
   return Number.isNaN(d.getTime()) ? undefined : d;
 }
-
 function getAtPath(root, path) {
-  const segs = String(path || "").split(".");
-  let cur = root;
-  for (const s of segs) {
-    if (cur == null) return undefined;
-    cur = cur[s];
-  }
-  return cur;
+  return String(path || "")
+    .split(".")
+    .reduce((a, k) => (a == null ? a : a[k]), root);
 }
-
 function makeRegex(pat, flags) {
-  try { return new RegExp(pat, flags); } catch { return null; }
+  try {
+    return new RegExp(pat, flags);
+  } catch {
+    return null;
+  }
 }
 
-/** Build base Zod by field.type (optional unless "required" is provided) */
+/* ------------- base schema by field.type ------------- */
+/** NOTE: repeater is NOT handled here; it is built in buildZodFromSchema */
 function baseForField(field, opts) {
   const t = (field.type || "text").toLowerCase();
   const allowEmpty = !!opts.allowEmptyWhenNotRequired;
 
   switch (t) {
     case "number": {
-      // coerce text->number; undefined if empty
-      let s = z.preprocess((v) => toNumber(v), z.number({
-        invalid_type_error: "Must be a number",
-      }));
+      // coerce text -> number; allow undefined for empty if not required
+      let s = z.preprocess((v) => toNumber(v), z.number({ invalid_type_error: "Must be a number" }));
       return allowEmpty ? s.optional() : s;
     }
     case "checkbox": {
-      // default false unless required says must be true
-      let s = z.boolean({ invalid_type_error: "Must be true/false" }).optional();
-      return s;
+      let s = z.boolean({ invalid_type_error: "Must be true/false" });
+      return allowEmpty ? s.optional() : s;
     }
-    case "date": {
-      // coerce ISO/date into Date()
+    case "date":
+    case "datepicker": {
       let s = z.preprocess((v) => toDate(v), z.date({ invalid_type_error: "Invalid date" }));
       return allowEmpty ? s.optional() : s;
     }
-    case "email": {
-      let s = z.string().transform((x) => (opts.trimStrings ? String(x || "").trim() : String(x || "")));
-      s = allowEmpty ? s.optional() : s;
-      return s;
-    }
-    case "repeater": {
-      const childShape = z.object(
-        Object.fromEntries(
-          field.item.fields.map((f) => [f.id, zodForField(f)])
-        )
-      );
-      shape[field.id] = z.array(childShape).min(field.min ?? 0).max(field.max ?? 99);
-    }
-    case "tel":
-    case "url":
-    case "password":
-    case "textarea":
-    case "text":
-    case "autocomplete":
+    // strings: text/password/email/tel/url/textarea/autocomplete/…
     default: {
-      let s = z.string().transform((x) => (opts.trimStrings ? String(x || "").trim() : String(x || "")));
-      // If empty & not required, normalize to "" to keep RHF happy
+      let s = z
+        .string()
+        .transform((x) => (opts.trimStrings ? String(x ?? "").trim() : String(x ?? "")));
+      // If empty & not required, normalize to "" so RHF stays happy
       return allowEmpty ? s.optional().or(z.literal("")) : s;
     }
   }
 }
 
-/** Apply validators to the base schema */
+/* ------------- apply validators ------------- */
 function applyValidatorsToFieldSchema(base, field, opts) {
   const vlist = Array.isArray(field.validations) ? field.validations : [];
   const t = (field.type || "text").toLowerCase();
   let sch = base;
-
-  // Track if "required" appeared to adjust optional allowance
-  let sawRequired = false;
 
   for (const v of vlist) {
     const type = String(v?.type || "").toLowerCase();
@@ -172,8 +110,6 @@ function applyValidatorsToFieldSchema(base, field, opts) {
 
     switch (type) {
       case "required": {
-        sawRequired = true;
-        // For string-like: ensure non-empty after trim
         if (t === "checkbox") {
           sch = sch.refine((val) => val === true, { message: msg || opts.messages.required });
         } else {
@@ -181,7 +117,6 @@ function applyValidatorsToFieldSchema(base, field, opts) {
         }
         break;
       }
-
       case "minlength": {
         const n = Number(v.value || 0);
         sch = sch.pipe(z.string().min(n, { message: msg || opts.messages.tooShort(n) }));
@@ -205,12 +140,14 @@ function applyValidatorsToFieldSchema(base, field, opts) {
         sch = sch.pipe(z.string().url({ message: msg || opts.messages.invalidUrl }));
         break;
       }
-
       case "min": {
         const n = v.value;
-        if (t === "date") {
+        if (t === "date" || t === "datepicker") {
           const d = toDate(n);
-          if (d) sch = sch.refine((val) => !val || val >= d, { message: msg || opts.messages.minDate(d.toLocaleDateString()) });
+          if (d)
+            sch = sch.refine((val) => !val || val >= d, {
+              message: msg || opts.messages.minDate(d.toLocaleDateString()),
+            });
         } else {
           const num = Number(n);
           sch = sch.pipe(z.number().min(num, { message: msg || opts.messages.minValue(num) }));
@@ -219,9 +156,12 @@ function applyValidatorsToFieldSchema(base, field, opts) {
       }
       case "max": {
         const n = v.value;
-        if (t === "date") {
+        if (t === "date" || t === "datepicker") {
           const d = toDate(n);
-          if (d) sch = sch.refine((val) => !val || val <= d, { message: msg || opts.messages.maxDate(d.toLocaleDateString()) });
+          if (d)
+            sch = sch.refine((val) => !val || val <= d, {
+              message: msg || opts.messages.maxDate(d.toLocaleDateString()),
+            });
         } else {
           const num = Number(n);
           sch = sch.pipe(z.number().max(num, { message: msg || opts.messages.maxValue(num) }));
@@ -240,49 +180,47 @@ function applyValidatorsToFieldSchema(base, field, opts) {
         sch = sch.pipe(z.number().nonnegative({ message: msg || opts.messages.nonnegative }));
         break;
       }
-
       case "enum": {
         const vals = Array.isArray(v.values) ? v.values : [];
-        sch = sch.refine((val) => isEmpty(val) || vals.includes(val), { message: msg || opts.messages.notInEnum });
+        sch = sch.refine((val) => isEmpty(val) || vals.includes(val), {
+          message: msg || opts.messages.notInEnum,
+        });
         break;
       }
       case "equals": {
-        const target = v.value;
-        sch = sch.refine((val) => isEmpty(val) || String(val) === String(target), { message: msg || opts.messages.equals });
+        sch = sch.refine((val) => isEmpty(val) || String(val) === String(v.value), {
+          message: msg || opts.messages.equals,
+        });
         break;
       }
       case "notequals": {
-        const target = v.value;
-        sch = sch.refine((val) => isEmpty(val) || String(val) !== String(target), { message: msg || opts.messages.notEquals });
+        sch = sch.refine((val) => isEmpty(val) || String(val) !== String(v.value), {
+          message: msg || opts.messages.notEquals,
+        });
         break;
       }
-
-      // Cross-field handled at object.superRefine, but keep here for field-level quick checks if possible
-      case "sameas":
-      case "requiredif":
-        // handled later
-        break;
-
+      // "sameAs" and "requiredIf" are handled at the object level (superRefine)
       default:
-        // ignore unknown
         break;
     }
   }
 
-  // If no "required" and we allowed empty, the base already permits empty string/undefined
-  // Nothing extra needed here.
+  // collect cross-field rules for superRefine
+  const cross = vlist.filter((vv) =>
+    ["sameas", "requiredif"].includes(String(vv.type || "").toLowerCase())
+  );
 
-  return { schema: sch, cross: vlist.filter((v) => ["sameas", "requiredif"].includes(String(v.type || "").toLowerCase())) };
+  return { schema: sch, cross };
 }
 
-/** Build field-level zod + collect cross-field validators */
+/* ------------- public helpers ------------- */
 export function buildFieldZod(field, options) {
   const opts = { ...DEFAULT_OPTS, ...(options || {}) };
   const base = baseForField(field, opts);
   return applyValidatorsToFieldSchema(base, field, opts);
 }
 
-/** Build object schema and add cross-field validations via superRefine */
+/* ------------- main: build object schema ------------- */
 export function buildZodFromSchema(schema, options) {
   const opts = { ...DEFAULT_OPTS, ...(options || {}) };
   const shape = {};
@@ -290,42 +228,62 @@ export function buildZodFromSchema(schema, options) {
 
   (schema.sections || []).forEach((sec) => {
     (sec.fields || []).forEach((f) => {
+      const t = (f.type || "text").toLowerCase();
+
+      if (t === "repeater" || t === "array") {
+        // Build child object shape
+        const childShape = {};
+        (f.item?.fields || []).forEach((child) => {
+          const { schema: childZ, cross } = buildFieldZod(child, opts);
+          childShape[child.id] = childZ;
+          // NOTE: cross validators inside a repeater row are not wired here.
+          // You can extend this to support nested superRefine if needed.
+        });
+
+        let arrZ = z.array(z.object(childShape));
+        if (Number.isFinite(f.min)) arrZ = arrZ.min(f.min, { message: opts.messages.minValue(f.min) });
+        if (Number.isFinite(f.max)) arrZ = arrZ.max(f.max, { message: opts.messages.maxValue(f.max) });
+
+        shape[f.id] = arrZ;
+        return;
+      }
+
+      // normal scalar/object field
       const { schema: fieldZ, cross } = buildFieldZod(f, opts);
       shape[f.id] = fieldZ;
       cross.forEach((v) => crossRules.push({ fieldId: f.id, v, field: f }));
     });
   });
 
-  const obj = z.object(shape);
+  let obj = z.object(shape);
 
   if (crossRules.length === 0) return obj;
 
+  // add cross-field validations
   return obj.superRefine((data, ctx) => {
-    for (const { fieldId, v, field } of crossRules) {
+    for (const { fieldId, v } of crossRules) {
       const type = String(v?.type || "").toLowerCase();
       const msg = v?.message;
 
       if (type === "sameas") {
         // { type: "sameAs", other: "values.password" }
         const otherPath = String(v.other || "");
-        const otherVal =
-          otherPath.startsWith("values.") ? getAtPath(data, otherPath.replace(/^values\./, "")) : undefined;
+        const otherVal = otherPath.startsWith("values.")
+          ? getAtPath(data, otherPath.replace(/^values\./, ""))
+          : undefined;
         if (data[fieldId] !== otherVal) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            path: [fieldId],
-            message: msg || opts.messages.sameAs,
-          });
+          ctx.addIssue({ code: z.ZodIssueCode.custom, path: [fieldId], message: msg || opts.messages.sameAs });
         }
       }
 
       if (type === "requiredif") {
-        // { type: "requiredIf", when: "values.state", op?: "filled"|"=="|... , value? }
+        // { type: "requiredIf", when: "values.state", op?: "filled"|... , value? }
         const when = String(v.when || "");
         const op = String(v.op || "filled").toLowerCase();
         const rhs = v.value;
-        const left =
-          when.startsWith("values.") ? getAtPath(data, when.replace(/^values\./, "")) : undefined;
+        const left = when.startsWith("values.")
+          ? getAtPath(data, when.replace(/^values\./, ""))
+          : undefined;
 
         let condition = false;
         switch (op) {
@@ -344,13 +302,9 @@ export function buildZodFromSchema(schema, options) {
 
         if (condition) {
           const val = data[fieldId];
-          const ok = !(isEmpty(val) || val === false); // checkbox false counts as empty
+          const ok = !(isEmpty(val) || val === false);
           if (!ok) {
-            ctx.addIssue({
-              code: z.ZodIssueCode.custom,
-              path: [fieldId],
-              message: msg || opts.messages.requiredIf,
-            });
+            ctx.addIssue({ code: z.ZodIssueCode.custom, path: [fieldId], message: msg || opts.messages.requiredIf });
           }
         }
       }

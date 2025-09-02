@@ -20,7 +20,7 @@ import {
   // clearDraft, // ← uncomment if you want to clear after successful submit
 } from "@gov/store";
 
-import { buildZodFromSchema } from "../adapters/zodFactory.js";
+import { buildZodFromSchema } from "../rules/ValidationFactory.js";
 
 /* ---------- helpers ---------- */
 const TYPE_DEFAULTS = { checkbox: false, default: "" };
@@ -58,10 +58,7 @@ export default function DynamicForm({
 }) {
   const dispatch = useDispatch();
 
-  const zodSchema = React.useMemo(
-    () => (typeof buildZodFromSchema === "function" ? buildZodFromSchema(schema) : null),
-    [schema]
-  );
+  const zodSchema = React.useMemo(() => buildZodFromSchema(schema), [schema]);
 
   const formKey = `${schema.id}::${entityId}`;
 
