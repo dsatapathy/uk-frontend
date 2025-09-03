@@ -7,10 +7,13 @@ import { DRAWER_WIDTH } from "../utils/menu-utils";
 import SearchField from "../atoms/SearchField";
 
 
-export default function Sidebar({ isDesktop, open, onClose, logo, title, items, currentPath, expandedSet, onToggle, onNavigate, searchValue, onSearchChange, onSearchEnter }) {    const content = (
+export default function Sidebar({ isDesktop, open, onClose, logo, title, items, currentPath, expandedSet, onToggle, onNavigate, searchValue, onSearchChange, onSearchEnter }) {
+    const content = (
         <Box role="navigation" sx={{ width: { xs: 280, md: DRAWER_WIDTH } }}>
             {/* Show title in the drawer header ONLY on mobile; hide on desktop */}
-            <DrawerHeader logo={logo} title={title} showClose={!isDesktop} showTitle={!isDesktop} onClose={onClose} />
+            {!isDesktop && (
+                <DrawerHeader logo={logo} title={title} showClose={!isDesktop} showTitle={!isDesktop} onClose={onClose} />
+            )}
 
             {/* On desktop, search lives inside the sidebar */}
             {isDesktop && (

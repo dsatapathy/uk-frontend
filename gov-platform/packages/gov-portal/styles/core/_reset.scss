@@ -1,4 +1,9 @@
 @use "./tokens" as *;
 * { box-sizing: border-box; }
 html, body, #root { height: 100%; }
-body { margin: 0; background: var(--g-bg); color: var(--g-fg); }
+body {
+  margin: 0;
+  background: var(--g-bg);
+  color: var(--g-fg);
+  overflow-x: hidden; // Prevent horizontal scroll on mobile
+}
