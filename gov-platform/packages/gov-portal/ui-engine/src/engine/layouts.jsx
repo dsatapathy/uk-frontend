@@ -1,7 +1,11 @@
+// layouts.jsx
 import React from "react";
 import { useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
 import { runtime } from "@gov/core";
+
+// ⬇️ import the hook (adjust path alias if needed)
+import { useMenu } from "@gov/data";
 
 export function AuthBlank({ children }) {
   return <main>{children}</main>;
@@ -16,7 +20,9 @@ export function DefaultShell({ children }) {
     []
   );
   const user = React.useMemo(() => ({ name: "Jane Admin" }), []);
-  const menu = React.useMemo(
+
+  // 👉 lightweight fallback (shown while fetching / on error)
+  const fallbackMenu = React.useMemo(
     () => [
       { label: "Home", icon: "home", path: "/" },
       {
@@ -43,6 +49,19 @@ export function DefaultShell({ children }) {
     []
   );
 
+  // 🔑 load the 150-item, role-aware menu
+  // enabled can be tied to auth state; for now it always runs (adjust if needed)
+  const {
+    data: fetchedMenu = [],
+    isLoading: menuLoading,
+    isError: menuError,
+  } = useMenu({ count: 150, enabled: true });
+
+  const menu = React.useMemo(() => {
+    if (menuLoading || menuError) return fallbackMenu;
+    return Array.isArray(fetchedMenu) && fetchedMenu.length ? fetchedMenu : fallbackMenu;
+  }, [fetchedMenu, menuLoading, menuError, fallbackMenu]);
+
   const handleSearch = React.useCallback((q) => {
     console.log("Search query:", q);
   }, []);
@@ -67,6 +86,7 @@ export function DefaultShell({ children }) {
       title="UGVS-REAP : MIS"
       onSearch={handleSearch}
       onNavigate={handleNavigate}
+      // You can also pass menuLoading to NavLayout if it supports a skeleton
     >
       {children}
     </NavLayout>
@@ -98,10 +118,7 @@ export function resolveShell(layout, authCfg) {
   const forceBlank = !!lc.forceAuthBlank;
   const authEnabled = authCfg && authCfg.strategy && authCfg.strategy !== "none";
 
-  // Explicitly forced blank
   if (forceBlank) return AuthBlank;
-
-  // Legacy host default: treat "AuthBlank" as AutoShell if auth is enabled
   if (authEnabled && (!comp || comp === "AuthBlank")) return AutoShell;
 
   if (!comp) return AutoShell;

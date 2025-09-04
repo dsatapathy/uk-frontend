@@ -9,6 +9,7 @@ export { setHttp, http } from "./services/bootstrap.js";
 export { makeAuthApi  } from "./services/auth/index.js";
 export { useOptions, useFileUpload, useSaveDraft, useSubmitForm } from "./services/form/index.js";
 export { useSidebar, useModules } from "./services/masters/index.js";
+export { useMenu } from "./services/sidebar/index.js"
 
 // ---- cache keys ----
 export { keys } from "./cache-keys/index.js";

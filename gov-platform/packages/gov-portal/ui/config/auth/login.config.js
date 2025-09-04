@@ -50,7 +50,7 @@ const loginConfig = {
 
   submit: { label: "Sign In", endpoint: "/api/auth/login", method: "POST" },
   register: { label: "Register", redirect: "/uk-portal/register" },
-  onSuccessRoute: "/uk-portal/landing"
+  onSuccessRoute: "/landing"
 };
 
 export default loginConfig;

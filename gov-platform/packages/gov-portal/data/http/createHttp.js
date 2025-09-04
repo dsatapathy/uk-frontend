@@ -1,14 +1,18 @@
 import axios from "axios";
 
-// Factory that returns a preconfigured Axios instance.
-// `cfg` is the host application's config object containing auth endpoints.
-// `storage` is an optional VersionedStorage used for persisting tokens.
+/**
+ * Factory that returns a preconfigured Axios instance.
+ * cfg: { baseURL?: string, auth?: { endpoints?: { refresh?: string } } }
+ * storage: optional VersionedStorage with get/set/remove
+ */
 export default function createHttp(cfg = {}, storage) {
   let isRefreshing = false;
   let refreshPromise = null;
   const queue = [];
 
-  const authBase = cfg?.auth?.endpoints?.baseURL || "";
+  const apiBase = cfg.http.baseURL || "";
+  const refreshPath = (cfg.auth && cfg.auth.endpoints && cfg.auth.endpoints.refresh) || "/auth/refresh";
+  const refreshURL = new URL(refreshPath, apiBase).toString();
 
   function getAccessToken() {
     const saved = storage?.get?.("auth");
@@ -25,26 +29,31 @@ export default function createHttp(cfg = {}, storage) {
     }
   }
 
-  function queueRequest(fn) {
+  function enqueue(fn) {
     queue.push(fn);
   }
-
-  function flushQueue(token) {
+  function flush(token) {
     while (queue.length) {
       const fn = queue.shift();
-      fn(token);
+      try { fn(token); } catch {}
     }
   }
 
   const instance = axios.create({
-    baseURL: authBase,
-    withCredentials: true,
+    baseURL: apiBase,        // single API base
+    withCredentials: true,   // needed if you use httpOnly cookies for refresh
   });
 
+  // expose getter (handy for hooks to gate queries)
+  instance.getAccessToken = getAccessToken;
+
+  // Attach latest token on every request
   instance.interceptors.request.use((req) => {
     const token = getAccessToken();
     if (token) {
       req.headers = { ...(req.headers || {}), Authorization: `Bearer ${token}` };
+    } else if (req.headers && req.headers.Authorization) {
+      delete req.headers.Authorization; // avoid sending stale header
     }
     return req;
   });
@@ -52,26 +61,31 @@ export default function createHttp(cfg = {}, storage) {
   instance.interceptors.response.use(
     (res) => res,
     async (error) => {
-      const status = error.response?.status;
-      const isAuthHost = (error.config?.baseURL ?? "").includes(authBase);
+      const status = error?.response?.status;
+      const original = error?.config || {};
 
-      if (status === 401 && isAuthHost) {
+      // Build full request URL and check same-origin
+      const reqURL = new URL(
+        original.url || "",
+        original.baseURL || apiBase || (typeof window !== "undefined" ? window.location.origin : "http://localhost")
+      ).toString();
+
+      const sameOrigin = new URL(reqURL).origin === new URL(apiBase || reqURL).origin;
+      const isRefreshCall = reqURL === refreshURL;
+
+      if (status === 401 && sameOrigin && !isRefreshCall) {
         if (!isRefreshing) {
           isRefreshing = true;
           refreshPromise = (async () => {
             try {
-              const { data } = await axios.post(
-                new URL(cfg?.auth?.endpoints?.refresh || "", authBase).toString(),
-                {},
-                { withCredentials: true }
-              );
+              const { data } = await axios.post(refreshURL, {}, { withCredentials: true });
               const token = data?.accessToken || data?.token;
               const refreshToken = data?.refreshToken;
               if (token) setTokens({ accessToken: token, refreshToken });
               return token;
             } catch (e) {
               setTokens(undefined);
-              throw e;
+              return undefined;
             } finally {
               isRefreshing = false;
             }
@@ -79,21 +93,23 @@ export default function createHttp(cfg = {}, storage) {
         }
 
         const token = await refreshPromise.catch(() => undefined);
+
         return new Promise((resolve, reject) => {
-          queueRequest(async (t) => {
+          enqueue(async (t) => {
             if (!t) return reject(error);
             try {
-              const cfgRetry = {
-                ...error.config,
-                headers: { ...(error.config.headers || {}), Authorization: `Bearer ${t}` },
+              const retryCfg = {
+                ...original,
+                headers: { ...(original.headers || {}), Authorization: `Bearer ${t}` },
               };
-              const resp = await axios(cfgRetry);
+              // Use same instance so interceptors stay applied
+              const resp = await instance.request(retryCfg);
               resolve(resp);
             } catch (e) {
               reject(e);
             }
           });
-          flushQueue(token);
+          flush(token);
         });
       }
 

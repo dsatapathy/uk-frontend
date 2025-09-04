@@ -18,127 +18,115 @@ import "@gov/styles/core/index.scss";
 import { AppProviders } from "./bootstrap-auth";
 
 export function start(rawConfig) {
-    const validated = configSchema.safeParse(rawConfig);
+  const validated = configSchema.safeParse(rawConfig);
+  if (!validated.success) {
+    console.error("Invalid engine config:", validated.error.flatten().fieldErrors);
+    throw new Error("Engine configuration validation failed");
+  }
 
-    if (!validated.success) {
-        console.error("Invalid engine config:", validated.error.flatten().fieldErrors);
-        throw new Error("Engine configuration validation failed");
-    }
+  const cfg = validated.data;
+  const {
+    target,
+    base,
+    app: appInfo,
+    layout,
+    layout: { sidebar: sidebarCfg = {} } = {},
+    modules = [],
+    redirects = [],
+    auth = { strategy: "none" },
+    hooks = {},
+    context = {},
+  } = cfg;
 
-    const cfg = validated.data;
-    const {
-        target,
-        base,
-        app: appInfo,
-        theme: themeOverrides,
-        layout,
-        layout: {
-            sidebar: sidebarCfg = {},
-            component: layoutComponent,
-            header: _headerCfg, // reserved
-        } = {},
-        modules = [],
-        redirects = [],
-        auth = { strategy: "none" },
-        hooks = {},
-        context = {},
-    } = cfg;
+  const history = createBrowserHistory({ basename: base });
 
-    const history = createBrowserHistory({ basename: base });
-    // Layout/Shell
-    // 1) Seed built-ins (AuthBlank, AutoShell) without importing them here
-    registerShellAsLayout(); // seeds only
-    // 2) Resolve requested shell with auth-aware behavior
-    const Shell = resolveShell(layout, auth);
-    // 3) Register chosen shell name for RouteBuilder as "Shell"
-    registerShellAsLayout(Shell);
-    // 🔽 Register library components lazily (no code is fetched until rendered)
-    registerLibraryDefaults();
-    registerUtilsDefaults();
-    // Engine API surface
-    let externalSetRoutes;
-    const app = {
-        base,
-        history,
+  // Layout/Shell
+  registerShellAsLayout(); // seed built-ins
+  const Shell = resolveShell(layout, auth);
+  registerShellAsLayout(Shell);
+
+  registerLibraryDefaults();
+  registerUtilsDefaults();
+
+  // One HTTP + one Storage for the whole app
+  const { http, storage } = initHttp(cfg, appInfo, history);
+
+  // Engine API surface
+  let externalSetRoutes;
+  const app = {
+    base,
+    history,
+    config: cfg,
+    addRoutes: (r) => externalSetRoutes((prev) => [...r, ...prev]),
+    addNav: (items) => runtime.registerNav?.(items),
+    actions: hooks.provideActions?.() || {},
+    reducers: hooks.provideReducers?.() || {},
+  };
+
+  const initialManifests = buildInitialManifests(modules);
+  const initialRoutes = registerGateAndBuildRoutes(app, initialManifests, redirects, Shell, auth);
+
+  hooks.onBootstrap?.({ app, manifests: initialManifests, appName: appInfo?.name, logo: appInfo?.logo });
+
+  function EngineApp() {
+    const [manifests, setManifests] = React.useState(initialManifests);
+    const [routes, setRoutes] = React.useState(initialRoutes);
+    externalSetRoutes = setRoutes;
+
+    useModulePrefetch();
+
+    React.useEffect(() => {
+      const unlisten = history.listen((loc, action) => hooks.onRouteChange?.(loc, action));
+      return unlisten;
+    }, []);
+
+    // Sidebar (once)
+    React.useEffect(() => {
+      bootstrapSidebar({ config: cfg, http, app, sidebarCfg, appInfo });
+    }, []);
+
+    // Modules bootstrap/merge (once)
+    React.useEffect(() => {
+      const onFallback = () => {
+        const merged = buildManifestsFromConfig(modules);
+        const guarded = registerGateAndBuildRoutes(app, merged, redirects, Shell, auth);
+        setManifests(merged);
+        setRoutes(guarded);
+      };
+
+      bootstrapModules({
         config: cfg,
-        addRoutes: (r) => externalSetRoutes((prev) => [...r, ...prev]), // prepend real routes
-        addNav: (items) => runtime.registerNav?.(items),
-        actions: hooks.provideActions?.() || {},
-        reducers: hooks.provideReducers?.() || {},
-    };
+        http,
+        modules,
+        app,
+        redirects,
+        Shell,
+        auth,
+        setManifests,
+        setRoutes,
+        onFallback,
+        appInfo,
+      });
+    }, []);
 
-    // HTTP client (engine-owned)
-    const http = initHttp(cfg, appInfo, history);
-
-    // Initial manifests & stub routes
-    const initialManifests = buildInitialManifests(modules);
-    const initialRoutes = registerGateAndBuildRoutes(app, initialManifests, redirects, Shell, auth);
-
-    hooks.onBootstrap?.({ app, manifests: initialManifests, appName: appInfo?.name, logo: appInfo?.logo });
-
-    function EngineApp() {
-        const [manifests, setManifests] = React.useState(initialManifests);
-        const [routes, setRoutes] = React.useState(initialRoutes);
-        externalSetRoutes = setRoutes;
-
-        // prefetch on hover/idle
-        useModulePrefetch();
-
-        // route change hook
-        React.useEffect(() => {
-            const unlisten = history.listen((loc, action) => hooks.onRouteChange?.(loc, action));
-            return unlisten;
-        }, []);
-
-        // Sidebar bootstrap (once)
-        React.useEffect(() => {
-            bootstrapSidebar({ config: cfg, http, app, sidebarCfg, appInfo });
-        }, []);
-
-        // Modules bootstrap/merge (once)
-        React.useEffect(() => {
-            // Fallback callback: re-derive from defaults on error
-            const onFallback = () => {
-                const merged = buildManifestsFromConfig(modules);
-                const guarded = registerGateAndBuildRoutes(app, merged, redirects, Shell, auth);
-                setManifests(merged);
-                setRoutes(guarded);
-            };
-
-            bootstrapModules({
-                config: cfg,
-                http,
-                modules,
-                app,
-                redirects,
-                Shell,
-                auth,
-                setManifests,
-                setRoutes,
-                onFallback,
-                appInfo,
-            });
-        }, []);
-
-        return (
-            <Router history={history}>
-                <RouteBuilder routes={routes} context={context} />
-            </Router>
-        );
-    }
-
-    ReactDOM.render(
-        <AppProviders cfg={cfg}>
-            <EngineApp />
-        </AppProviders>
-        ,
-        document.querySelector(target)
+    return (
+      <Router history={history}>
+        <RouteBuilder routes={routes} context={context} />
+      </Router>
     );
+  }
+
+  ReactDOM.render(
+    <AppProviders cfg={cfg} http={http} storage={storage}>
+      <EngineApp />
+    </AppProviders>,
+    document.querySelector(target)
+  );
 }
 
 export async function startFromUrl(url) {
-    const res = await fetch(url);
-    if (!res.ok) throw new Error(`Failed to load config: ${url}`);
-    const cfg = await res.json();
-    return start(cfg);
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`Failed to load config: ${url}`);
+  const cfg = await res.json();
+  return start(cfg);
 }

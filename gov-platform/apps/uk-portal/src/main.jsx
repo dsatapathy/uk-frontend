@@ -24,7 +24,7 @@ start({
     shape: { borderRadius: 8 }
   },
   // --- Authentication ---
-  http: { baseURL: "http://localhost:3001/api" },
+  http: { baseURL: "http://localhost:3001/api/" },
   auth: {
     strategy: "jwt",
     login: {
@@ -35,10 +35,10 @@ start({
     },
     publicPaths: ["/register", "/forgot", "/otp"],
     endpoints: {
-      login: "/api/auth/login",
-      refresh: "/api/auth/refresh",
-      logout: "/api/auth/logout",
-      me: "/api/auth/me"
+      login: "auth/login",
+      refresh: "auth/refresh",
+      logout: "auth/logout",
+      me: "auth/me"
     },
     tokens: {
       storage: "localStorage",

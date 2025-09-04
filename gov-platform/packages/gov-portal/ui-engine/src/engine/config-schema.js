@@ -65,7 +65,7 @@ export const configSchema = z.object({
   }).default({}),
 
   theme: z.any().optional(),
-
+  http: z.any().optional(), // overrides for http client
   layout: z.object({
     sidebar: z.any().default({}),
     component: z.any().optional(),

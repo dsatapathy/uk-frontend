@@ -1,18 +1,28 @@
 // src/engine/http.js
 import { createHttp, setHttp, VersionedStorage } from "@gov/data";
+
 export function initHttp(config, appInfo, history) {
-  // Build a versioned, namespaced storage keyed by tenant (mirrors to session if enabled)
+  // One versioned, tenant-namespaced storage
   const storage = new VersionedStorage({
     version: config?.auth?.storage?.version || "v1",
-    namespace: `${appInfo?.tenant || "default"}-${config?.auth?.storage?.namespace || "uk-portal"}`,
+    // namespace: `${appInfo?.tenant || "default"}-${config?.auth?.storage?.namespace || "uk-portal"}`,
+    namespace: "uk-portal",
     mirrorToSession: config?.auth?.storage?.mirrorToSession ?? true,
     ttlSeconds: config?.auth?.storage?.ttlSeconds,
   });
 
-  // Create the Axios instance with refresh queue + retries
-  const http = createHttp(config, storage);
+  // Normalize base and refresh path so URL() composes correctly
+  const baseURL = (config?.auth?.endpoints?.baseURL || config?.auth?.baseURL || "").replace(/\/+$/, "");
+  // Prefer path without leading slash so it appends after /api
+  const refreshPath = (config?.auth?.endpoints?.refresh || "/api/auth/refresh").replace(/^\/+/, "");
 
-  // Optional: centralize auth-fail navigation
+  // Create the Axios instance with refresh queue + retries
+  const http = createHttp(
+    config,
+    storage
+  );
+
+  // Optional: centralize auth-fail navigation AFTER refresh truly failed
   http.interceptors?.response?.use(
     (r) => r,
     (err) => {
@@ -23,6 +33,10 @@ export function initHttp(config, appInfo, history) {
       return Promise.reject(err);
     }
   );
+
+  // Expose globally (if your app uses http() getter elsewhere)
   setHttp(http);
-  return http;
+
+  // Return both so callers can pass them down
+  return { http, storage };
 }
