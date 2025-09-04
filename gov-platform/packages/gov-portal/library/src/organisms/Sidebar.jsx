@@ -57,7 +57,7 @@ export default function Sidebar({
           overflowY: "auto",
           overscrollBehavior: "contain",       // prevent scroll chaining to page
           scrollbarWidth: "none",              // Firefox
-          "-ms-overflow-style": "none",        // old Edge/IE
+          msOverflowStyle: 'none',        // old Edge/IE
           "&::-webkit-scrollbar": {            // WebKit/Chromium
             width: 0,
             height: 0,
