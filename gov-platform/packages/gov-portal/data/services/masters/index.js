@@ -1,32 +1,23 @@
-import { useQuery } from "@tanstack/react-query";
+// src/services/sidebar.js
+import { useRQQuery, idOf } from "../rq";
 import { keys } from "../../cache-keys";
-import { http } from "../bootstrap";
 
-// The sidebar and modules services fire HTTP requests. When required
-// parameters like tenant/role/locale are not yet available, React Query
-// would otherwise repeatedly attempt to run the query leading to
-// unnecessary or even infinite network calls. Guard the queries with an
-// `enabled` flag so they execute only when the required params are
-// present. Additionally, normalise potentially complex objects (e.g.
-// `{ code: "pb" }`) to primitive identifiers so that the query keys remain
-// stable across renders and don't trigger refetches due to reference
-// changes.
-
+/**
+ * Sidebar: GET /masters/sidebar
+ * Server shape: { items: [...] }
+ */
 export function useSidebar({ tenant, role, locale } = {}) {
-  const tenantId = typeof tenant === "object" ? tenant?.code || tenant?.id : tenant;
-  const roleCode = typeof role === "object" ? role?.code || role?.id : role;
-  const localeCode = typeof locale === "object" ? locale?.code || locale?.id : locale;
+  const tenantId = idOf(tenant);
+  const roleCode = idOf(role);
+  const localeCode = idOf(locale);
   const enabled = Boolean(tenantId && roleCode && localeCode);
 
-  return useQuery({
-    queryKey: keys.sidebar(tenantId, roleCode, localeCode),
-    queryFn: async () => {
-      const res = await http().get("/masters/sidebar", {
-        params: { tenant: tenantId, role: roleCode, locale: localeCode },
-      });
-      return res.data; // { items: [...] }
-    },
+  return useRQQuery({
+    key: keys.sidebar(tenantId, roleCode, localeCode),
+    url: "/masters/sidebar",
+    params: { tenant: tenantId, role: roleCode, locale: localeCode },
     enabled,
+    selectPath: "items",
     staleTime: Infinity,
     gcTime: Infinity,
     retry: false,
@@ -36,18 +27,19 @@ export function useSidebar({ tenant, role, locale } = {}) {
   });
 }
 
+/**
+ * Modules: GET /masters/modules
+ * Server shape: { modules: [...] }
+ */
 export function useModules(tenant) {
-  const tenantId = typeof tenant === "object" ? tenant?.code || tenant?.id : tenant;
+  const tenantId = idOf(tenant);
 
-  return useQuery({
-    queryKey: keys.modules(tenantId),
-    queryFn: async () => {
-      const res = await http().get("/masters/modules", {
-        params: { tenant: tenantId },
-      });
-      return res.data; // { modules: [...] }
-    },
+  return useRQQuery({
+    key: keys.modules(tenantId),
+    url: "/masters/modules",
+    params: { tenant: tenantId },
     enabled: Boolean(tenantId),
+    selectPath: "modules",
     staleTime: Infinity,
     gcTime: Infinity,
     retry: false,
