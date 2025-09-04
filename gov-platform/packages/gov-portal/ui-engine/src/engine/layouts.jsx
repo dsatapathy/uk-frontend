@@ -19,7 +19,7 @@ export function DefaultShell({ children }) {
     () => <div style={{ width: 28, height: 28, borderRadius: 6, background: "#1976d2" }} />,
     []
   );
-  const user = React.useMemo(() => ({ name: "Jane Admin" }), []);
+  // const user = React.useMemo(() => ({ name: "Jane Admin" }), []);
 
   // 👉 lightweight fallback (shown while fetching / on error)
   const fallbackMenu = React.useMemo(
@@ -48,14 +48,19 @@ export function DefaultShell({ children }) {
     ],
     []
   );
-
+  const { tokens, user, hydrated } = useSelector((s) => s.auth || {});
+  const accessToken = tokens?.accessToken;
   // 🔑 load the 150-item, role-aware menu
   // enabled can be tied to auth state; for now it always runs (adjust if needed)
   const {
     data: fetchedMenu = [],
     isLoading: menuLoading,
     isError: menuError,
-  } = useMenu({ count: 150, enabled: true });
+  } = useMenu({
+    count: 150,
+    deps: { accessToken, hydrated, userId: user?.id }, // <- IMPORTANT
+    enabled: true,
+  });
 
   const menu = React.useMemo(() => {
     if (menuLoading || menuError) return fallbackMenu;
@@ -86,7 +91,7 @@ export function DefaultShell({ children }) {
       title="UGVS-REAP : MIS"
       onSearch={handleSearch}
       onNavigate={handleNavigate}
-      // You can also pass menuLoading to NavLayout if it supports a skeleton
+    // You can also pass menuLoading to NavLayout if it supports a skeleton
     >
       {children}
     </NavLayout>

@@ -1,41 +1,45 @@
+// src/services/useMenu.js
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { http } from "../bootstrap";
 
-// same depsReady helper
+// Be permissive: only block on explicit null or empty strings.
+// Ignore undefined keys (like hydrated/userId when not available yet).
 function depsReady(deps = {}) {
-  const ks = Object.keys(deps || {});
-  if (ks.length === 0) return true;
-  return ks.every((k) => {
-    const v = deps[k];
-    if (v === null || v === undefined) return false;
-    if (typeof v === "string") return v.trim() !== "";
-    return true;
-  });
+  for (const [k, v] of Object.entries(deps || {})) {
+    if (v === null) return false;
+    if (typeof v === "string" && v.trim() === "") return false;
+    // undefined is OK
+  }
+  return true;
 }
 
-// Include userId so cache is per-user
 export function getMenuQueryKey(count = 150, deps = {}) {
-  return ["menu", count, deps.userId ?? "anonymous"];
+  const userKey = deps.userId ? String(deps.userId) : "anonymous";
+  return ["menu", count, userKey];
 }
 
-/**
- * Server returns: { total, menu }
- * Hook returns: menu[] for convenience.
- *
- * Pass your auth state in `deps`:
- *   { hydrated: boolean, accessToken?: string, userId?: string }
- */
 export function useMenu({
   count = 150,
-  deps = {},
+  deps = {},                 // e.g. { hydrated, accessToken, userId }
   enabled = true,
   staleTime = 10 * 60 * 1000,
 } = {}) {
-  const url = "/api/menu";
+  const url = "/menu";       // baseURL should already include /api
 
   const ready = depsReady(deps);
-  const authReady = !!deps.hydrated && !!deps.accessToken; // critical gate
-  const isEnabled = enabled && ready && authReady;
+
+  // Only require `hydrated` if the caller actually passed it.
+  const callerProvidedHydrated = Object.prototype.hasOwnProperty.call(deps, "hydrated");
+  const hasToken =
+    !!deps.accessToken ||
+    // Optional fallback: read from axios instance if it exposes getAccessToken()
+    !!(http().getAccessToken && http().getAccessToken());
+
+  const hydrationOk = callerProvidedHydrated ? !!deps.hydrated : true;
+  const isEnabled = !!enabled && ready && hasToken && hydrationOk;
+
+  // DEBUG (remove later): see exactly why it isn't firing
+  // console.debug("[useMenu]", { isEnabled, ready, hasToken, hydrationOk, deps });
 
   return useQuery({
     queryKey: getMenuQueryKey(count, { userId: deps.userId }),
@@ -48,7 +52,7 @@ export function useMenu({
     gcTime: 30 * 60 * 1000,
     retry: (failureCount, err) => {
       const status = err?.response?.status;
-      if (status === 401) return false;     // don't spam retries while logged out
+      if (status === 401) return false; // avoid loops while logged out
       return failureCount < 2;
     },
     refetchOnMount: "always",
@@ -61,11 +65,17 @@ export function useMenu({
 export function usePrefetchMenu() {
   const qc = useQueryClient();
   return async ({ count = 150, deps = {} } = {}) => {
-    if (!(deps.hydrated && deps.accessToken)) return; // guard prefetch while logged out
+    const callerProvidedHydrated = Object.prototype.hasOwnProperty.call(deps, "hydrated");
+    const hasToken =
+      !!deps.accessToken ||
+      !!(http().getAccessToken && http().getAccessToken());
+    const hydrationOk = callerProvidedHydrated ? !!deps.hydrated : true;
+    if (!(hasToken && hydrationOk)) return;
+
     await qc.prefetchQuery({
       queryKey: getMenuQueryKey(count, { userId: deps.userId }),
       queryFn: async () => {
-        const { data } = await http().get("/api/menu", { params: { count } });
+        const { data } = await http().get("/menu", { params: { count } });
         return data?.menu || [];
       },
       staleTime: 10 * 60 * 1000,

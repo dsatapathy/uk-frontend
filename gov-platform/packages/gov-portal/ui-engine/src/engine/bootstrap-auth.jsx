@@ -5,7 +5,7 @@ import { ThemeProvider, createTheme, CssBaseline } from "@mui/material";
 import { Provider as ReduxProvider } from "react-redux";
 import { appStore, FormEngineProvider } from "@gov/store";
 import { QueryProvider } from "@gov/data";
-import { setAuth, setUser, clearAuth } from "@gov/store";
+import { setAuth, setUser, clearAuth, setHydrated } from "@gov/store";
 import ThemeBridge from "../ThemeBridge";
 import { DEFAULT_THEME } from "./constants";
 
@@ -40,41 +40,46 @@ export function AppProviders({ cfg, http, storage, children }) {
       logout: async () => { await http.post(build(cfg.auth.endpoints.logout), {}); },
     };
   }, [http, cfg]);
-
-  // Hydrator: read storage once on mount, seed Redux, optionally fetch "me"
   function AuthHydrator({ children }) {
-    const mountedRef = useRef(true);
-    useEffect(() => () => { mountedRef.current = false; }, []);
+  const mountedRef = useRef(true);
+  useEffect(() => () => { mountedRef.current = false; }, []);
 
-    useEffect(() => {
-      const saved = storage.get("auth");
-      if (saved?.tokens?.accessToken) {
-        appStore.dispatch(setAuth({ tokens: saved.tokens, user: saved.user }));
+  useEffect(() => {
+    (async () => {
+      try {
+        const saved = storage.get("auth");
+        if (saved?.tokens?.accessToken) {
+          // seed tokens & maybe stale user
+          appStore.dispatch(setAuth({ tokens: saved.tokens, user: saved.user }));
 
-        (async () => {
+          // try to refresh profile
           try {
             const u = await authApi.getMe();
             if (mountedRef.current) {
-              appStore.dispatch(setUser(u));
+              appStore.dispatch(setUser(u));                  // pass object directly
               storage.set("auth", { ...saved, user: u });
             }
           } catch (err) {
             const status = err?.response?.status || err?.status;
-            if (status === 401) {
-              if (mountedRef.current) {
-                appStore.dispatch(clearAuth());
-                storage.remove("auth");
-              }
+            if (status === 401 && mountedRef.current) {
+              appStore.dispatch(clearAuth());
+              storage.remove("auth");
             }
           }
-        })();
-      } else {
-        appStore.dispatch(clearAuth());
+        } else {
+          appStore.dispatch(clearAuth());
+        }
+      } finally {
+        // mark hydration complete regardless of outcome
+        if (mountedRef.current) appStore.dispatch(setHydrated(true));
       }
-    }, []); // run once
+    })();
+    // run once
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-    return <>{children}</>;
-  }
+  return <>{children}</>;
+}
 
   return (
     <ThemeProvider theme={theme}>
