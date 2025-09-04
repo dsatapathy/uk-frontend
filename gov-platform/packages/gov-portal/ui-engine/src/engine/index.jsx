@@ -36,13 +36,14 @@ export function start(rawConfig) {
     auth = { strategy: "none" },
     hooks = {},
     context = {},
+    brand = { logo: null, title: "" }
   } = cfg;
 
   const history = createBrowserHistory({ basename: base });
 
   // Layout/Shell
   registerShellAsLayout(); // seed built-ins
-  const Shell = resolveShell(layout, auth);
+  const Shell = resolveShell(layout, auth, brand);
   registerShellAsLayout(Shell);
 
   registerLibraryDefaults();

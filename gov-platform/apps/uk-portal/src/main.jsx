@@ -1,5 +1,6 @@
 import { start } from "@gov/ui-engine";
 import { moduleMap } from "./moduleRegistry";
+import landingLogo from "../public/assets/images/landing_logo.png";
 // build the route list to match enabled modules
 const enabled = Object.keys(moduleMap);
 const basePaths = { auth: "/", landing: "/landing", bpa: "/bpa", tl: "/tl", wns: "/wns" };
@@ -9,6 +10,7 @@ const moduleRegistry = Object.fromEntries(defaultModules.map((m) => [m.key, modu
 start({
   target: "#root",
   base: "/uk-portal/",
+  brand: { logo : landingLogo , title: "UK Portal" },
   layout: { component: "AuthBlank" },
   app: {
     name: "UK Portal",

@@ -1,5 +1,5 @@
 // src/services/sidebar.js
-import { useRQQuery, idOf } from "./rq";
+import { useRQQuery, idOf } from "../rq";
 import { keys } from "../../cache-keys";
 
 export function useSidebar({ tenant, role, locale } = {}) {
@@ -16,7 +16,7 @@ export function useSidebar({ tenant, role, locale } = {}) {
     staleTime: Infinity,
     gcTime: Infinity,
     retry: false,
-    refetchOnMount: false,        // 🔽
+    refetchOnMount: false,
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
   });

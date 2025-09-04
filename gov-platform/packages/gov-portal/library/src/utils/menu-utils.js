@@ -1,4 +1,4 @@
-export const DRAWER_WIDTH = 256;
+export const DRAWER_WIDTH = 280;
 
 
 export function ensureId(item, idx, parentKey = "root") {

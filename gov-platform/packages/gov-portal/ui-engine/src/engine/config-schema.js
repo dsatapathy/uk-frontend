@@ -58,7 +58,10 @@ const modulesSchema = z.union([modulesArraySchema, modulesObjectSchema]);
 export const configSchema = z.object({
   target: z.string().default("#root"),
   base: z.string().default("/uk-portal"),
-
+  brand: z.object({
+    logo: z.string().optional(),
+    title: z.string().optional(),
+  }).default({}),
   app: z.object({
     name: z.string().optional(),
     logo: z.string().optional(),

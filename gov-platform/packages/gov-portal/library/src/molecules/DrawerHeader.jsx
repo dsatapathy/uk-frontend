@@ -7,15 +7,36 @@ import CloseIcon from "@mui/icons-material/Close";
 export default function DrawerHeader({ logo, title, showClose, onClose, showTitle = true }) {
     return (
         <>
-            <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", p: 1.5 }}>
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <Box
+                sx={{
+                    p: 1.5,
+                    position: "relative",
+                }}
+            >
+                {/* FULL-WIDTH LOGO WRAPPER */}
+                <Box
+                    sx={{
+                        width: "100%",
+                        "& img, & svg, & .logo": {
+                            width: "100% !important",
+                            height: "auto !important",
+                            display: "block",
+                            // objectFit: "contain",
+                            borderRadius: 1.5,
+                        },
+                    }}
+                >
                     {logo}
-                    {showTitle && (
-                        <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>{title}</Typography>
-                    )}                
                 </Box>
+
                 {showClose && (
-                    <IconButton onClick={onClose} aria-label="Close menu"><CloseIcon /></IconButton>
+                    <IconButton
+                        onClick={onClose}
+                        aria-label="Close menu"
+                        sx={{ position: "absolute", top: 8, right: 8 }}
+                    >
+                        <CloseIcon />
+                    </IconButton>
                 )}
             </Box>
             <Divider />

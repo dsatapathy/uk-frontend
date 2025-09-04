@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import { Box } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import useMediaQuery from "@mui/material/useMediaQuery";
-import { findAncestorsByPath, filterTreeByQuery } from "../utils/menu-utils";
+import { findAncestorsByPath, filterTreeByQuery, DRAWER_WIDTH } from "../utils/menu-utils";
 import TopBar from "./TopBar";
 import Sidebar from "./Sidebar";
 
@@ -52,6 +52,7 @@ export default function ResponsiveNav({
       sx={{
         display: "grid",
         gridTemplateRows: { xs: "56px 1fr", sm: "64px 1fr" },
+        "--sidebar-w": `${DRAWER_WIDTH}px`,
         height: "100dvh",          // lock to viewport
         overflow: "hidden",        // window never scrolls
       }}
@@ -88,7 +89,7 @@ export default function ResponsiveNav({
       <Box
         sx={{
           display: "grid",
-          gridTemplateColumns: { xs: "1fr", md: "256px 1fr" },
+          gridTemplateColumns: { xs: "1fr", md: "var(--sidebar-w) 1fr" },
           minHeight: 0,
           overflow: "hidden",      // prevent second scrollbar here
         }}

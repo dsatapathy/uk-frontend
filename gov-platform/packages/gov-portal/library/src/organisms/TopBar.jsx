@@ -57,14 +57,14 @@ export default function TopBar(props) {
         {/* LEFT SIDE: brand (logo + project title) */}
         <Box sx={{ display: "flex", alignItems: "center", gap: 1, minWidth: 0, flexShrink: 1 }}>
           {logo}
-          <Typography
+          {/* <Typography
             variant="h6"
             sx={{ fontWeight: 600, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
                   maxWidth: { xs: 160, sm: 240, md: "none" } }}
             title={title}
           >
             {title}
-          </Typography>
+          </Typography> */}
         </Box>
 
         {/* optional centered search on desktop; otherwise just fill space */}
