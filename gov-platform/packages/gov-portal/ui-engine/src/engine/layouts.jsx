@@ -19,9 +19,7 @@ export function DefaultShell({ children }) {
     () => <div style={{ width: 28, height: 28, borderRadius: 6, background: "#1976d2" }} />,
     []
   );
-  // const user = React.useMemo(() => ({ name: "Jane Admin" }), []);
 
-  // 👉 lightweight fallback (shown while fetching / on error)
   const fallbackMenu = React.useMemo(
     () => [
       { label: "Home", icon: "home", path: "/" },
@@ -50,15 +48,13 @@ export function DefaultShell({ children }) {
   );
   const { tokens, user, hydrated } = useSelector((s) => s.auth || {});
   const accessToken = tokens?.accessToken;
-  // 🔑 load the 150-item, role-aware menu
-  // enabled can be tied to auth state; for now it always runs (adjust if needed)
   const {
     data: fetchedMenu = [],
     isLoading: menuLoading,
     isError: menuError,
   } = useMenu({
     count: 150,
-    deps: { accessToken, hydrated, userId: user?.id }, // <- IMPORTANT
+    deps: { accessToken, hydrated, userId: user?.id },
     enabled: true,
   });
 
