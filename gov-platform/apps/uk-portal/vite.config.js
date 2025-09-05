@@ -20,6 +20,7 @@ const devOnlySrcAliases = {
   "@gov/mod-landing": toFs(path.resolve(repoRoot, "packages/gov-portal/modules/landing/src")),
   "@gov/ui-engine": toFs(path.resolve(repoRoot, "packages/gov-portal/ui-engine/src")),
   "@gov/form-engine": toFs(path.resolve(repoRoot, "packages/gov-portal/formengine/src")),
+  "@gov/styles":      toFs(path.resolve(repoRoot, "packages/gov-portal/styles")),
 };
 
 // Tiny React 17-safe shim for Emotion’s helper
@@ -44,16 +45,10 @@ export default defineConfig(({ command, mode }) => {
     id.includes("/packages/gov-portal/modules/") &&
     enabled.some((mk) => id.includes(`/modules/${mk}/`));
 
-  const alias = [
-    ...(isServe
-      ? Object.entries(devOnlySrcAliases).map(([find, replacement]) => ({
-        find,
-        replacement,
-      }))
-      : []),
-    // 👉 Always map Emotion helper to our shim to avoid TDZ in React 17
-    // { find: "@emotion/use-insertion-effect-with-fallbacks", replacement: shimEmotion },
-  ];
+  const alias = Object.entries(devOnlySrcAliases).map(([find, replacement]) => ({
+  find,
+  replacement,
+}));
 
   const analyze =
     process.env.ANALYZE === "1" || String(process.env.ANALYZE).toLowerCase() === "true";
@@ -92,11 +87,16 @@ export default defineConfig(({ command, mode }) => {
       ],
     },
     server: { fs: { allow: [repoRoot] }, port: 5173 },
-    css: { preprocessorOptions: { scss: {} } },
+    css: { preprocessorOptions: { scss: {
+      // Add the repo's packages directory to SASS's include paths.
+      // This is helpful for resolving SCSS imports from other packages in the monorepo.
+      includePaths: [path.resolve(repoRoot, 'packages')],
+    }, } },
     build: {
       outDir: "dist",
       emptyOutDir: true,
       sourcemap: true,
+      cssCodeSplit: true,
       // Set NO_MINIFY=1 for readable chunks during debugging
       minify: process.env.NO_MINIFY ? false : "esbuild",
       rollupOptions: {

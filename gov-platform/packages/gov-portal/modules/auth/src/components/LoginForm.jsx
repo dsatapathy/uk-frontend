@@ -6,6 +6,7 @@ import defaultS from "@gov/styles/modules/auth/Auth.module.scss";
 import { getComponent } from "@gov/core";
 import { http } from "@gov/data";
 function LoginFormInner({ config, onSubmit, onSuccess, components, classes, schema }) {
+  console.log("Auth CSS mapping:", defaultS);
   const s = classes || defaultS;
   const AuthLayout = getComponent("AuthLayout");
   const AuthCard = getComponent("AuthCard");
