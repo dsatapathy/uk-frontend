@@ -11,7 +11,7 @@
         ".": "./src/index.js",
         "./*": "./src/*"
     },
-    "sideEffects": false,
+    "sideEffects": ["**/*.css", "**/*.scss"],
     "dependencies": {
         "@gov/styles": "0.0.0",
         "@gov/core": "0.1.0"

@@ -1,10 +1,9 @@
 // src/engine/bootstrap-auth.js
 import React, { useEffect, useMemo, useRef } from "react";
-import { QueryClient } from "@tanstack/react-query";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ThemeProvider, createTheme, CssBaseline } from "@mui/material";
 import { Provider as ReduxProvider } from "react-redux";
 import { appStore, FormEngineProvider } from "@gov/store";
-import { QueryProvider } from "@gov/data";
 import { setAuth, setUser, clearAuth, setHydrated } from "@gov/store";
 import ThemeBridge from "../ThemeBridge";
 import { DEFAULT_THEME } from "./constants";
@@ -21,18 +20,30 @@ export function AppProviders({ cfg, http, storage, children }) {
     [cfg?.theme]
   );
 
-  // React Query client
-  const qc = useMemo(
-    () =>
-      new QueryClient({
-        defaultOptions: { queries: { refetchOnWindowFocus: false, retry: 1 } },
-      }),
-    []
-  );
+  function useSingletonQueryClient() {
+    const ref = React.useRef(null);
+    if (!ref.current) {
+      ref.current = new QueryClient({
+        defaultOptions: {
+          queries: {
+            staleTime: 60_000,
+            gcTime: 10 * 60_000,
+            retry: 1,
+            refetchOnWindowFocus: false,
+            refetchOnReconnect: true,
+            refetchOnMount: false,
+          },
+          mutations: { retry: 0 },
+        },
+      });
+    }
+    return ref.current;
+  }
+  const qc = useSingletonQueryClient();
 
   // Minimal auth API using the single http instance
   const authApi = useMemo(() => {
-    // const base = (cfg?.auth?.endpoints?.baseURL || cfg?.http?.baseURL || "").replace(/\/+$/, "");
+    // const base = (cfg?.auth?.endpoints?.baseURL || cfg?.http?.baseURL || "").replace(/\/$/, "");
     const build = (p) => new URL(String(p || ""), cfg?.http?.baseURL).toString();
     return {
       getMe: async () => (await http.get(build(cfg.auth.endpoints.me))).data,
@@ -41,56 +52,56 @@ export function AppProviders({ cfg, http, storage, children }) {
     };
   }, [http, cfg]);
   function AuthHydrator({ children }) {
-  const mountedRef = useRef(true);
-  useEffect(() => () => { mountedRef.current = false; }, []);
+    const mountedRef = useRef(true);
+    useEffect(() => () => { mountedRef.current = false; }, []);
 
-  useEffect(() => {
-    (async () => {
-      try {
-        const saved = storage.get("auth");
-        if (saved?.tokens?.accessToken) {
-          // seed tokens & maybe stale user
-          appStore.dispatch(setAuth({ tokens: saved.tokens, user: saved.user }));
+    useEffect(() => {
+      (async () => {
+        try {
+          const saved = storage.get("auth");
+          if (saved?.tokens?.accessToken) {
+            // seed tokens & maybe stale user
+            appStore.dispatch(setAuth({ tokens: saved.tokens, user: saved.user }));
 
-          // try to refresh profile
-          try {
-            const u = await authApi.getMe();
-            if (mountedRef.current) {
-              appStore.dispatch(setUser(u));                  // pass object directly
-              storage.set("auth", { ...saved, user: u });
+            // try to refresh profile
+            try {
+              const u = await authApi.getMe();
+              if (mountedRef.current) {
+                appStore.dispatch(setUser(u));                  // pass object directly
+                storage.set("auth", { ...saved, user: u });
+              }
+            } catch (err) {
+              const status = err?.response?.status || err?.status;
+              if (status === 401 && mountedRef.current) {
+                appStore.dispatch(clearAuth());
+                storage.remove("auth");
+              }
             }
-          } catch (err) {
-            const status = err?.response?.status || err?.status;
-            if (status === 401 && mountedRef.current) {
-              appStore.dispatch(clearAuth());
-              storage.remove("auth");
-            }
+          } else {
+            appStore.dispatch(clearAuth());
           }
-        } else {
-          appStore.dispatch(clearAuth());
+        } finally {
+          // mark hydration complete regardless of outcome
+          if (mountedRef.current) appStore.dispatch(setHydrated(true));
         }
-      } finally {
-        // mark hydration complete regardless of outcome
-        if (mountedRef.current) appStore.dispatch(setHydrated(true));
-      }
-    })();
-    // run once
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+      })();
+      // run once
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
-  return <>{children}</>;
-}
+    return <>{children}</>;
+  }
 
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <ThemeBridge />
       <ReduxProvider store={appStore}>
-        <QueryProvider client={qc}>
+        <QueryClientProvider client={qc}>
           <FormEngineProvider>
             <AuthHydrator>{children}</AuthHydrator>
           </FormEngineProvider>
-        </QueryProvider>
+        </QueryClientProvider>
       </ReduxProvider>
     </ThemeProvider>
   );

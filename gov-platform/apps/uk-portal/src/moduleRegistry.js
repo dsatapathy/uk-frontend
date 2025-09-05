@@ -7,8 +7,6 @@ const all = {
   landing: () => import("@gov/mod-landing"),
   auth: () => import("@gov/mod-auth"),
   bpa: () => import("@gov/mod-bpa"),
-  tl: () => import("@gov/mod-tl"),
-  wns: () => import("@gov/mod-wns"),
 };
 
 // Allow selection with VITE_ENABLED_MODULES="landing,auth,tl"

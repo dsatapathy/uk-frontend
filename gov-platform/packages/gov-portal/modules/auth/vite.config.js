@@ -22,11 +22,16 @@ export default defineConfig({
         "@gov/core",
         "@gov/data",
         "@gov/store",
-        "@gov/library",
-        "@mui/material",
         "@hookform/resolvers",
         "react-hook-form",
-        "zod"
+        "zod",
+        "@mui/material",
+        "@mui/icons-material",
+        "@mui/system",
+        "@emotion/react",
+        "@emotion/styled",
+        "@tanstack/react-query",
+        "@tanstack/react-query-devtools",
       ],
       onwarn(warning, defaultHandler) {
         if (warning.code === "UNRESOLVED_IMPORT") {

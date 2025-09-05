@@ -12,7 +12,6 @@ export const Label         = makeLoader("../atoms/Label.jsx",        "Label");
 export const HelperText    = makeLoader("../atoms/HelperText.jsx",   "HelperText");
 export const ErrorMessage  = makeLoader("../atoms/ErrorMessage.jsx", "ErrorMessage");
 export const FieldWrapper  = makeLoader("../atoms/FieldWrapper.jsx", "FieldWrapper");
-export const TextFieldAtom = makeLoader("../atoms/TextFieldAtom.jsx","TextFieldAtom");
 export const IconSlot      = makeLoader("../atoms/IconSlot.jsx",     "IconSlot");
 export const TypographyX   = makeLoader("../atoms/TypographyX.jsx",  "TypographyX");
 export const CardItem      = makeLoader("../atoms/CardItem.jsx",    "CardItem");
@@ -31,7 +30,6 @@ const defs = [
   ["HelperText",    HelperText],
   ["ErrorMessage",  ErrorMessage],
   ["FieldWrapper",  FieldWrapper],
-  ["TextFieldAtom", TextFieldAtom],
   ["IconSlot",      IconSlot],
   ["TypographyX",   TypographyX],
   ["CardItem",      CardItem],

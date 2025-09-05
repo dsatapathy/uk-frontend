@@ -4,7 +4,7 @@ export function useOptions(
   endpointKey,
   { query, page = 1, deps = {}, endpoint, enabled = true, staleTime = 10 * 60 * 1000 } = {}
 ) {
-  const url = endpoint || (endpointKey ? `/api/options/${endpointKey}` : undefined);
+  const url = endpoint || (endpointKey ? `/options/${endpointKey}` : undefined);
   return useRQQuery({
     key: ["options", endpointKey || "custom"],
     url,

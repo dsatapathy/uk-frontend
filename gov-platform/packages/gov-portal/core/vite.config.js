@@ -11,7 +11,8 @@ export default defineConfig({
     },
     rollupOptions: {
       // keep peers out of the bundle
-      external: ["react", "react-dom", "react-router-dom"],
+      external: ["react", "react-dom", "react-router-dom", "@tanstack/react-query",
+        "@tanstack/react-query-devtools",],
       onwarn(warning, defaultHandler) {
         if (warning.code === "UNRESOLVED_IMPORT") {
           console.error(

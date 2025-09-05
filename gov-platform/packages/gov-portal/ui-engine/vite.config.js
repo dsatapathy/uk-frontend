@@ -14,17 +14,13 @@ export default defineConfig({
       fileName: (format) => (format === "es" ? "index.mjs" : "index.cjs")
     },
     rollupOptions: {
-      external: [
-        "react",
-        "react-dom",
-        "react-router-dom",
-        "@gov/core",
-        "@gov/data",
-        "@gov/styles",
-        "@gov/library",
-        "@gov/utils",
-        "@gov/store"
-      ],
+           external: [
+       "react", "react-dom", "react-router-dom",
+       "@mui/material", "@mui/icons-material", "@mui/system",
+       "@emotion/react", "@emotion/styled",
+       "@tanstack/react-query", "@tanstack/react-query-devtools", "axios",
+       "@gov/core", "@gov/data", "@gov/styles", "@gov/library", "@gov/utils", "@gov/store"
+     ],
       onwarn(warning, defaultHandler) {
         if (warning.code === "UNRESOLVED_IMPORT") {
           console.error(
