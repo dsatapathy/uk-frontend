@@ -15,7 +15,9 @@ export const FieldWrapper  = makeLoader("../atoms/FieldWrapper.jsx", "FieldWrapp
 export const TextFieldAtom = makeLoader("../atoms/TextFieldAtom.jsx","TextFieldAtom");
 export const IconSlot      = makeLoader("../atoms/IconSlot.jsx",     "IconSlot");
 export const TypographyX   = makeLoader("../atoms/TypographyX.jsx",  "TypographyX");
-
+export const CardItem      = makeLoader("../atoms/CardItem.jsx",    "CardItem");
+export const CardItemSkeleton = makeLoader("../atoms/CardItemSkeleton.jsx", "CardItemSkeleton");
+export const AttentionBar  = makeLoader("../atoms/AttentionBar.jsx", "AttentionBar");
 
 const defs = [
   ["AppButton",     loadButton],
@@ -32,6 +34,9 @@ const defs = [
   ["TextFieldAtom", TextFieldAtom],
   ["IconSlot",      IconSlot],
   ["TypographyX",   TypographyX],
+  ["CardItem",      CardItem],
+  ["CardItemSkeleton", CardItemSkeleton],
+  ["AttentionBar",  AttentionBar],
 ];
 
 export const registerAtoms = () => registerAll(defs);
