@@ -1,4 +1,4 @@
-import { makeLoader, registerAll } from "./helpers";
+import { makeLoader, registerAll, registerAllOnce } from "./helpers";
 
 // ⬇ Keep the exported names exactly as before
 export const loadButton = makeLoader("../atoms/AppButton.jsx", "AppButton");
@@ -36,4 +36,6 @@ const defs = [
   ["DSBox", DSBox],
 ];
 
-export const registerAtoms = () => registerAll(defs);
+export function registerAtoms() {
+  registerAllOnce("registry:atoms", defs);
+}

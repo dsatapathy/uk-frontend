@@ -1,4 +1,4 @@
-import { makeLoader, registerAll } from "./helpers";
+import { makeLoader, registerAll, registerAllOnce } from "./helpers";
 
 // “Components” that aren’t strictly atoms/molecules/organisms
 export const loadAuthCard     = makeLoader("../components/AuthCard.jsx",     "AuthCard");
@@ -17,4 +17,4 @@ const defs = [
   ["ErrorSummary", ErrorSummary],
 ];
 
-export const registerComponents = () => registerAll(defs);
+export const registerComponents = () => registerAllOnce("registry:components", defs);

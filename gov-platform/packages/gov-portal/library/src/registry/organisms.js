@@ -1,4 +1,4 @@
-import { makeLoader, registerAll } from "./helpers";
+import { makeLoader, registerAll, registerAllOnce } from "./helpers";
 
 export const DynamicForm   = makeLoader("../organisms/DynamicForm.jsx",   "DynamicForm");
 export const FormGrid      = makeLoader("../organisms/FormGrid.jsx",      "FormGrid");
@@ -15,4 +15,4 @@ const defs = [
   ["ModuleGrid",     ModuleGrid],
 ];
 
-export const registerOrganisms = () => registerAll(defs);
+export const registerOrganisms = () => registerAllOnce("registry:organisms", defs);

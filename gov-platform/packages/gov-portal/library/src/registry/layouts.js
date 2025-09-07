@@ -1,4 +1,4 @@
-import { makeLoader, registerAll } from "./helpers";
+import { makeLoader, registerAll, registerAllOnce } from "./helpers";
 
 // Keep old export names
 export const loadAuthLayout = makeLoader("../components/AuthLayout.jsx", "AuthLayout");
@@ -9,4 +9,4 @@ const defs = [
   ["NavLayout",  loadNavLayout],
 ];
 
-export const registerLayouts = () => registerAll(defs);
+export const registerLayouts = () => registerAllOnce("registry:layouts", defs);

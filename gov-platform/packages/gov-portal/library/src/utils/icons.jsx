@@ -50,7 +50,6 @@ export const ICONS = {
   account: PersonIcon,
   campaign: Campaign,
   edit: Edit,
-  notifications: Notifications,
 };
 
 export function getIcon(name, props = {}) {

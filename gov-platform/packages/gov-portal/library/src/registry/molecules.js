@@ -1,4 +1,4 @@
-import { makeLoader, registerAll } from "./helpers";
+import { makeLoader, registerAll, registerAllOnce } from "./helpers";
 
 export const AsyncAutocomplete = makeLoader("../molecules/AsyncAutocomplete.jsx", "AsyncAutocomplete");
 export const MultiSelect       = makeLoader("../molecules/MultiSelect.jsx",       "MultiSelect");
@@ -15,4 +15,4 @@ const defs = [
   ["NotificationsModal", NotificationsModal],
 ];
 
-export const registerMolecules = () => registerAll(defs);
+export const registerMolecules = () => registerAllOnce("registry:molecules", defs);

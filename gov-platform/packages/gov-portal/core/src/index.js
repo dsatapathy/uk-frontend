@@ -16,6 +16,8 @@ export {
     assertRenderable,
     lazyModule,
   } from "./runtime/lazy";
+
+  export { ensureOnce } from "./runtime/once.js";
   
   // Keep namespace export too (optional, but handy: `import * as core from "@gov/core"`)
   export * as runtime from "./runtime/registry";
