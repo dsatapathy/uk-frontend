@@ -20,6 +20,7 @@ import CloseIcon from "@mui/icons-material/Close";
 
 // People
 import PersonIcon from "@mui/icons-material/Person";
+import { Campaign, Edit, Notifications } from "@mui/icons-material";
 
 export const ICONS = {
   // nav
@@ -47,6 +48,9 @@ export const ICONS = {
   user: PersonIcon,
   person: PersonIcon,
   account: PersonIcon,
+  campaign: Campaign,
+  edit: Edit,
+  notifications: Notifications,
 };
 
 export function getIcon(name, props = {}) {

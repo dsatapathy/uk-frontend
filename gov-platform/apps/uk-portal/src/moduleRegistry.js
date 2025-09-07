@@ -9,6 +9,8 @@ const all = {
   bpa: () => import("@gov/mod-bpa"),
 };
 
+console.log("[env] VITE_ENABLED_MODULES =", import.meta.env.VITE_ENABLED_MODULES);
+
 // Allow selection with VITE_ENABLED_MODULES="landing,auth,tl"
 // If missing, default to *all* in dev; lock it in prod via .env.production
 const list = (import.meta.env.VITE_ENABLED_MODULES ||

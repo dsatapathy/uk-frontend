@@ -118,7 +118,7 @@ export default defineConfig(({ command, mode }) => {
             }
 
             // your existing app-specific split
-            if (isEnabledGovModule(id)) return "gov";
+            // if (isEnabledGovModule(id)) return "gov";
           },
         },
       },

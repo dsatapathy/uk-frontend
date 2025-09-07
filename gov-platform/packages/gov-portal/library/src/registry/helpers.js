@@ -31,6 +31,8 @@ function resolveFromManifest(relPath) {
 
   for (const key of Object.keys(MANIFEST)) {
     const k = normalize(key);
+      console.log(`resolveFromManifest: no match for "${relPath}"`);
+
     if (variants.has(k) || k.endsWith("/" + p)) return MANIFEST[key];
   }
   return null;

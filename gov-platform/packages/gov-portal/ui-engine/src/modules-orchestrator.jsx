@@ -1,6 +1,7 @@
 import React from "react";
 import { registerComponent } from "@gov/core";
 import { CircularProgress } from "@mui/material";
+import { useLocation } from "react-router-dom";
 
 /** Cache of in-flight loads: moduleKey -> Promise<mod> */
 const loadCache = new Map();
@@ -26,6 +27,17 @@ export function makeModuleGate({ app, manifests }) {
       return <div style={{ color: "crimson" }}>Unknown module: {moduleKey}</div>;
     }
 
+    // --- route-aware activation: only load when this gate is "active" for the URL
+    const { pathname } = useLocation();
+    const base = manifest.basePath || "/";
+    const isActive =
+      base === "/"
+        ? pathname === "/"
+        : pathname === base || pathname.startsWith(base + "/");
+
+    // If gate is not active for current URL, don't import/register anything.
+    if (!isActive) return null;
+
     const [error, setError] = React.useState(null);
 
     React.useEffect(() => {
@@ -50,8 +62,10 @@ export function makeModuleGate({ app, manifests }) {
           if (!cancel) setError(e);
         });
 
-      return () => { cancel = true; };
-    }, [moduleKey, app]);
+      return () => {
+        cancel = true;
+      };
+    }, [moduleKey, app, isActive]);
 
     // If already registered, render nothing (module routes will render the real pages)
     if (loadedFlags.get(moduleKey) === true) return null;

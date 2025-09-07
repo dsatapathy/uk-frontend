@@ -1,40 +1,39 @@
 import { makeLoader, registerAll } from "./helpers";
 
 // ⬇ Keep the exported names exactly as before
-export const loadButton    = makeLoader("../atoms/AppButton.jsx",    "AppButton");
-export const InputText     = makeLoader("../atoms/InputText.jsx",    "InputText");
-export const InputNumber   = makeLoader("../atoms/InputNumber.jsx",  "InputNumber");
-export const TextArea      = makeLoader("../atoms/TextArea.jsx",     "TextArea");
-export const Checkbox      = makeLoader("../atoms/Checkbox.jsx",     "Checkbox");       // if you have it
-export const RadioGroup    = makeLoader("../atoms/RadioGroup.jsx",   "RadioGroup");
-export const DatePicker    = makeLoader("../atoms/DatePicker.jsx",   "DatePicker");
-export const Label         = makeLoader("../atoms/Label.jsx",        "Label");
-export const HelperText    = makeLoader("../atoms/HelperText.jsx",   "HelperText");
-export const ErrorMessage  = makeLoader("../atoms/ErrorMessage.jsx", "ErrorMessage");
-export const FieldWrapper  = makeLoader("../atoms/FieldWrapper.jsx", "FieldWrapper");
-export const IconSlot      = makeLoader("../atoms/IconSlot.jsx",     "IconSlot");
-export const TypographyX   = makeLoader("../atoms/TypographyX.jsx",  "TypographyX");
-export const CardItem      = makeLoader("../atoms/CardItem.jsx",    "CardItem");
+export const loadButton = makeLoader("../atoms/AppButton.jsx", "AppButton");
+export const InputText = makeLoader("../atoms/InputText.jsx", "InputText");
+export const InputNumber = makeLoader("../atoms/InputNumber.jsx", "InputNumber");
+export const TextArea = makeLoader("../atoms/TextArea.jsx", "TextArea");
+export const Checkbox = makeLoader("../atoms/Checkbox.jsx", "Checkbox");       // if you have it
+export const RadioGroup = makeLoader("../atoms/RadioGroup.jsx", "RadioGroup");
+export const DatePicker = makeLoader("../atoms/DatePicker.jsx", "DatePicker");
+export const Label = makeLoader("../atoms/Label.jsx", "Label");
+export const HelperText = makeLoader("../atoms/HelperText.jsx", "HelperText");
+export const ErrorMessage = makeLoader("../atoms/ErrorMessage.jsx", "ErrorMessage");
+export const FieldWrapper = makeLoader("../atoms/FieldWrapper.jsx", "FieldWrapper");
+export const IconSlot = makeLoader("../atoms/IconSlot.jsx", "IconSlot");
+export const TypographyX = makeLoader("../atoms/TypographyX.jsx", "TypographyX");
+export const CardItem = makeLoader("../atoms/CardItem.jsx", "CardItem");
 export const CardItemSkeleton = makeLoader("../atoms/CardItemSkeleton.jsx", "CardItemSkeleton");
-export const AttentionBar  = makeLoader("../atoms/AttentionBar.jsx", "AttentionBar");
-
+export const DSBox = makeLoader("../atoms/DSBox.jsx", "DSBox");
 const defs = [
-  ["AppButton",     loadButton],
-  ["InputText",     InputText],
-  ["InputNumber",   InputNumber],
-  ["TextArea",      TextArea],
-  ["Checkbox",      Checkbox],
-  ["RadioGroup",    RadioGroup],
-  ["DatePicker",    DatePicker],
-  ["Label",         Label],
-  ["HelperText",    HelperText],
-  ["ErrorMessage",  ErrorMessage],
-  ["FieldWrapper",  FieldWrapper],
-  ["IconSlot",      IconSlot],
-  ["TypographyX",   TypographyX],
-  ["CardItem",      CardItem],
+  ["AppButton", loadButton],
+  ["InputText", InputText],
+  ["InputNumber", InputNumber],
+  ["TextArea", TextArea],
+  ["Checkbox", Checkbox],
+  ["RadioGroup", RadioGroup],
+  ["DatePicker", DatePicker],
+  ["Label", Label],
+  ["HelperText", HelperText],
+  ["ErrorMessage", ErrorMessage],
+  ["FieldWrapper", FieldWrapper],
+  ["IconSlot", IconSlot],
+  ["TypographyX", TypographyX],
+  ["CardItem", CardItem],
   ["CardItemSkeleton", CardItemSkeleton],
-  ["AttentionBar",  AttentionBar],
+  ["DSBox", DSBox],
 ];
 
 export const registerAtoms = () => registerAll(defs);

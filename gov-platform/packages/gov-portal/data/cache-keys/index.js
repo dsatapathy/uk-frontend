@@ -3,4 +3,5 @@ export const keys = {
     sidebar: (tenant, role, locale) => ["sidebar", tenant, role, locale],
     modules: (tenant) => ["modules", tenant],
   };
+
   
