@@ -11,7 +11,7 @@ import { initHttp } from "./http";
 import { resolveShell, registerShellAsLayout } from "./layouts";
 import { registerGateAndBuildRoutes } from "./routes";
 import { buildInitialManifests, bootstrapModules } from "./modules";
-import { bootstrapSidebar } from "./sidebar";
+// import { bootstrapSidebar } from "./sidebar";
 import { buildManifestsFromConfig } from "./utils";
 import { configSchema } from "./config-schema";
 import "@gov/styles/core/index.scss";
@@ -82,9 +82,9 @@ export function start(rawConfig) {
     }, []);
 
     // Sidebar (once)
-    React.useEffect(() => {
-      bootstrapSidebar({ config: cfg, http, app, sidebarCfg, appInfo });
-    }, []);
+    // React.useEffect(() => {
+    //   bootstrapSidebar({ config: cfg, http, app, sidebarCfg, appInfo });
+    // }, []);
 
     // Modules bootstrap/merge (once)
     React.useEffect(() => {

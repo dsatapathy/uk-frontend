@@ -1,7 +1,7 @@
 // page/LandingPage.jsx (DS + RQ version)
 import React from "react";
 import { Container } from "@mui/material";
-import { landingConfig } from "@gov/ui";
+import { useConfig } from "@gov/library";
 
 import {
   useNotifications,
@@ -10,16 +10,16 @@ import {
 } from "@gov/data";
 import { getComponent } from "@gov/core";
 import { useSelector } from "react-redux";
+import { loadLanding } from "@gov/ui";
 
 export default function LandingPage() {
   const DSBox = getComponent("DSBox");
   const AttentionBar = getComponent("AttentionBar");
   const NotificationsModal = getComponent("NotificationsModal");
   const ModuleGrid = getComponent("ModuleGrid");
-    const { user } = useSelector((s) => s.auth.user || {});
-  
+  const { config: landingConfig, loading: cfgLoading } = useConfig(loadLanding, "landing");
+  const { user } = useSelector((s) => s.auth.user || {});  
   const isAdmin = !!user?.roles?.includes?.("admin");
-
   // — Data Fetching (RQ) —
   const {
     data: notifications = [],
@@ -38,6 +38,7 @@ export default function LandingPage() {
   const [open, setOpen] = React.useState(false);
   const openModal = () => setOpen(true);
   const closeModal = () => setOpen(false);
+  if (cfgLoading) return null;
 
   const onCreateNotification = async (payload) => {
     await createNotification.mutateAsync(payload);

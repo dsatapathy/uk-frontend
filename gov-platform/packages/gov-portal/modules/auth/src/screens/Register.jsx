@@ -1,10 +1,14 @@
 import * as React from "react";
-import { registerConfig } from "@gov/ui";
+import { loadRegister, registerConfig } from "@gov/ui";
 import { getComponent } from "@gov/core";
 // import { useAuth } from "@gov/ui-engine";
 
 export default function Register() {
   const LoginForm = getComponent("LoginForm");
+  const { config: registerConfig, loading: cfgLoading } = useConfig(loadRegister, "register");
+  if (cfgLoading) {
+    return null;
+  }
   // const { tokens } = useAuth();
 
   // React.useEffect(() => {

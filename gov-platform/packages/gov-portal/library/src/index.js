@@ -7,6 +7,7 @@ export * from "./registry/molecules";
 export * from "./registry/organisms";
 export * from "./registry/layouts";
 export * from "./registry/components";
+export * from "./registry/hooks";
 
 import { registerAtoms } from "./registry/atoms";
 import { registerMolecules } from "./registry/molecules";
