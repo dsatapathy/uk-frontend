@@ -19,8 +19,8 @@ const makePerfFields = (count = 100) =>
 
 const PERF_100_SECTION = {
   id: "perf-100",
-  title: "Performance 500",
-  fields: makePerfFields(500),
+  title: "Performance 50",
+  fields: makePerfFields(50),
 };
 export const bpaSchema = {
   $schema: "fe.v1",
