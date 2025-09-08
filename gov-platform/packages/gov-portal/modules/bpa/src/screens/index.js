@@ -5,3 +5,8 @@ export const loadBpaApply = asDefault(
     () => import("./BpaApplyPage.jsx"),
     "BpaApplyPage"
 );
+
+export const loadStepperTestPage = asDefault(
+    () => import("./StepperTestPage.jsx"),
+    "StepperTestPage"
+);
