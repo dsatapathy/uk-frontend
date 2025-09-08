@@ -90,7 +90,8 @@ function LoginFormInner({ config, onSubmit, onSuccess, components, classes, sche
       place={place}
       styleVars={styleVars}
       classes={s}
-      decorations={config.visual?.decorations}
+      // decorations={config.visual?.decorations}
+      decorations={[]}
       animation={config.animation}
     >
       <form

@@ -1,4 +1,4 @@
-%inlineRow  { display: flex; gap: 16px; flex-wrap: wrap; }
+%inlineRow  { display: flex; gap: 16px; }
 %submitRow  { margin-top: var(--btn-mt, 8px); display: flex; }
 %submitLeft   { justify-content: flex-start; }
 %submitCenter { justify-content: center; }
