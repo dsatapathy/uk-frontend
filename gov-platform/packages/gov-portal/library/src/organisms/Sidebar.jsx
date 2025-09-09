@@ -32,11 +32,9 @@ export default function Sidebar(props) {
     display: "flex",
     overflow: "hidden",
     overflowX: "hidden",
-
-    // text color from tokens
+    borderRadius: 0,
     color: "var(--sidebar-fg, var(--g-fg-muted))", // Using a muted text color for better contrast on a light bg
 
-    // divider / hairline
     borderRight: "1px solid var(--sidebar-line, var(--g-border, #e0e0e0))",
 
     backgroundImage: `
