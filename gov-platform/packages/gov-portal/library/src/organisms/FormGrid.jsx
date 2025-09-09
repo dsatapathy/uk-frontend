@@ -5,18 +5,13 @@ const BPS = ["xs", "sm", "md", "lg", "xl"];
 
 const DEFAULT_CFG = {
   cols: { xs: 1, sm: 2, md: 3, lg: 3, xl: 4 },
-  gap:  { xs: "s2", sm: "s2", md: "s3", lg: "s3", xl: "s3" }, // token or CSS length
-  rowGap: null,             // override gap rows
-  columnGap: null,          // override gap columns
-  flow: "row dense",        // grid-auto-flow
-  autoRows: "minmax(3rem, auto)",  // fallback height for rows auto-created
+  gap:  { xs: "s2", sm: "s2", md: "s2", lg: "s2", xl: "s2" }, // token or CSS length
+  rowGap: null,
+  columnGap: null,
+  flow: "row dense",
+  autoRows: "minmax(3rem, auto)",
   autoCols: "auto",
-  areas: null,              // responsive template: string | string[] rows | { xs, sm, ... }
-  // example areas value:
-  // areas: {
-  //   xs: [["applicant","applicant"],["location","location"]],
-  //   md: [["applicant","location"], ["building","attachments"]],
-  // }
+  areas: null,
 };
 
 const isObj = (v) => v && typeof v === "object" && !Array.isArray(v);
@@ -131,6 +126,7 @@ export default function FormGrid({
   config,
   ...rest
 }) {
+  console.log("Cols", cols)
   const cfg = React.useMemo(() => {
     const base = { ...DEFAULT_CFG, ...(config || {}) };
     const colsR = toResponsive(cols ?? base.cols, base.cols);

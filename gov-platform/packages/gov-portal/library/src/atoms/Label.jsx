@@ -4,6 +4,7 @@ import { Box, FormLabel, IconButton, Tooltip } from "@mui/material";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import { visuallyHidden } from "@mui/utils";
 import s from "@gov/styles/library/form/Label.module.scss";
+import TypographyX from "./TypographyX";
 
 /**
  * Label — Config-driven, responsive, SCSS-styled (no context).
@@ -19,7 +20,7 @@ import s from "@gov/styles/library/form/Label.module.scss";
 const DEFAULT_CFG = {
   gap: "xs",                 // "xs" | "sm" | "md" | "lg"
   size: "md",                // "sm" | "md" | "lg"
-  weight: "600",             // "400" | "500" | "600" | "700" (map to your SCSS)
+  weight: "bold",             // "400" | "500" | "600" | "700" (map to your SCSS)
   color: "default",          // "default" | "muted" | "primary" | etc. (as in SCSS)
 
   showRequiredMark: true,
@@ -60,7 +61,7 @@ export default function Label({ htmlFor, required = false, tooltip, config, chil
   return (
     <Box component="div" className={rootClass}>
       <FormLabel htmlFor={htmlFor} required={false} className={textClass}>
-        <span>{children}</span>
+        <TypographyX variant="body2" sx={{ fontWeight: cfg.weight || "bold" }}>{children}</TypographyX>
 
         {required ? (
           <>

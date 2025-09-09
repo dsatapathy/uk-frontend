@@ -22,7 +22,7 @@ export const memberProfileSchema = {
             ]
           },
           validations: [{ type: "required" }],
-          grid: { span: { xs: 12, sm: 6, md: 4 } }
+          grid: { span: { xs: 12, sm: 6, md: 4 }, }
         },
         {
           id: "district",
@@ -34,7 +34,7 @@ export const memberProfileSchema = {
             valueKey: "code"
           },
           validations: [{ type: "required" }],
-          grid: { span: { xs: 12, sm: 6, md: 4 } }
+          grid: { span: { xs: 12, sm: 6, md: 4 }, }
         },
         {
           id: "block",
@@ -48,7 +48,7 @@ export const memberProfileSchema = {
             dependsOnHint: "Select District first"
           },
           validations: [{ type: "required" }],
-          grid: { span: { xs: 12, sm: 6, md: 4 } }
+          grid: { span: { xs: 12, sm: 6, md: 4 }, }
         },
         {
           id: "gp",
@@ -62,7 +62,7 @@ export const memberProfileSchema = {
             dependsOnHint: "Select District and Block first"
           },
           validations: [{ type: "required" }],
-          grid: { span: { xs: 12, sm: 6, md: 4 } }
+          grid: { span: { xs: 12, sm: 6, md: 4 }, }
         },
         {
           id: "village",
@@ -76,7 +76,7 @@ export const memberProfileSchema = {
             dependsOnHint: "Select District, Block and GP first"
           },
           validations: [{ type: "required" }],
-          grid: { span: { xs: 12, sm: 6, md: 4 } }
+          grid: { span: { xs: 12, sm: 6, md: 4 }, }
         }
       ]
     },

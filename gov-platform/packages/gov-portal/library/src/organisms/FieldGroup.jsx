@@ -3,9 +3,9 @@ import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import Divider from "@mui/material/Divider";
 import IconButton from "@mui/material/IconButton";
-import Typography from "@mui/material/Typography";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import s from "@gov/styles/library/organism/FieldGroup.module.scss";
+import TypographyX from "../atoms/TypographyX";
 
 /**
  * FieldGroup — Card/panel grouping fields (config-driven).
@@ -137,22 +137,24 @@ export default function FieldGroup({
       >
         <div className={s.titles}>
           {title ? (
-            <Typography
+            <TypographyX
               variant={cfg.header.dense ? "subtitle1" : "h6"}
               className={s.title}
+              sx={{ fontWeight: "bold" }}
             >
               {title}
-            </Typography>
+            </TypographyX>
           ) : null}
 
           {description ? (
-            <Typography
+            <TypographyX
               variant="body2"
               color="text.secondary"
               className={s.description}
+              sx={{ fontWeight: "bold" }}
             >
               {description}
-            </Typography>
+            </TypographyX>
           ) : null}
         </div>
 

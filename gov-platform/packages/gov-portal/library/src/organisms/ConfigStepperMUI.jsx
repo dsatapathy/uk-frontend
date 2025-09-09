@@ -142,7 +142,7 @@ export default function ConfigStepperMUI({
     // Make the whole area a column so the footer can sit at the bottom *inside the body*
     <DSBox sx={{ display: "flex", flexDirection: "column", minHeight: "100vh", gap: 2 }}>
       {/* top stepper */}
-      <Paper elevation={0} sx={{ p: { xs: 1, sm: 2 }, borderRadius: 2 }}>
+      <Paper elevation={0} sx={{ p: { xs: 1, sm: 2 }, border: "none" }}>
         <Stepper activeStep={index} alternativeLabel={!isMobile} orientation={isMobile ? "vertical" : "horizontal"}>
           {steps.map((s) => (
             <Step key={s.id}>
@@ -163,7 +163,7 @@ export default function ConfigStepperMUI({
         sx={{
           p: { xs: 1.5, sm: 2 },
           borderRadius: 2,
-          border: (t) => `1px solid ${t.palette.divider}`,
+          border: "none",
           flex: 1,
           overflow: "auto",
           pb: { xs: 10, sm: 9 }, // avoid overlap with sticky footer height

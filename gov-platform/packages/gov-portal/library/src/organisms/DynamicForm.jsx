@@ -186,8 +186,9 @@ export default function DynamicForm({
             defaultOpen={ui?.sections?.defaultOpen ?? true}
             config={ui?.sectionCard}
           >
+            
             <FormGrid
-              cols={ui?.grid?.cols ?? { xs: 1, sm: 2 }}
+              cols={ui?.grid?.cols ? ui?.grid?.cols : { xs: 1, sm: 2, md: 12 }}
               gap={ui?.grid?.gap ?? { xs: "s2", md: "s3" }}
               areas={ui?.grid?.areas?.[sec.id]}
             >
