@@ -19,7 +19,7 @@ import {
 } from "@gov/store";
 
 import { buildZodFromSchema } from "../rules/ValidationFactory.js";
-
+import InlineCondition from "../form/InlineCondition.jsx";
 
 /* -------------------------------- helpers -------------------------------- */
 const TYPE_DEFAULTS = { checkbox: false, default: "" };
@@ -40,24 +40,31 @@ function formKeyOf(schema, entityId) {
   return `${schema?.id || "form"}::${entityId || "local-entity"}`;
 }
 
-/* ------------------------------- Component ------------------------------- */
-/**
- * DynamicForm (optimized for use with a stepper)
- * -------------------------------------------------------------------------
- * Props:
- * - schema:          JSON schema for the VISIBLE part (current step)
- * - validationSchema?: JSON schema for validation (defaults to `schema`).
- *                      Pass the FULL schema when using stepper so Submit can validate all fields.
- * - defaultsSchema?: JSON schema used to compute default values (defaults to `validationSchema`).
- * - onSubmit(values)
- * - defaultValues?
- * - user?, flags?, ui?
- * - entityId?            : string (default "local-entity")
- * - autosaveMs?          : number (default 1000ms)
- * - hideDefaultActions?  : boolean (when true, hides the built-in submit/reset row)
- * - formApiRef?          : ref exposing { getValues, setValue, trigger, reset, getErrors }
- * - onValuesChange?      : (values, meta) => void (meta: { name, type })
+/** ── derive deps & show-expression from f.rules ─────────────────────────── */
+const RULE_PATH_RE = /values\.([a-zA-Z0-9_.]+)/g;
+
+function extractRuleDepsFromField(field) {
+  const out = new Set();
+  (field.rules || []).forEach((r) => {
+    if (!r || typeof r.when !== "string") return;
+    let m;
+    while ((m = RULE_PATH_RE.exec(r.when))) out.add(m[1]); // capture after "values."
+  });
+  return Array.from(out);
+}
+
+/** Build a string expression for InlineCondition.when
+ *  Logic: visible IFF none of the 'hide' rules are true → !(hide1 || hide2 || ...)
+ *  If there are no 'hide' rules → "true"
  */
+function buildShowExpr(field) {
+  const hides = (field.rules || []).filter((r) => r.action === "hide" && typeof r.when === "string" && r.when.trim());
+  if (!hides.length) return "true";
+  const orClauses = hides.map((r) => `(${r.when})`).join(" || ");
+  return `!(${orClauses})`;
+}
+
+/* ------------------------------- Component ------------------------------- */
 export default function DynamicForm({
   schema,
   validationSchema,
@@ -75,26 +82,22 @@ export default function DynamicForm({
 }) {
   const dispatch = useDispatch();
 
-  // pick schemas for validation + defaults
   const schemaForValidation = validationSchema || schema;
   const schemaForDefaults = defaultsSchema || schemaForValidation;
 
-  // Build Zod ONCE per validation schema (can be full schema for stepper)
-  const zodSchema = React.useMemo(() => buildZodFromSchema(schemaForValidation), [schemaForValidation]);
+  const zodSchema = React.useMemo(
+    () => buildZodFromSchema(schemaForValidation),
+    [schemaForValidation]
+  );
 
-  // Draft key should be stable to the full form identity, not the visible slice
   const formKey = formKeyOf(schemaForValidation, entityId);
-
-  // Pull any existing draft from Redux (shape: { values, updatedAt })
   const draft = useSelector((s) => s?.drafts?.[formKey]);
 
-  // Defaults: explicit defaultValues > saved draft > defaults from FULL schema
   const formDefaults = React.useMemo(() => {
     const base = defaultsFromSchema(schemaForDefaults);
     return { ...base, ...(draft?.values || {}), ...(defaultValues || {}) };
   }, [schemaForDefaults, defaultValues, draft]);
 
-  // React Hook Form setup
   const methods = useForm({
     resolver: zodSchema ? zodResolver(zodSchema) : undefined,
     mode: "onSubmit",
@@ -104,13 +107,11 @@ export default function DynamicForm({
 
   const { handleSubmit, formState, reset, getValues, setValue, trigger, watch } = methods;
 
-  // If a draft arrives later (e.g., async load), merge once
   React.useEffect(() => {
     if (draft?.values) reset((prev) => ({ ...prev, ...draft.values }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [draft?.updatedAt]);
 
-  // Start / end session
   React.useEffect(() => {
     dispatch(
       startFormSession({
@@ -119,27 +120,24 @@ export default function DynamicForm({
         schemaVersion: schemaForValidation?.version || schema?.version || "1.0.0",
       })
     );
-    return () => { dispatch(endFormSession()); };
+    return () => {
+      dispatch(endFormSession());
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch, schemaForValidation?.id, schemaForValidation?.version, entityId]);
 
-  // Efficient autosave via RHF subscription (avoids re-render per keystroke)
   const autosaveTimerRef = React.useRef();
   React.useEffect(() => {
     const sub = watch((vals, meta) => {
-      // upcall if needed
       onValuesChange?.(vals, meta);
-      // debounce autosave
       window.clearTimeout(autosaveTimerRef.current);
       autosaveTimerRef.current = window.setTimeout(() => {
         const updatedAt = Date.now();
         try {
           dispatch(saveDraft({ key: formKey, values: vals, updatedAt }));
           dispatch(setLastSavedAt(updatedAt));
-          // Optional localStorage mirror
-          // localStorage.setItem(formKey, JSON.stringify({ values: vals, updatedAt }));
-        } catch (e) {
-          // no-op
+        } catch {
+          /* no-op */
         }
       }, autosaveMs);
     });
@@ -149,7 +147,6 @@ export default function DynamicForm({
     };
   }, [watch, autosaveMs, dispatch, formKey, onValuesChange]);
 
-  // Submit handler
   const submit = handleSubmit(async (vals) => {
     dispatch(setSubmitting(true));
     try {
@@ -160,7 +157,6 @@ export default function DynamicForm({
     }
   });
 
-  // Expose safe API to parent (stepper)
   React.useImperativeHandle(
     formApiRef,
     () => ({
@@ -186,31 +182,48 @@ export default function DynamicForm({
             defaultOpen={ui?.sections?.defaultOpen ?? true}
             config={ui?.sectionCard}
           >
-            
             <FormGrid
               cols={ui?.grid?.cols ? ui?.grid?.cols : { xs: 1, sm: 2, md: 12 }}
               gap={ui?.grid?.gap ?? { xs: "s2", md: "s3" }}
               areas={ui?.grid?.areas?.[sec.id]}
             >
-              {(sec.fields || []).map((f) => (
-                <FormGrid.Item
-                  key={f.id}
-                  span={f.grid?.span}
-                  rowSpan={f.grid?.rowSpan}
-                  area={f.grid?.area}
-                >
-                  <FieldController
-                    field={f}
-                    user={user}
-                    flags={flags}
-                    wrap
-                    wrapperProps={{
-                      layout: ui?.fieldLayout ?? "top",
-                      config: ui?.fieldWrapper,
+              {(sec.fields || []).map((f) => {
+                // Build InlineCondition props from the field's rules
+                const whenExpr = buildShowExpr(f);                  // string expression to SHOW
+                const deps = extractRuleDepsFromField(f);           // e.g. ["landOwnership", "ownsLivestock", ...]
+                return (
+                  <InlineCondition
+                    key={f.id}
+                    when={whenExpr}
+                    then={{ show: true }}
+                    else={{ show: false }}
+                    deps={deps}
+                    config={{
+                      keepMountedWhenHidden: false,  // do not render DOM when hidden
+                      collapseHidden: true,          // if ever mounted and hidden, use display:none
+                      allowStringExpr: true,         // enable string expression evaluation
                     }}
-                  />
-                </FormGrid.Item>
-              ))}
+                  >
+                    <FormGrid.Item
+                      span={f.grid?.span}
+                      rowSpan={f.grid?.rowSpan}
+                      area={f.grid?.area}
+                    >
+                      <FieldController
+                        field={f}
+                        user={user}
+                        flags={flags}
+                        wrap
+                        wrapperProps={{
+                          layout: ui?.fieldLayout ?? "top",
+                          config: ui?.fieldWrapper,
+                        }}
+                        mountWhenHidden={false}
+                      />
+                    </FormGrid.Item>
+                  </InlineCondition>
+                );
+              })}
             </FormGrid>
           </FieldGroup>
         ))}

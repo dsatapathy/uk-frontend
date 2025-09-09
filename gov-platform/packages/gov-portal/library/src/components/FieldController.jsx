@@ -98,6 +98,22 @@ function evaluateRules(field, { values }) {
   return res;
 }
 
+/** ── NEW: derive dependencies from rule expressions ── */
+const RULE_PATH_RE = /values\.([a-zA-Z0-9_.]+)/g;
+function extractRuleDeps(field) {
+  const out = new Set();
+  (field.rules || []).forEach((r) => {
+    const scan = (txt) => {
+      if (!txt || typeof txt !== "string") return;
+      let m;
+      while ((m = RULE_PATH_RE.exec(txt))) out.add(m[1]); // capture after "values."
+    };
+    scan(r.when);
+    scan(r.value);
+  });
+  return Array.from(out);
+}
+
 /** -----------------------------------------------------------------------
  * FieldController
  * --------------------------------------------------------------------- */
@@ -110,29 +126,45 @@ export default function FieldController({
   ruleEngine,
   mountWhenHidden = true,
 }) {
-  const { control, setValue, getValues, formState } = useFormContext();
+  // ⬇️ also pull trigger from RHF
+  const { control, setValue, getValues, formState, trigger } = useFormContext();
 
-  // watch only what we need: the field itself declared dependsOn
+  // explicit dependsOn from schema
   const depList = field?.options?.dependsOn || [];
+  // ⬇️ NEW: implicit deps from rules (values.* referenced in when/value)
+  const ruleDeps = React.useMemo(() => extractRuleDeps(field), [field]);
+
+  // Re-render the controller whenever field itself, dependsOn, or ruleDeps change
   useWatch({
     control,
-    name: [field.id, ...depList.map((d) => d.replace(/^values\./, ""))],
+    name: [
+      field.id,
+      ...depList.map((d) => d.replace(/^values\./, "")),
+      ...ruleDeps,
+    ],
   });
 
   const values = getValues(); // RHF snapshot for rules/derive
   const ruleState = React.useMemo(
-    () => (typeof ruleEngine === "function"
-      ? ruleEngine(field, { values, user, flags })
-      : evaluateRules(field, { values })),
+    () =>
+      (typeof ruleEngine === "function"
+        ? ruleEngine(field, { values, user, flags })
+        : evaluateRules(field, { values })),
     [field, values, user, flags, ruleEngine]
   );
 
-  // apply derived value (formula) when present (in effect only; not during render)
+  // apply derived / revalidate when required flips on
   React.useEffect(() => {
     if (ruleState.derived !== undefined) {
       setValue(field.id, ruleState.derived, { shouldValidate: true, shouldDirty: true });
     }
-  }, [ruleState.derived, field.id, setValue]);
+    if (ruleState.required) {
+      // prompt immediate validation so user sees error right away if empty
+      // (no await needed; RHF batches internally)
+      // eslint-disable-next-line @typescript-eslint/no-floating-promises
+      trigger(field.id);
+    }
+  }, [ruleState.derived, ruleState.required, field.id, setValue, trigger]);
 
   // compute “required” from rules validators
   const requiredBySchema = (field.validations || []).some((v) => v.type === "required");
@@ -160,14 +192,12 @@ export default function FieldController({
   // SPECIAL CASE: CAPTCHA
   // ──────────────────────────────
   if (field.type === "captcha") {
-    // Let CaptchaBox own its RHF Controller & business logic (generate, refresh, clear, focus, validate).
     const body = (
       <CaptchaBox
         control={control}
         cfg={{
           name: field.id,
           length: field.length || field.props?.length || 6,
-          // Allow per-field tweaks to flow into the captcha:
           ...field.config,
         }}
         errors={formState.errors}
@@ -201,8 +231,8 @@ export default function FieldController({
         field.defaultValue !== undefined
           ? field.defaultValue
           : field.type === "checkbox"
-            ? false
-            : ""
+          ? false
+          : ""
       }
       control={control}
       render={({ field: rhf, fieldState }) => {
@@ -217,6 +247,8 @@ export default function FieldController({
           depsReady,
         });
 
+        // ⬇️ If hidden, don't render wrapper/label either
+        if (hidden) return null;
         if (!wrap) return body;
 
         return (
@@ -224,7 +256,7 @@ export default function FieldController({
             {...wrapperRest}
             label={field.label}
             required={required}
-            error={errorObj} // pass the OBJECT to wrapper (it normalizes to string)
+            error={errorObj}
             helper={field.helperText}
             config={wrapperCfg}
           >
@@ -242,7 +274,6 @@ function replaceIndexTokens(str, idx) {
 }
 
 function materializeNestedField(child, idx, parentPath) {
-  // nested field id: owners.0.name
   const id = `${parentPath}.${child.id}`;
 
   // rewrite rules (when/value) to resolve $index / $n
@@ -268,14 +299,12 @@ function materializeNestedField(child, idx, parentPath) {
 function renderFieldByType(field, { rhf, error, disabled, required, hidden, ctxDeps, depsReady }) {
   if (hidden) return null;
 
-  // Inputs expect boolean error; wrapper receives the object.
   const inputCommon = { disabled, required, error: !!error };
 
   switch (field.type) {
     // ⛔️ captcha handled above
-
     case "file":
-    case "upload":
+    case "upload": {
       const multiple = !!field.props?.multiple;
       return (
         <UploadInput
@@ -295,21 +324,21 @@ function renderFieldByType(field, { rhf, error, disabled, required, hidden, ctxD
             field.defaultValue !== undefined
               ? field.defaultValue
               : field.type === "checkbox"
-                ? false
-                : (field.type === "file" || field.type === "upload")
-                  ? (field.props?.multiple ? [] : null)
-                  : ""
+              ? false
+              : (field.type === "file" || field.type === "upload")
+              ? (field.props?.multiple ? [] : null)
+              : ""
           }
         />
       );
-
+    }
 
     case "checkbox":
       return (
         <Checkbox
           name={rhf.name}
           checked={!!rhf.value}
-          onChange={(next) => rhf.onChange(next)}  // <- boolean, not event
+          onChange={(next) => rhf.onChange(next)}  // boolean
           onBlur={rhf.onBlur}
           inputRef={rhf.ref}
           label={field.inlineLabel || field.label}
@@ -343,7 +372,7 @@ function renderFieldByType(field, { rhf, error, disabled, required, hidden, ctxD
           onChange={(v) => rhf.onChange(v)}
           onBlur={rhf.onBlur}
           inputRef={rhf.ref}
-          options={field.options?.items || []} // static options
+          options={field.options?.items || []}
           maxSelected={field.props?.maxSelected}
           chipColor={field.props?.chipColor}
           {...inputCommon}
@@ -394,8 +423,8 @@ function renderFieldByType(field, { rhf, error, disabled, required, hidden, ctxD
             c.defaultValue !== undefined
               ? c.defaultValue
               : c.type === "checkbox"
-                ? false
-                : "";
+              ? false
+              : "";
         });
         return o;
       };
@@ -407,7 +436,6 @@ function renderFieldByType(field, { rhf, error, disabled, required, hidden, ctxD
           addLabel={field.addLabel || "Add"}
           removeLabel={field.removeLabel || "Remove"}
           itemDefault={field.itemDefault || makeDefaultRow}
-          // Render the nested fields of each row
           renderItem={({ index, path }) => (
             <div style={{ display: "grid", gap: "var(--g-s2)" }}>
               {(field.item?.fields || []).map((child) => {
