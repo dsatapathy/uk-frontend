@@ -1,26 +1,13 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { ListItemButton, Box } from "@mui/material";
-import { alpha, useTheme } from "@mui/material/styles";
-import useMediaQuery from "@mui/material/useMediaQuery";
 import IconSlot from "../atoms/IconSlot";
 import NavChevron from "../atoms/NavChevron";
 import TypographyX from "../atoms/TypographyX";
 
 export default function NavItem({ item, level = 0, selected, open, onClick }) {
-  const theme = useTheme();
-
   const INDENT = 12 + level * 14;
-  const ICON_W  = 24;
-
-  // light-on-dark palette
-  const txt      = "#EAF0F7";
-  const txtDim   = "rgba(234,240,247,0.72)";
-  const hoverBg  = "rgba(255,255,255,0.06)";
-  const activeBg = "rgba(120,180,255,0.14)";
-  const activeBd = "rgba(120,180,255,0.28)";
-  const accent   = "rgba(120,180,255,1)";
-
+  const ICON_W = 24;
   const hasChildren = Array.isArray(item.children) && item.children.length > 0;
 
   return (
@@ -37,13 +24,25 @@ export default function NavItem({ item, level = 0, selected, open, onClick }) {
         py: 0.9,
         pr: 1.25,
         pl: 0,
-        borderRadius: 1.75,
+        borderRadius: "var(--g-radius, 12px)",
         position: "relative",
-        color: selected ? txt : txt, // keep bright
-        backgroundColor: selected ? activeBg : "transparent",
-        border: selected ? `1px solid ${activeBd}` : "1px solid transparent",
-        transition: "background-color .18s ease, transform .12s ease, border-color .18s ease",
-        "&:hover": { backgroundColor: hoverBg, transform: "translateY(-1px)" },
+
+        color: "var(--sidebar-fg, var(--g-fg))",
+        backgroundColor: selected
+          ? "var(--sidebar-active-bg)"
+          : "transparent",
+        border: selected
+          ? "1px solid var(--sidebar-active-bd)"
+          : "1px solid transparent",
+
+        transition:
+          "background-color .18s ease, transform .12s ease, border-color .18s ease",
+        "&:hover": {
+          backgroundColor: "var(--sidebar-hover-bg)",
+          transform: "translateY(-1px)",
+        },
+
+        // active accent strip
         "&::before": selected
           ? {
               content: '""',
@@ -53,15 +52,16 @@ export default function NavItem({ item, level = 0, selected, open, onClick }) {
               bottom: 8,
               width: 3,
               borderRadius: 3,
-              background: `linear-gradient(${accent}, rgba(120,180,255,0.25))`,
+              background:
+                "linear-gradient(var(--sidebar-accent), color-mix(in srgb, var(--sidebar-accent) 25%, transparent))",
             }
           : {},
       }}
     >
-      {/* left indent */}
+      {/* left indentation */}
       <Box sx={{ width: INDENT, flex: "0 0 auto" }} />
 
-      {/* icon col */}
+      {/* icon */}
       <Box
         sx={{
           width: ICON_W,
@@ -70,7 +70,9 @@ export default function NavItem({ item, level = 0, selected, open, onClick }) {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          color: selected ? accent : txtDim,
+          color: selected
+            ? "var(--sidebar-accent)"
+            : "var(--sidebar-fg-dim, var(--g-fg-muted))",
         }}
       >
         {item.icon ? <IconSlot name={item.icon} /> : null}
@@ -87,16 +89,26 @@ export default function NavItem({ item, level = 0, selected, open, onClick }) {
           textOverflow: "ellipsis",
           fontWeight: selected ? 700 : 600,
           letterSpacing: 0.1,
-          color: selected ? "#DCE9FF" : txt, // a hint brighter on active
+          color: selected
+            ? "var(--sidebar-label-active)"
+            : "var(--sidebar-fg, var(--g-fg))",
         }}
-        onClick={(e) => { if (!hasChildren && onClick) onClick(e); }}
+        onClick={(e) => {
+          if (!hasChildren && onClick) onClick(e);
+        }}
       >
         {item.label}
       </TypographyX>
 
-      {/* chevron / spacer */}
+      {/* chevron or spacer */}
       {hasChildren ? (
-        <Box sx={{ color: selected ? accent : txtDim }}>
+        <Box
+          sx={{
+            color: selected
+              ? "var(--sidebar-accent)"
+              : "var(--sidebar-fg-dim, var(--g-fg-muted))",
+          }}
+        >
           <NavChevron open={open} />
         </Box>
       ) : (

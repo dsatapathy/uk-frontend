@@ -5,7 +5,7 @@ import DrawerHeader from "../molecules/DrawerHeader";
 import NavTree from "../molecules/NavTree";
 import { DRAWER_WIDTH } from "../utils/menu-utils";
 import SearchField from "../atoms/SearchField";
-import TypographyX from "../atoms/TypographyX"; // ⬅️ use your TypographyX
+import TypographyX from "../atoms/TypographyX";
 
 export default function Sidebar(props) {
   const {
@@ -14,35 +14,67 @@ export default function Sidebar(props) {
     searchValue, onSearchChange, onSearchEnter,
   } = props;
 
-  const theme = useTheme();
+  const t = useTheme();
+  const p = t.palette;
 
-  // Colors for dark rail
-  const darkBgTop    = "#0F1420";    // near-black blue
-  const darkBgBottom = "#0B0F18";
-  const lightText    = "#EAF0F7";    // label text
-  const dimText      = "#B7C2D0";    // secondary text
-  const lineColor    = "rgba(255,255,255,0.08)";
+  // Build CSS variable fallbacks from the active theme
+  const fg = p.mode === "light" ? p.text.primary : p.text.primary;
+  const fgDim = p.text.secondary;
+  const divider = p.divider;
 
   const paperBase = {
     position: "sticky",
     top: 0,
     alignSelf: "flex-start",
     height: "100dvh",
-    width: { xs: 280, md: "var(--sidebar-w)" },
+    width: { xs: 280, md: "var(--sidebar-w, " + (DRAWER_WIDTH || 320) + "px)" },
     boxSizing: "border-box",
     display: "flex",
     overflow: "hidden",
     overflowX: "hidden",
-    color: lightText,                     // ⬅️ light text for the rail
-    borderRight: `1px solid ${lineColor}`,
-    // dark layered background + faint blue glows
+
+    // text color from tokens
+    color: "var(--sidebar-fg, var(--g-fg-muted))", // Using a muted text color for better contrast on a light bg
+
+    // divider / hairline
+    borderRight: "1px solid var(--sidebar-line, var(--g-border, #e0e0e0))",
+
     backgroundImage: `
-      radial-gradient(900px 420px at -20% -20%, rgba(48,127,255,0.10) 0%, transparent 60%),
-      radial-gradient(600px 320px at 120% 10%, rgba(96,211,255,0.10) 0%, transparent 55%),
-      linear-gradient(180deg, ${darkBgTop} 0%, ${darkBgBottom} 100%)
-    `,
-    boxShadow: `inset -1px 0 0 ${lineColor}, 8px 0 24px -18px rgba(0,0,0,0.4)`,
+    /* Sharp, angled facets for the diamond-cut effect */
+    linear-gradient(
+      165deg,
+      transparent 45%,
+      var(--crystal-highlight, rgba(236, 253, 245, 0.2)) 50%, /* Sharp highlight edge */
+      var(--crystal-shadow, rgba(20, 83, 45, 0.15)) 52%,       /* Subtle shadow edge */
+      transparent 60%
+    ),
+    linear-gradient(
+      -40deg,
+      transparent 30%,
+      var(--crystal-highlight, rgba(236, 253, 245, 0.15)) 48%, /* Second highlight facet */
+      transparent 60%
+    ),
+    linear-gradient(
+      20deg,
+      transparent 40%,
+      var(--crystal-shadow, rgba(20, 83, 45, 0.1)) 55%,        /* A wider, softer shadow facet */
+      transparent 70%
+    ),
+
+    /* The original 3-stop base gradient for color foundation */
+    linear-gradient(
+      180deg,
+      var(--sidebar-bg-top, #aed581) 0%,    /* Light Banana Leaf Green */
+      var(--sidebar-bg-mid, #9ccc65) 46%,     /* Medium Banana Leaf Green */
+      var(--sidebar-bg-bottom, #8bc34a) 100%  /* Richer Banana Leaf Green */
+    )
+  `,
+
+    // Softer inner shadow for a lighter theme
+    boxShadow: `inset -1px 0 0 var(--sidebar-line, var(--g-border, #e0e0e0)),
+            4px 0 18px -12px rgba(0,0,0,0.3)`,
   };
+
 
   const content = (
     <Box role="navigation" sx={{ height: "100%", display: "flex", flexDirection: "column", width: "100%" }}>
@@ -57,22 +89,28 @@ export default function Sidebar(props) {
         />
       )}
 
-      {/* Desktop search – make its wrapper dark-friendly */}
+      {/* Desktop search – styled via tokens */}
       {isDesktop && (
         <Box sx={{ p: 1.5, pt: 2, flexShrink: 0 }}>
           <SearchField
             value={searchValue}
             onChange={onSearchChange}
             onEnter={onSearchEnter}
-            // if your SearchField exposes sx/inputProps, this keeps it readable on dark:
             sx={{
               "& .MuiOutlinedInput-root": {
-                color: lightText,
-                "& fieldset": { borderColor: lineColor },
-                "&:hover fieldset": { borderColor: "rgba(255,255,255,0.20)" },
-                "&.Mui-focused fieldset": { borderColor: "rgba(120,180,255,0.50)" },
+                color: "var(--sidebar-fg, var(--g-fg, " + fg + "))",
+                backgroundColor: "transparent",
+                "& fieldset": { borderColor: "var(--sidebar-line, var(--g-border, " + divider + "))" },
+                "&:hover fieldset": { borderColor: "var(--sidebar-line-hover, var(--g-border, " + divider + "))" },
+                "&.Mui-focused fieldset": { borderColor: "var(--sidebar-focus, var(--g-primary, " + p.primary.main + "))" },
               },
-              "& .MuiInputBase-input::placeholder": { color: dimText, opacity: 1 },
+              "& .MuiInputBase-input::placeholder": {
+                color: "var(--sidebar-fg-dim, var(--g-fg-muted, " + fgDim + "))",
+                opacity: 1,
+              },
+              "& .MuiSvgIcon-root": {
+                color: "var(--sidebar-icon, var(--g-fg-muted, " + fgDim + "))",
+              },
             }}
           />
         </Box>
@@ -83,7 +121,7 @@ export default function Sidebar(props) {
         <TypographyX
           variant="overline"
           sx={{
-            color: dimText,
+            color: "var(--sidebar-fg-dim, var(--g-fg-muted, " + fgDim + "))",
             letterSpacing: 1.1,
             textTransform: "uppercase",
             background: "linear-gradient(90deg, currentColor 0%, transparent 80%)",
@@ -104,11 +142,11 @@ export default function Sidebar(props) {
           px: 1,
           pb: 2,
           scrollbarWidth: "thin",
-          scrollbarColor: "rgba(255,255,255,0.25) transparent",
+          scrollbarColor: "var(--sidebar-scroll, rgba(255,255,255,0.25)) transparent",
           "&::-webkit-scrollbar": { width: 6 },
           "&::-webkit-scrollbar-thumb": {
-            borderRadius: 8,
-            backgroundColor: "rgba(255,255,255,0.25)",
+            borderRadius: 1,
+            backgroundColor: "var(--sidebar-scroll, rgba(255,255,255,0.25))",
           },
           "&::-webkit-scrollbar-track": { background: "transparent" },
         }}
@@ -122,7 +160,13 @@ export default function Sidebar(props) {
         />
       </Box>
 
-      <Box sx={{ height: 16, flexShrink: 0, background: "linear-gradient(180deg, transparent, rgba(255,255,255,0.03))" }} />
+      <Box
+        sx={{
+          height: 16,
+          flexShrink: 0,
+          background: "linear-gradient(180deg, transparent, var(--sidebar-foot-glow, rgba(255,255,255,0.03)))",
+        }}
+      />
     </Box>
   );
 
