@@ -14,7 +14,7 @@
 /* variants */
 .variant--plain   {}
 .variant--divider {}
-.variant--accent  { border-inline-start: 3px solid var(--g-primary, #0b5fff); padding-inline-start: var(--g-s2); }
+.variant--accent  { border-inline-start: 3px solid var(--g-primary, #16a34a); padding-inline-start: var(--g-s2); }
 
 /* sticky header (container needs relative stacking context) */
 .sticky {
@@ -51,7 +51,7 @@
   font-weight: 600;
   font-size: calc(var(--_size) * 0.45);
   color: var(--g-on-primary, #fff);
-  background: var(--g-primary, #0b5fff);
+  background: var(--g-primary, #16a34a);
 }
 .icon--circle { border-radius: 999px; }
 .icon--square { border-radius: 10px; }

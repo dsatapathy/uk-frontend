@@ -65,7 +65,7 @@ function LoginFormInner({ config, onSubmit, onSuccess, components, classes, sche
     "login-button-mt": (config.style?.button?.marginTopPx ?? 8) + "px",
     "field-bg": config.style?.field?.bg || "#fff",
     "field-error": config.style?.field?.errorColor || "#ef4444",
-    "field-focus": config.style?.field?.focusColor || "#0b5fff",
+    "field-focus": config.style?.field?.focusColor || "#16a34a",
   };
   const elevation = config.style?.card?.elevation ?? 2;
   const place = config.style?.layout?.place || "center";
@@ -122,9 +122,9 @@ function LoginFormInner({ config, onSubmit, onSuccess, components, classes, sche
           </div>
 
           <div className={`${s.submitRow} ${s[`align-${config.style?.button?.align}`] || ""}`}>
-            {config.submit && (<RenderButton cfg={config.submit} key="submit" isSubmitting={isSubmitting} classes={s} />)}
-            {config.register && (<RenderButton cfg={config.register} key="register" isSubmitting={isSubmitting} classes={s} />)}
-            {config.back && (<RenderButton cfg={config.back} key="back" isSubmitting={isSubmitting} classes={s} />)}
+            {config.submit && (<RenderButton color="primary" cfg={config.submit} key="submit" isSubmitting={isSubmitting} classes={s} />)}
+            {config.register && (<RenderButton color="secondary" cfg={config.register} key="register" isSubmitting={isSubmitting} classes={s} />)}
+            {config.back && (<RenderButton color="secondary" cfg={config.back} key="back" isSubmitting={isSubmitting} classes={s} />)}
           </div>
         </C.AuthCard>
       </form>

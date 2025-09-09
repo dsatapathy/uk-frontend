@@ -1,12 +1,13 @@
 import { getComponent } from "@gov/core";
 
-export default function RenderButton({cfg, key, isSubmitting, classes}) {
+export default function RenderButton({cfg, key, isSubmitting, classes, color}) {
     const AppButton = getComponent("AppButton");
     const s = classes || {};
     const isRedirect = !!cfg.redirect;
   
     return (
       <AppButton
+        color={color}
         key={key}
         type={isRedirect ? "button" : "submit"}
         variant={cfg.variant || "contained"}

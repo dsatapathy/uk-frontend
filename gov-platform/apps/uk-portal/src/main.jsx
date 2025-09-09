@@ -22,8 +22,13 @@ start({
   },
 
   theme: {
-    palette: { mode: "light", primary: { main: "#0b5fff" } },
-    shape: { borderRadius: 8 }
+palette: {
+    mode: "light",
+    primary:   { main: "#16a34a" },
+    secondary: { main: "#15803d", contrastText: "#ffffff" },
+    background: { default: "#f9fafb" },
+  },
+  shape: { borderRadius: 8 }
   },
   // --- Authentication ---
   http: { baseURL: "http://localhost:3001/api/" },

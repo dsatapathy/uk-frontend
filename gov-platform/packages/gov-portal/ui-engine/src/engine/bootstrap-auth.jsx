@@ -6,7 +6,7 @@ import { Provider as ReduxProvider } from "react-redux";
 import { appStore, FormEngineProvider } from "@gov/store";
 import { setAuth, setUser, clearAuth, setHydrated } from "@gov/store";
 import ThemeBridge from "../ThemeBridge";
-import { DEFAULT_THEME } from "./constants";
+import { DEFAULT_THEME } from "../constants";
 
 export function AppProviders({ cfg, http, storage, children }) {
   // expose store for guards/utilities
