@@ -1,6 +1,6 @@
 import * as React from "react";
 import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
+import TypographyX from "../atoms/TypographyX";
 import Divider from "@mui/material/Divider";
 import IconButton from "@mui/material/IconButton";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
@@ -28,7 +28,7 @@ const DEFAULT_CFG = {
   gap: "sm",                  // "xs" | "sm" | "md" | "lg"
   marginY: "md",              // "none" | "xs" | "sm" | "md"
   titleTag: "h2",             // heading tag
-  titleVariantMap: {          // MUI typography variant per size
+  titleVariantMap: {          // MUI TypographyX variant per size
     sm: "subtitle1",
     md: "h6",
     lg: "h5",
@@ -130,20 +130,20 @@ export default function Section({
 
         <div className={s.titles}>
           {title ? (
-            <Typography
+            <TypographyX
               id={id ? `${id}-title` : undefined}
               component={cfg.titleTag}
               variant={titleVariant}
               className={s.title}
             >
               {title}
-            </Typography>
+            </TypographyX>
           ) : null}
 
           {description ? (
-            <Typography variant={descVariant} color="text.secondary" className={s.description}>
+            <TypographyX variant={descVariant} color="text.secondary" className={s.description}>
               {description}
-            </Typography>
+            </TypographyX>
           ) : null}
         </div>
 

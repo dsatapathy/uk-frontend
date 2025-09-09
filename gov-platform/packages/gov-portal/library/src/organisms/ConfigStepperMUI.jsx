@@ -79,7 +79,7 @@ export default function ConfigStepperMUI({
 
   // Compute field IDs in current step (for step validation)
   const stepFieldIds = React.useMemo(() => fieldsForStep(schema, step), [schema, step]);
-  const allFieldIds  = React.useMemo(() => uniq(steps.flatMap((s) => fieldsForStep(schema, s))), [schema, steps]);
+  const allFieldIds = React.useMemo(() => uniq(steps.flatMap((s) => fieldsForStep(schema, s))), [schema, steps]);
 
   const ctx = React.useMemo(() => ({ index, total, step }), [index, total, step]);
 
@@ -113,11 +113,11 @@ export default function ConfigStepperMUI({
 
   // default actions wiring (you can override with getStepActions)
   const baseActions = React.useMemo(() => ({
-    prev:   { id: "prev",   label: "Previous",   variant: "outlined",  color: "inherit",   onClick: () => go(index - 1) },
-    next:   { id: "next",   label: "Next",       variant: "contained", color: "primary",   requiresValid: true, onClick: async () => (await triggerStep()) && go(index + 1) },
-    save:   { id: "save",   label: "Save",       variant: "outlined",  color: "primary",   onClick: async () => onSave?.(formApiRef?.current?.getValues?.(), ctx) },
-    draft:  { id: "draft",  label: "Save Draft", variant: "outlined",  color: "secondary", onClick: async () => onDraft?.(formApiRef?.current?.getValues?.(), ctx) },
-    submit: { id: "submit", label: "Submit",     variant: "contained", color: "success",   requiresValid: true, onClick: async () => (await triggerAll()) && onSubmit?.(formApiRef?.current?.getValues?.(), ctx) },
+    prev: { id: "prev", label: "Previous", variant: "outlined", color: "inherit", onClick: () => go(index - 1) },
+    next: { id: "next", label: "Next", variant: "contained", color: "primary", requiresValid: true, onClick: async () => (await triggerStep()) && go(index + 1) },
+    save: { id: "save", label: "Save", variant: "outlined", color: "primary", onClick: async () => onSave?.(formApiRef?.current?.getValues?.(), ctx) },
+    draft: { id: "draft", label: "Save Draft", variant: "outlined", color: "secondary", onClick: async () => onDraft?.(formApiRef?.current?.getValues?.(), ctx) },
+    submit: { id: "submit", label: "Submit", variant: "contained", color: "success", requiresValid: true, onClick: async () => (await triggerAll()) && onSubmit?.(formApiRef?.current?.getValues?.(), ctx) },
   }), [go, index, triggerStep, triggerAll, onSave, onDraft, onSubmit, formApiRef, ctx]);
 
   function resolveActions() {
@@ -142,11 +142,16 @@ export default function ConfigStepperMUI({
     // Make the whole area a column so the footer can sit at the bottom *inside the body*
     <DSBox sx={{ display: "flex", flexDirection: "column", minHeight: "100vh", gap: 2 }}>
       {/* top stepper */}
-      <Paper elevation={0} sx={{ p: { xs: 1, sm: 2 }, borderRadius: 2, border: (t) => `1px solid ${t.palette.divider}` }}>
+      <Paper elevation={0} sx={{ p: { xs: 1, sm: 2 }, borderRadius: 2 }}>
         <Stepper activeStep={index} alternativeLabel={!isMobile} orientation={isMobile ? "vertical" : "horizontal"}>
           {steps.map((s) => (
             <Step key={s.id}>
-              <StepLabel>{s.label || s.title || s.id}</StepLabel>
+              <StepLabel sx={{
+                "& .MuiStepLabel-label": {
+                  fontWeight: 600,   // or 'bold'
+                  color: "var(--g-fg)", // optional: use your theme token
+                },
+              }}>{s.label || s.title || s.id}</StepLabel>
             </Step>
           ))}
         </Stepper>
@@ -166,7 +171,7 @@ export default function ConfigStepperMUI({
       >
         {step?.description && (
           <DSBox sx={{ mb: 2 }}>
-            <TypographyX variant="subtitle1" color="text.secondary">{step.description}</TypographyX>
+            <TypographyX variant="subtitle1" weight="bold" color="text.secondary">{step.description}</TypographyX>
             <Divider sx={{ mt: 1 }} />
           </DSBox>
         )}

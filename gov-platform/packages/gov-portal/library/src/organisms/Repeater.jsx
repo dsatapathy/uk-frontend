@@ -4,7 +4,7 @@ import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
-import Typography from "@mui/material/Typography";
+import TypographyX from "../atoms/TypographyX";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
@@ -166,14 +166,14 @@ export default function Repeater({
         <div className={s.header}>
           <div className={s.titles}>
             {header?.title ? (
-              <Typography variant={cfg.dense ? "subtitle1" : "h6"} className={s.title}>
+              <TypographyX variant={cfg.dense ? "subtitle1" : "h6"} className={s.title}>
                 {header.title}
-              </Typography>
+              </TypographyX>
             ) : null}
             {header?.description ? (
-              <Typography variant="body2" color="text.secondary" className={s.description}>
+              <TypographyX variant="body2" color="text.secondary" className={s.description}>
                 {header.description}
-              </Typography>
+              </TypographyX>
             ) : null}
           </div>
 

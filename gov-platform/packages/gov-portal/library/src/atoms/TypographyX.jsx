@@ -15,25 +15,37 @@ import MuiTypography from "@mui/material/Typography";
  * Everything else is passed through to MUI <Typography />.
  */
 const FW = { regular: 400, medium: 500, semibold: 600, bold: 700 };
-const MARGINS = { none: 0, xs: "var(--g-s1)", sm: "var(--g-s2)", md: "var(--g-s3)", lg: "var(--g-s4)" };
+const MARGINS = {
+  none: 0,
+  xs: "var(--g-s1, 2px)",
+  sm: "var(--g-s2, 4px)",
+  md: "var(--g-s3, 8px)",
+  lg: "var(--g-s4, 12px)",
+};
 
+// map tone -> CSS variable color
 function toneToColor(tone) {
   switch (tone) {
     case "muted":
-      return (theme) => ({ color: theme.palette.text.secondary });
+      return "var(--g-fg-muted)";
     case "primary":
+      return "var(--g-primary)";
     case "secondary":
+      return "var(--g-secondary)";
     case "success":
+      return "var(--success-600)";
     case "warning":
+      return "var(--warning-600)";
+    case "danger":
+      return "var(--error-600)";
     case "info":
-      return (theme) => ({ color: theme.palette[tone].main });
-    case "danger": // alias to error
-      return (theme) => ({ color: theme.palette.error.main });
+      return "var(--info-600)";
     default:
-      return undefined; // use default color
+      return "var(--g-fg)"; // default text color
   }
 }
 
+// per-breakpoint typography variant mapping
 function makeResponsiveTypography(responsive) {
   if (!responsive) return undefined;
   const order = ["xs", "sm", "md", "lg", "xl"];
@@ -56,19 +68,17 @@ export default function TypographyX({
   tone = "default",
   clamp,
   ellipsis,
-  weight,
+  weight = "regular",   // default weight
   mb = "none",
-  align,          // passthrough to MUI
+  align,                 // passthrough to MUI
   underline = false,
   sx,
   children,
   ...rest
 }) {
-  const colorSx = toneToColor(tone);
   const respSx = makeResponsiveTypography(responsive);
-  const fontWeight = typeof weight === "number" ? weight : (weight ? FW[weight] : undefined);
 
-  // If clamp is set, prefer multi-line clamp over single-line ellipsis.
+  // clamp → multi-line truncation
   const clampCount = clamp === true ? 1 : clamp;
   const clampSx =
     typeof clampCount === "number"
@@ -80,6 +90,7 @@ export default function TypographyX({
         }
       : undefined;
 
+  // single-line ellipsis if no clamp
   const ellipsisSx =
     !clampSx && ellipsis
       ? { whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }
@@ -90,10 +101,12 @@ export default function TypographyX({
       variant={variant}
       align={align}
       sx={[
-        { marginBottom: MARGINS[mb] ?? 0 },
-        fontWeight ? { fontWeight } : null,
+        {
+          color: toneToColor(tone),
+          fontWeight: typeof weight === "number" ? weight : FW[weight],
+          marginBottom: MARGINS[mb] ?? 0,
+        },
         underline ? { textDecoration: "underline" } : null,
-        colorSx,
         respSx,
         clampSx,
         ellipsisSx,
@@ -106,5 +119,5 @@ export default function TypographyX({
   );
 }
 
-// Optional named alias if you like importing as `Text`
+// Optional alias
 export { TypographyX as Text };

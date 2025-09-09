@@ -1,10 +1,11 @@
 import React from "react";
 import PropTypes from "prop-types";
 import {
-  AppBar, Toolbar, Box, Typography, IconButton, Collapse, Badge, Avatar,
+  AppBar, Toolbar, Box, IconButton, Collapse, Badge, Avatar,
   Menu, MenuItem, Divider, ListItemIcon, ListItemText, ListSubheader,
   List, ListItemButton, Tooltip
 } from "@mui/material";
+import TypographyX from "../atoms/TypographyX";
 import SearchField from "../atoms/SearchField";
 import { getIcon } from "../utils/icons";
 
@@ -67,14 +68,14 @@ export default function TopBar(props) {
         {/* LEFT SIDE: brand (logo + project title) */}
         <Box sx={{ display: "flex", alignItems: "center", gap: 1, minWidth: 0, flexShrink: 1 }}>
           {logo}
-          {/* <Typography
+          {/* <TypographyX
             variant="h6"
             sx={{ fontWeight: 600, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
                   maxWidth: { xs: 160, sm: 240, md: "none" } }}
             title={title}
           >
             {title}
-          </Typography> */}
+          </TypographyX> */}
         </Box>
 
         {/* optional centered search on desktop; otherwise just fill space */}
@@ -216,15 +217,15 @@ export default function TopBar(props) {
               sx={{ alignItems: "flex-start", gap: 1, whiteSpace: "normal" }}>
               <Avatar sx={{ width: 32, height: 32 }}>{n.avatar ?? "U"}</Avatar>
               <Box sx={{ minWidth: 0 }}>
-                <Typography variant="body2" sx={{ fontWeight: n.unread ? 600 : 400 }} noWrap title={n.title}>
+                <TypographyX variant="body2" sx={{ fontWeight: n.unread ? 600 : 400 }} noWrap title={n.title}>
                   {n.title}
-                </Typography>
+                </TypographyX>
                 {n.subtitle && (
-                  <Typography variant="caption" color="text.secondary" sx={{ display: "block" }} noWrap title={n.subtitle}>
+                  <TypographyX variant="caption" color="text.secondary" sx={{ display: "block" }} noWrap title={n.subtitle}>
                     {n.subtitle}
-                  </Typography>
+                  </TypographyX>
                 )}
-                {n.time && <Typography variant="caption" color="text.secondary">{n.time}</Typography>}
+                {n.time && <TypographyX variant="caption" color="text.secondary">{n.time}</TypographyX>}
               </Box>
             </MenuItem>
           ))}
