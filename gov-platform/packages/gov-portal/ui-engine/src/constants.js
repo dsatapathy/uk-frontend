@@ -93,6 +93,38 @@ export const DEFAULT_THEME = {
     MuiLink: {
       styleOverrides: { root: { color: "var(--g-link)" } },
     },
+    MuiCheckbox: {
+  styleOverrides: {
+    root: {
+      color: 'var(--field-icon, #94a3b8)',              // unchecked
+      '&.Mui-checked, &.MuiCheckbox-indeterminate': {
+        color: 'var(--g-primary)',                       // checked/indeterminate
+      },
+    },
+  },
+},
+MuiRadio: {
+  styleOverrides: {
+    root: {
+      color: 'var(--field-icon, #94a3b8)',              // unchecked
+      '&.Mui-checked': {
+        color: 'var(--g-primary)',                       // checked
+      },
+    },
+  },
+},
+    MuiSwitch: {
+      styleOverrides: {
+        switchBase: {
+          "&.Mui-checked": {
+            color: "var(--g-primary)",
+          },
+          "&.Mui-checked + .MuiSwitch-track": {
+            backgroundColor: "var(--g-primary)",
+          },
+        },
+      },
+    },
   },
 };
 

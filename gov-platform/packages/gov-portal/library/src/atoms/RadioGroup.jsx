@@ -30,7 +30,7 @@ const DEFAULT_CFG = {
   size: "md",
   color: "primary",
   marginY: "sm",
-  orientation: "vertical",
+  orientation: "horizontal",
   gap: "sm",
   columns: null,
   labelPlacement: "end",

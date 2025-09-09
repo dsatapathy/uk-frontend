@@ -86,7 +86,7 @@ export default function Checkbox({
             inputRef={controlled.inputRef}
             indeterminate={!!indeterminate}
             size={muiSize}
-            color={cfg.color}
+            color="primary"  // always primary, tones come from theme.palette
             disabled={disabled || readOnly}
             inputProps={{
               "aria-describedby": ariaDescribedBy,
