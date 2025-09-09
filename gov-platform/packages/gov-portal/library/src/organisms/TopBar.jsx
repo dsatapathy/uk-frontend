@@ -6,7 +6,6 @@ import {
   List, ListItemButton, Tooltip
 } from "@mui/material";
 import SearchField from "../atoms/SearchField";
-import ActionsTray from "../molecules/ActionsTray"; // keep if you still need it
 import { getIcon } from "../utils/icons";
 
 function useMenu() {
@@ -44,8 +43,19 @@ export default function TopBar(props) {
   const unread = React.useMemo(() => notifications.filter(n => n.unread).length, [notifications]);
 
   return (
-    <AppBar position="static" elevation={0} color="default"
-      sx={{ borderBottom: "1px solid", borderColor: "divider" }}>
+    <AppBar
+      position="static"
+      elevation={0}
+      color="default"
+      sx={{
+        borderBottom: "1px solid",
+        borderColor: "var(--topbar-border)",
+        // backgroundImage: "var(--topbar-gradient)",
+        backgroundColor: "transparent",  // ensure gradient shows
+        color: "var(--topbar-fg)",
+        boxShadow: "0 1px 4px rgb(0 0 0 / 0.1)",
+      }}
+    >
       <Toolbar sx={{ gap: 1, minHeight: { xs: 56, sm: 64 } }}>
         {/* Left: hamburger (mobile) */}
         {!isDesktop && (
@@ -158,8 +168,10 @@ export default function TopBar(props) {
         <Collapse in={mobileSearchOpen} timeout="auto" unmountOnExit>
           <Box
             id={searchPanelId}
-            sx={{ px: 2, py: 1, borderTop: "1px solid", borderColor: "divider",
-                  bgcolor: "background.paper", display: "flex" }}
+            sx={{
+              px: 2, py: 1, borderTop: "1px solid", borderColor: "divider",
+              bgcolor: "background.paper", display: "flex"
+            }}
           >
             <SearchField autoFocus value={searchValue} onChange={onSearchChange} onEnter={onSearchEnter} fullWidth />
           </Box>
@@ -168,7 +180,7 @@ export default function TopBar(props) {
 
       {/* MENUS (unchanged) */}
       <Menu id="home-menu" anchorEl={home.anchorEl} open={home.open} onClose={home.onClose}
-            anchorOrigin={{ vertical: "bottom", horizontal: "right" }}>
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}>
         <ListSubheader disableSticky>Home</ListSubheader>
         {homeMenu.map(item => (
           <MenuItem key={item.id} onClick={() => { home.onClose(); item.onClick?.(item); }}>
@@ -179,7 +191,7 @@ export default function TopBar(props) {
       </Menu>
 
       <Menu id="line-menu" anchorEl={line.anchorEl} open={line.open} onClose={line.onClose}
-            anchorOrigin={{ vertical: "bottom", horizontal: "right" }}>
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}>
         <ListSubheader disableSticky>Line Department</ListSubheader>
         <List dense disablePadding sx={{ minWidth: 260, maxHeight: 360, overflowY: "auto" }}>
           {lineDeptMenu.map(item => (
@@ -192,8 +204,8 @@ export default function TopBar(props) {
       </Menu>
 
       <Menu id="notif-menu" anchorEl={notif.anchorEl} open={notif.open} onClose={notif.onClose}
-            slotProps={{ paper: { sx: { width: 360, maxWidth: "calc(100vw - 32px)" } } }}
-            anchorOrigin={{ vertical: "bottom", horizontal: "right" }}>
+        slotProps={{ paper: { sx: { width: 360, maxWidth: "calc(100vw - 32px)" } } }}
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}>
         <ListSubheader disableSticky>Notifications</ListSubheader>
         <Box sx={{ maxHeight: 420, overflowY: "auto" }}>
           {notifications.length === 0 ? (
@@ -225,7 +237,7 @@ export default function TopBar(props) {
       </Menu>
 
       <Menu id="profile-menu" anchorEl={profile.anchorEl} open={profile.open} onClose={profile.onClose}
-            anchorOrigin={{ vertical: "bottom", horizontal: "right" }}>
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}>
         {profileMenu.map(item => (
           <MenuItem key={item.id} onClick={() => { profile.onClose(); item.onClick?.(item); }}>
             {item.icon ? <ListItemIcon>{getIcon(item.icon)}</ListItemIcon> : null}
