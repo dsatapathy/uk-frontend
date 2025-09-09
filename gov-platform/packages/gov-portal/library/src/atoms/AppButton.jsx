@@ -1,6 +1,7 @@
 import * as React from "react";
 import MuiButton from "@mui/material/Button";
 import CircularProgress from "@mui/material/CircularProgress";
+import { fontWeight } from "@mui/system";
 
 const cx = (...a) => a.filter(Boolean).join(" ");
 
@@ -54,7 +55,10 @@ const AppButton = React.forwardRef(function AppButton(
       aria-busy={loading || undefined}
       sx={[
         (theme) => marginStyles(theme),
-        { borderRadius: "var(--g-radius)" },  // still picks up from ThemeBridge
+        { borderRadius: "var(--g-radius)", fontWeight: "bold", minWidth: {
+            xs: "120px",   // below sm (mobile)
+            sm: "150px",   // above sm (tablet & desktop)
+          }, },        
         loading && { pointerEvents: "none" },
         ...(Array.isArray(sx) ? sx : sx ? [sx] : []),
       ]}
