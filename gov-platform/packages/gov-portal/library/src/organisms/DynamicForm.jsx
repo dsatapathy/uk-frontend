@@ -53,15 +53,64 @@ function extractRuleDepsFromField(field) {
   return Array.from(out);
 }
 
-/** Build a string expression for InlineCondition.when
- *  Logic: visible IFF none of the 'hide' rules are true → !(hide1 || hide2 || ...)
- *  If there are no 'hide' rules → "true"
- */
 function buildShowExpr(field) {
-  const hides = (field.rules || []).filter((r) => r.action === "hide" && typeof r.when === "string" && r.when.trim());
+  const hides = (field.rules || []).filter(
+    (r) => r.action === "hide" && typeof r.when === "string" && r.when.trim()
+  );
   if (!hides.length) return "true";
   const orClauses = hides.map((r) => `(${r.when})`).join(" || ");
   return `!(${orClauses})`;
+}
+
+/* -------------------- VISIBILITY AWARE RESOLVER HELPERS ------------------- */
+function safeBool(expr, values) {
+  if (!expr) return false;
+  try {
+    // eslint-disable-next-line no-new-func
+    return !!new Function("values", `return !!(${expr});`)(values);
+  } catch {
+    return false;
+  }
+}
+function fieldIsHidden(field, values) {
+  const rules = (field.rules || []).filter(
+    (r) => r?.action === "hide" && typeof r.when === "string" && r.when.trim()
+  );
+  if (!rules.length) return false;
+  return rules.some((r) => safeBool(r.when, values));
+}
+function collectHiddenFieldIds(schema, values) {
+  const out = new Set();
+  (schema?.sections || []).forEach((sec) => {
+    (sec.fields || []).forEach((f) => {
+      if (fieldIsHidden(f, values)) out.add(f.id);
+    });
+  });
+  return out;
+}
+// Wrap zodResolver to drop errors/values for hidden fields
+function makeVisibilityAwareResolver(zodSchema, formSchema) {
+  const base = zodResolver(zodSchema);
+  return async (values, context, options) => {
+    const res = await base(values, context, options);
+
+    const hidden = collectHiddenFieldIds(formSchema, values);
+
+    // 1) strip errors for hidden fields
+    if (res.errors) {
+      for (const key of Array.from(hidden)) {
+        if (res.errors[key]) delete res.errors[key];
+      }
+    }
+
+    // 2) OPTIONAL: strip hidden values from the validated result
+    //    (If you want drafts to retain hidden field values, comment this out.)
+    hidden.forEach((k) => {
+      if (k in res.values) delete res.values[k];
+    });
+
+    return res;
+  };
 }
 
 /* ------------------------------- Component ------------------------------- */
@@ -98,8 +147,14 @@ export default function DynamicForm({
     return { ...base, ...(draft?.values || {}), ...(defaultValues || {}) };
   }, [schemaForDefaults, defaultValues, draft]);
 
+  // ▼▼▼ CHANGED: use visibility-aware resolver
+  const resolver = React.useMemo(
+    () => (zodSchema ? makeVisibilityAwareResolver(zodSchema, schemaForValidation) : undefined),
+    [zodSchema, schemaForValidation]
+  );
+
   const methods = useForm({
-    resolver: zodSchema ? zodResolver(zodSchema) : undefined,
+    resolver,                         // << was: zodResolver(zodSchema)
     mode: "onSubmit",
     reValidateMode: "onChange",
     defaultValues: formDefaults,
@@ -188,9 +243,8 @@ export default function DynamicForm({
               areas={ui?.grid?.areas?.[sec.id]}
             >
               {(sec.fields || []).map((f) => {
-                // Build InlineCondition props from the field's rules
-                const whenExpr = buildShowExpr(f);                  // string expression to SHOW
-                const deps = extractRuleDepsFromField(f);           // e.g. ["landOwnership", "ownsLivestock", ...]
+                const whenExpr = buildShowExpr(f);
+                const deps = extractRuleDepsFromField(f);
                 return (
                   <InlineCondition
                     key={f.id}
@@ -199,9 +253,9 @@ export default function DynamicForm({
                     else={{ show: false }}
                     deps={deps}
                     config={{
-                      keepMountedWhenHidden: false,  // do not render DOM when hidden
-                      collapseHidden: true,          // if ever mounted and hidden, use display:none
-                      allowStringExpr: true,         // enable string expression evaluation
+                      keepMountedWhenHidden: false,
+                      collapseHidden: true,
+                      allowStringExpr: true,
                     }}
                   >
                     <FormGrid.Item

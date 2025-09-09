@@ -99,7 +99,7 @@ function evaluateRules(field, { values }) {
 }
 
 /** ── NEW: derive dependencies from rule expressions ── */
-const RULE_PATH_RE = /values\.([a-zA-Z0-9_.]+)/g;
+const RULE_PATH_RE = /values\.([a-zA-Z0-9_.])/g;
 function extractRuleDeps(field) {
   const out = new Set();
   (field.rules || []).forEach((r) => {
@@ -127,7 +127,7 @@ export default function FieldController({
   mountWhenHidden = true,
 }) {
   // ⬇️ also pull trigger from RHF
-  const { control, setValue, getValues, formState, trigger } = useFormContext();
+  const { control, setValue, getValues, formState, trigger, clearErrors, unregister } = useFormContext();
 
   // explicit dependsOn from schema
   const depList = field?.options?.dependsOn || [];
@@ -147,9 +147,9 @@ export default function FieldController({
   const values = getValues(); // RHF snapshot for rules/derive
   const ruleState = React.useMemo(
     () =>
-      (typeof ruleEngine === "function"
-        ? ruleEngine(field, { values, user, flags })
-        : evaluateRules(field, { values })),
+    (typeof ruleEngine === "function"
+      ? ruleEngine(field, { values, user, flags })
+      : evaluateRules(field, { values })),
     [field, values, user, flags, ruleEngine]
   );
 
@@ -177,6 +177,15 @@ export default function FieldController({
   // dependency context for async option components
   const ctxDeps = buildDeps(depList, values, user);
   const depsReady = depsResolved(depList, values, user);
+
+  // when a field flips hidden, clear its error (and optionally unregister)
+  React.useEffect(() => {
+    if (hidden) {
+      clearErrors(field.id);
+      // Optional: fully unregister so RHF drops refs and validation
+      // unregister(field.id);
+    }
+  }, [hidden, field.id, clearErrors, unregister]);
 
   // If not mounting hidden fields, bail out entirely
   if (hidden && !mountWhenHidden) return null;
@@ -231,8 +240,8 @@ export default function FieldController({
         field.defaultValue !== undefined
           ? field.defaultValue
           : field.type === "checkbox"
-          ? false
-          : ""
+            ? false
+            : ""
       }
       control={control}
       render={({ field: rhf, fieldState }) => {
@@ -324,10 +333,10 @@ function renderFieldByType(field, { rhf, error, disabled, required, hidden, ctxD
             field.defaultValue !== undefined
               ? field.defaultValue
               : field.type === "checkbox"
-              ? false
-              : (field.type === "file" || field.type === "upload")
-              ? (field.props?.multiple ? [] : null)
-              : ""
+                ? false
+                : (field.type === "file" || field.type === "upload")
+                  ? (field.props?.multiple ? [] : null)
+                  : ""
           }
         />
       );
@@ -423,8 +432,8 @@ function renderFieldByType(field, { rhf, error, disabled, required, hidden, ctxD
             c.defaultValue !== undefined
               ? c.defaultValue
               : c.type === "checkbox"
-              ? false
-              : "";
+                ? false
+                : "";
         });
         return o;
       };
