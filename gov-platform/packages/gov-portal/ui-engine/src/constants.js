@@ -2,16 +2,14 @@
 export const DEFAULT_THEME = {
   palette: {
     mode: "light",
-    primary:   { main: "#16a34a" },                 // agri-600
+    primary: { main: "#16a34a" }, // agri-600
     secondary: { main: "#15803d", contrastText: "#ffffff" }, // agri-700
     background: { default: "#f9fafb" },
   },
 
-  // keep in sync with ThemeBridge -> --g-radius
   shape: { borderRadius: 12 },
 
   components: {
-    // Nice focus ring + tokenized radius for all buttons
     MuiButton: {
       styleOverrides: {
         root: {
@@ -24,43 +22,34 @@ export const DEFAULT_THEME = {
       },
     },
 
-    // Tokenized inputs (uses your --field-* with fallbacks)
+    // ✅ Added subtle box shadow
     MuiOutlinedInput: {
       styleOverrides: {
         root: {
           borderRadius: "var(--field-radius, var(--g-radius))",
           backgroundColor: "var(--field-bg, #fff)",
+          boxShadow: "0 1px 2px rgba(0, 0, 0, 0.08)",   // <-- added
           transition: "box-shadow .2s ease, border-color .2s ease",
 
-          // hover
+          "&:hover": {
+            boxShadow: "0 2px 4px rgba(0, 0, 0, 0.10)", // hover bigger
+          },
+
           "&:hover .MuiOutlinedInput-notchedOutline": {
             borderColor: "var(--field-hover, var(--g-border))",
           },
 
-          // focused
-          "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-            borderColor: "var(--field-focus, var(--g-primary))",
-            borderWidth: 2,
-          },
           "&.Mui-focused": {
             boxShadow: "0 0 0 3px var(--field-focus-ring, var(--g-focus-ring))",
           },
 
-          // error
-          "&.Mui-error .MuiOutlinedInput-notchedOutline": {
-            borderColor: "var(--field-error, #ef4444)",
-          },
           "&.Mui-error.Mui-focused": {
             boxShadow:
               "0 0 0 3px var(--field-error-ring, color-mix(in srgb, #ef4444 35%, transparent))",
           },
         },
-        notchedOutline: {
-          borderColor: "var(--field-border, var(--g-border))",
-        },
-        input: {
-          padding: "14.5px 14px", // compact feel
-        },
+        notchedOutline: { borderColor: "var(--field-border, var(--g-border))" },
+        input: { padding: "14.5px 14px" },
       },
     },
 
@@ -82,43 +71,43 @@ export const DEFAULT_THEME = {
 
     MuiSvgIcon: {
       styleOverrides: {
-        root: { color: "var(--field-icon, #94a3b8)" }, // adornment icon color
+        root: { color: "var(--field-icon, #94a3b8)" },
       },
     },
 
     MuiPaper: {
-      styleOverrides: { root: { borderRadius: "var(--g-radius)" } },
+      styleOverrides: {
+        root: {
+          borderRadius: "var(--g-radius)",
+          boxShadow: "0 1px 2px rgba(0, 0, 0, 0.06)", // paper shadow too
+        },
+      },
     },
 
-    MuiLink: {
-      styleOverrides: { root: { color: "var(--g-link)" } },
-    },
+    MuiLink: { styleOverrides: { root: { color: "var(--g-link)" } } },
+
     MuiCheckbox: {
-  styleOverrides: {
-    root: {
-      color: 'var(--field-icon, #94a3b8)',              // unchecked
-      '&.Mui-checked, &.MuiCheckbox-indeterminate': {
-        color: 'var(--g-primary)',                       // checked/indeterminate
+      styleOverrides: {
+        root: {
+          color: "var(--field-icon, #94a3b8)",
+          "&.Mui-checked, &.MuiCheckbox-indeterminate": {
+            color: "var(--g-primary)",
+          },
+        },
       },
     },
-  },
-},
-MuiRadio: {
-  styleOverrides: {
-    root: {
-      color: 'var(--field-icon, #94a3b8)',              // unchecked
-      '&.Mui-checked': {
-        color: 'var(--g-primary)',                       // checked
+    MuiRadio: {
+      styleOverrides: {
+        root: {
+          color: "var(--field-icon, #94a3b8)",
+          "&.Mui-checked": { color: "var(--g-primary)" },
+        },
       },
     },
-  },
-},
     MuiSwitch: {
       styleOverrides: {
         switchBase: {
-          "&.Mui-checked": {
-            color: "var(--g-primary)",
-          },
+          "&.Mui-checked": { color: "var(--g-primary)" },
           "&.Mui-checked + .MuiSwitch-track": {
             backgroundColor: "var(--g-primary)",
           },
