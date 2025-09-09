@@ -21,6 +21,7 @@ const devOnlySrcAliases = {
   "@gov/ui-engine": toFs(path.resolve(repoRoot, "packages/gov-portal/ui-engine/src")),
   "@gov/form-engine": toFs(path.resolve(repoRoot, "packages/gov-portal/formengine/src")),
   "@gov/styles":      toFs(path.resolve(repoRoot, "packages/gov-portal/styles")),
+  "@gov/mod-member": toFs(path.resolve(repoRoot, "packages/gov-portal/modules/member/src"))
 };
 
 // Tiny React 17-safe shim for Emotion’s helper

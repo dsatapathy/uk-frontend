@@ -53,7 +53,10 @@ function LoginFormInner({ config, onSubmit, onSuccess, components, classes, sche
     "login-bg-pos": config.style?.layout?.backgroundPosition || "center",
     "login-overlay": config.style?.layout?.overlay || "transparent",
     "login-blur": (config.style?.layout?.blurPx ?? 0) + "px",
-    "login-card-w": (config.style?.card?.widthPx ?? 480) + "px",
+    "login-card-w":
+      (config.style?.card?.maxWidthPx ??
+        config.style?.card?.widthPx ??
+        520) + "px",
     "login-card-p": (config.style?.card?.paddingPx ?? 24) + "px",
     "login-card-radius": (config.style?.card?.radiusPx ?? 12) + "px",
     "login-card-border": config.style?.card?.border || "1px solid #e5e7eb",

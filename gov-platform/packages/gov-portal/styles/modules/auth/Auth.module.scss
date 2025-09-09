@@ -1,274 +1,113 @@
-@use "../../core/index" as *;
-@use "../../layout/grid" as grid;
-@use "../../components/brand";
-@use "../../components/card";
-@use "../../components/form-helpers";
-
-/* Layout */
+/* Root layout */
 .authLayout {
-  /* background image + overlay are layers */
-  --bg-url: var(--login-bg-img, none);
-  --bg-fit: var(--login-bg-fit, cover);
-  --bg-pos: var(--login-bg-pos, center);
-  // --bg-overlay: var(--login-overlay, transparent);
-  --bg-blur: var(--login-blur, 0px);
+  /* center content */
+  display: flex;
+  justify-content: center;
+  align-items: center;
 
-  min-height: 100vh;
+  /* allow the page to grow if needed, but try to fill screen */
+  min-height: 100svh; /* falls back to dvh/vh below if svh unsupported */
+  @supports not (min-height: 100svh) {
+    min-height: 100dvh;
+  }
+
   position: relative;
-  overflow: hidden;
-  background: var(--login-bg, #f6f7fb);
-  padding: var(--login-pad, 24px);
+
+  /* no horizontal scroll blips; vertical scroll only when content taller */
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+
+  /* fluid outer padding: 12px..24px depending on viewport */
+  padding: clamp(12px, 4vh, var(--login-pad, 24px));
+
+  background: var(--login-bg, transparent);
+  background-image: var(--login-bg-img);
+  background-size: var(--login-bg-fit, cover);
+  background-position: var(--login-bg-pos, center);
 }
 
-/* background layer (image + overlay + blur) */
+/* Background overlay + blur */
 .bgLayer {
   position: absolute;
   inset: 0;
-  pointer-events: none;
-
-  &:before,
-  &:after {
-    content: "";
-    position: absolute;
-    inset: 0;
-  }
-
-  &:before {
-    background-image: var(--bg-url);
-    background-size: var(--bg-fit);
-    background-position: var(--bg-pos);
-    background-repeat: no-repeat;
-    filter: none;
-  }
-
-  &:after {
-    background: var(--bg-overlay);
-    backdrop-filter: blur(var(--bg-blur));
-    -webkit-backdrop-filter: blur(var(--bg-blur));
-  }
+  background: var(--login-overlay, transparent);
+  backdrop-filter: blur(var(--login-blur, 0px));
+  z-index: 0;
 }
 
-/* Position helpers */
-.pos-center {
-  display: grid;
-  place-items: center;
-}
-
-.pos-left {
-  display: grid;
-  place-items: center start;
-}
-
-.pos-right {
-  display: grid;
-  place-items: center end;
-}
-
-.pos-top-left {
-  display: grid;
-  place-items: start start;
-}
-
-.pos-top-right {
-  display: grid;
-  place-items: start end;
-}
-
-.pos-bottom-left {
-  display: grid;
-  place-items: end start;
-}
-
-.pos-bottom-right {
-  display: grid;
-  place-items: end end;
-}
-
-/* Card (glass) */
+/* The card (MUI Card/Paper wrapper) */
 .authCard {
-  --card-w: var(--login-card-w, 520px);
-  --card-p: var(--login-card-p, 28px);
-  --card-radius: var(--login-card-radius, 16px);
-  --card-border: var(--login-card-border, 1px solid rgba(255, 255, 255, .5));
-  @extend %cardRoot;
+  position: relative;
 
-  /* glass look w/ safe backdrop */
-  background: rgba(255, 255, 255, .75);
-  border: var(--card-border);
-  border-radius: var(--card-radius);
-  max-width: var(--card-w);
+  /* never exceed viewport width */
   width: 100%;
-  backdrop-filter: saturate(1.2) blur(8px);
-  -webkit-backdrop-filter: saturate(1.2) blur(8px);
-  box-shadow:
-    0 10px 30px rgba(2, 6, 23, .08),
-    0 4px 10px rgba(2, 6, 23, .04);
+  max-width: var(--login-card-w, 480px);
+
+  /* padding stays inside measured width */
+  box-sizing: border-box;
+
+  /* fluid inner padding for short screens */
+  // padding: clamp(16px, 3.5vh, var(--login-card-p, 24px));
+
+  border-radius: var(--login-card-radius, 12px);
+  border: var(--login-card-border, 1px solid #e5e7eb);
+  z-index: 1;
 }
 
-.authCardContent {
+/* Brand: scale down gracefully on short viewports */
+.brand {
   display: flex;
   flex-direction: column;
-  overflow: auto;
-  @extend %cardContent;
+  align-items: center;
+  // margin-bottom: clamp(8px, 2vh, 16px);
+
+  .brandLogo {
+    /* scale with viewport height, clamp between 36 and 64px */
+    max-height: clamp(36px, 7vh, 64px);
+    width: auto;
+    margin-bottom: clamp(6px, 1.6vh, 12px);
+  }
+  .brandTitle {
+    font-size: clamp(1.05rem, 2.2vh, 1.25rem);
+    font-weight: 600;
+  }
+  .brandSubtitle {
+    font-size: clamp(0.8rem, 1.8vh, 0.95rem);
+    color: #666;
+  }
 }
 
-/* Brand */
-.brand {
-  @extend %brand;
-}
-
-.brandLogo {
-  width: var(--login-logo-w, 120px);
-  height: var(--login-logo-h, 64px);
-  display: inline-block;
-}
-
-.brandLogo img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-}
-
-.brandTitle {
-  @extend %brandTitle;
-}
-
-.brandSubtitle {
-  @extend %brandSubtitle;
-}
-
-/* Grid */
+/* Form grid */
 .loginGrid {
-  --grid-cols: var(--login-grid-cols, 12);
-  --grid-gap: var(--login-grid-gap, 16px);
-  @extend %grid;
-  flex: 1 1 auto;
+  display: grid;
+  grid-template-columns: repeat(var(--login-grid-cols, 12), 1fr);
+  // gap: clamp(8px, 2vh, var(--login-grid-gap, 16px));
 }
 
 .gridItem {
-  @extend %gridItem;
+  grid-column: span var(--span-xs, 12);
 }
 
-@include grid.gridResponsive();
-
-/* Rows / Buttons / Errors */
-.captchaRow {
-  @extend %inlineRow;
-  min-height: var(--captcha-h, 56px);
+@media (min-width: 768px) {
+  .gridItem { grid-column: span var(--span-md, 12); }
 }
 
+/* Buttons row */
 .submitRow {
-  min-height: 56px;
-  --btn-mt: var(--login-button-mt, 12px);
-  @extend %submitRow;
+  // margin-top: clamp(8px, 1.8vh, var(--login-button-mt, 12px));
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+
+  &.align-center { justify-content: center; }
+  &.align-left   { justify-content: flex-start; }
+  &.align-right  { justify-content: flex-end; }
 }
 
-.align-left {
-  @extend %submitLeft;
-}
-
-.align-center {
-  @extend %submitCenter;
-}
-
-.align-right {
-  @extend %submitRight;
-}
-
-.submitBtn {
-  width: 160px;
-  @extend %submitBtn;
-}
-
-.fieldError {
-  @extend %fieldError;
-}
-
-/* ---------- Animations (CLS-safe: transform/opacity only) ---------- */
-.cardIn {
-  will-change: transform, opacity;
-}
-
-.noMotion {
-  animation: none !important;
-  transform: none !important;
-  opacity: 1 !important;
-}
-
-@keyframes fadeUpKf {
-  from {
-    opacity: 0;
-    transform: translateY(12px)
-  }
-
-  to {
-    opacity: 1;
-    transform: none
-  }
-}
-
-@keyframes scaleInKf {
-  from {
-    opacity: 0;
-    transform: scale(.98)
-  }
-
-  to {
-    opacity: 1;
-    transform: none
-  }
-}
-
-.fadeUp {
-  animation: fadeUpKf var(--cardIn-duration, 500ms) ease-out both;
-}
-
-.scaleIn {
-  animation: scaleInKf var(--cardIn-duration, 500ms) cubic-bezier(.2, .8, .2, 1) both;
-}
-
-/* ---------- Decorations ---------- */
-.decor {
-  position: absolute;
-  width: var(--decor-size, 280px);
-  height: var(--decor-size, 280px);
-  opacity: var(--decor-opacity, .2);
-  filter: blur(10px);
-  pointer-events: none;
-}
-
-.decor-blob {
-  border-radius: 50%;
-  background: radial-gradient(circle at 30% 30%,
-      hsla(var(--decor-hue, 220), 95%, 65%, .65),
-      hsla(var(--decor-hue, 220), 95%, 55%, .35),
-      transparent 70%);
-  animation: floatKf var(--decor-speed, 24s) ease-in-out infinite alternate;
-}
-
-.decor-ring {
-  border-radius: 50%;
-  box-shadow: inset 0 0 0 30px hsla(var(--decor-hue, 220), 85%, 55%, .18),
-    inset 0 0 0 2px hsla(var(--decor-hue, 220), 95%, 65%, .5);
-  animation: driftKf var(--decor-speed, 30s) linear infinite;
-}
-
-@keyframes floatKf {
-  from {
-    transform: translateY(-8px)
-  }
-
-  to {
-    transform: translateY(8px)
-  }
-}
-
-@keyframes driftKf {
-  from {
-    transform: rotate(0deg)
-  }
-
-  to {
-    transform: rotate(360deg)
-  }
+/* Extra compression on short screens (≤ 750px tall) */
+@media (max-height: 750px) {
+  .authCard { max-width: 460px; }
+  .brand .brandLogo { max-height: 48px; }
+  .submitRow { gap: 10px; }
 }

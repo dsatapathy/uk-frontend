@@ -7,6 +7,7 @@ const all = {
   landing: () => import("@gov/mod-landing"),
   auth: () => import("@gov/mod-auth"),
   bpa: () => import("@gov/mod-bpa"),
+  member: () => import("@gov/mod-member"),
 };
 
 console.log("[env] VITE_ENABLED_MODULES =", import.meta.env.VITE_ENABLED_MODULES);

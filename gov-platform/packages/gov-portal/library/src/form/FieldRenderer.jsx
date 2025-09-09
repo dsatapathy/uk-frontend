@@ -7,6 +7,9 @@ import {
   Checkbox,
   FormControlLabel,
   MenuItem,
+  FormControl,
+  FormLabel,
+  FormHelperText,
 } from "@mui/material";
 import { Controller } from "react-hook-form";
 import PersonIcon from "@mui/icons-material/Person";
@@ -48,9 +51,10 @@ export function FieldRenderer({ control, field, errors, classes, globalStyle }) 
     "--span-md": grid.span?.md ?? 12,
   };
 
-  const errMsg = errors?.[name]?.message || "";
+  const errObj = errors?.[name];
+  const errMsg = errObj?.message || "";
 
-  // ---------- Checkbox ----------
+  // ---------- Checkbox (kept as-is with inline label) ----------
   if (type === "checkbox") {
     return (
       <div className={s.gridItem} style={itemStyle}>
@@ -66,7 +70,7 @@ export function FieldRenderer({ control, field, errors, classes, globalStyle }) 
     );
   }
 
-  // ---------- Select ----------
+  // ---------- Select (label on top) ----------
   if (type === "select") {
     return (
       <div className={s.gridItem} style={itemStyle}>
@@ -74,36 +78,51 @@ export function FieldRenderer({ control, field, errors, classes, globalStyle }) 
           name={name}
           control={control}
           render={({ field: rhf }) => (
-            <TextField
-              select
+            <FormControl
               fullWidth
               margin="normal"
               required={!!required}
-              label={label}
-              placeholder={placeholder}
-              {...rhf}
-              error={!!errors?.[name]}
-              helperText={errMsg}
-              InputProps={{
-                startAdornment: adornment ? (
-                  <InputAdornment position="start">{adornment}</InputAdornment>
-                ) : null,
-              }}
-              {...(textFieldProps || {})}
+              error={!!errObj}
+              disabled={!!disabled}
             >
-              {(selectOptions || []).map((opt) => (
-                <MenuItem key={opt.value} value={opt.value}>
-                  {opt.label}
-                </MenuItem>
-              ))}
-            </TextField>
+              {label ? <FormLabel htmlFor={name}>{label}</FormLabel> : null}
+
+              <TextField
+                id={name}
+                select
+                fullWidth
+                margin="none"                  // avoid double vertical spacing (FormControl handles it)
+                placeholder={placeholder}
+                {...rhf}
+                error={!!errObj}
+                // helper text is rendered by FormHelperText below
+                InputProps={{
+                  startAdornment: adornment ? (
+                    <InputAdornment position="start">{adornment}</InputAdornment>
+                  ) : null,
+                  readOnly: readOnly || false,
+                }}
+                {...(textFieldProps || {})}
+                // IMPORTANT: do not pass `label` here, we show label above
+                label={undefined}
+                helperText={undefined}
+              >
+                {(selectOptions || []).map((opt) => (
+                  <MenuItem key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </MenuItem>
+                ))}
+              </TextField>
+
+              <FormHelperText>{errMsg || textFieldProps?.helperText}</FormHelperText>
+            </FormControl>
           )}
         />
       </div>
     );
   }
 
-  // ---------- Text / Password (InputText) ----------
+  // ---------- Text / Password (InputText) with top label ----------
   return (
     <div className={s.gridItem} style={itemStyle}>
       <Controller
@@ -129,7 +148,6 @@ export function FieldRenderer({ control, field, errors, classes, globalStyle }) 
 
           // merge global style for inputs (if you pass loginConfig.style.field)
           const mergedCfg = {
-            // global size from loginConfig.style.field.size -> "small" | "medium"
             size:
               globalStyle?.field?.size === "small"
                 ? "sm"
@@ -137,7 +155,7 @@ export function FieldRenderer({ control, field, errors, classes, globalStyle }) 
                 ? "md"
                 : undefined, // default "md" inside InputText
             fullWidth: globalStyle?.field?.fullWidth ?? true,
-            // sensible defaults + per-field UI overrides
+            // defaults + per-field UI overrides
             showClear: ui?.showClear ?? true,
             showPrefix: ui?.showPrefix ?? true,
             showSuffix: ui?.showSuffix ?? true,
@@ -145,33 +163,43 @@ export function FieldRenderer({ control, field, errors, classes, globalStyle }) 
           };
 
           return (
-            <InputText
-              id={name}
-              name={name}
-              value={rhf.value ?? ""}
-              onChange={rhf.onChange}
-              onBlur={rhf.onBlur}
-              placeholder={placeholder}
-              maxLength={maxLength}
-              prefix={prefixNode}
-              suffix={suffixNode}
-              disabled={disabled}
-              readOnly={readOnly}
-              type={isPwd ? (show ? "text" : "password") : type}
-              error={!!errors?.[name]}
-              inputRef={rhf.ref}
-              ariaDescribedBy={undefined}
-              config={mergedCfg}
-              // Pass label/helper to the internal TextField
-              textFieldProps={{
-                label,
-                required: !!required,
-                margin: "normal",
-                helperText: errMsg,
-                // spread any extra field-level textFieldProps
-                ...(textFieldProps || {}),
-              }}
-            />
+            <FormControl
+              fullWidth
+              margin="normal"
+              required={!!required}
+              error={!!errObj}
+              disabled={!!disabled}
+            >
+              {label ? <FormLabel htmlFor={name}>{label}</FormLabel> : null}
+
+              <InputText
+                id={name}
+                name={name}
+                value={rhf.value ?? ""}
+                onChange={rhf.onChange}
+                onBlur={rhf.onBlur}
+                placeholder={placeholder}
+                maxLength={maxLength}
+                prefix={prefixNode}
+                suffix={suffixNode}
+                disabled={disabled}
+                readOnly={readOnly}
+                type={isPwd ? (show ? "text" : "password") : type}
+                error={!!errObj}
+                inputRef={rhf.ref}
+                ariaDescribedBy={undefined}
+                config={mergedCfg}
+                // Do NOT pass `label` here; we show label via <FormLabel> above.
+                textFieldProps={{
+                  margin: "none",              // FormControl handles vertical spacing
+                  helperText: undefined,       // use FormHelperText below
+                  ...(textFieldProps || {}),
+                  label: undefined,
+                }}
+              />
+
+              <FormHelperText>{errMsg || textFieldProps?.helperText}</FormHelperText>
+            </FormControl>
           );
         }}
       />

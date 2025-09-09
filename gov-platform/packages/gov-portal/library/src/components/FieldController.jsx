@@ -12,6 +12,8 @@ import MultiSelect from "../molecules/MultiSelect.jsx";
 import AsyncAutocomplete from "../molecules/AsyncAutocomplete.jsx";
 import DatePicker from "../atoms/DatePicker.jsx";
 import Repeater from "../organisms/Repeater.jsx";
+import UploadInput from "../atoms/UploadInput.jsx";
+import CaptchaBox from "../components/CaptchaBox.jsx";
 
 /** -----------------------------------------------------------------------
  * Small, safe helpers
@@ -38,8 +40,8 @@ function buildDeps(depList = [], values, user) {
   const out = {};
   depList.forEach((d) => {
     if (d.startsWith("values.")) {
-      const key = d.slice(7);                // after "values."
-      const param = key.split(".").pop();    // last segment
+      const key = d.slice(7);
+      const param = key.split(".").pop();
       out[param] = get(values, key);
     } else if (d.startsWith("user.")) {
       const key = d.slice(5);
@@ -99,15 +101,6 @@ function evaluateRules(field, { values }) {
 /** -----------------------------------------------------------------------
  * FieldController
  * --------------------------------------------------------------------- */
-/**
- * Props:
- * - field: a field node from your JSON schema
- * - wrap?: boolean = true                 // wrap with FieldWrapper
- * - wrapperProps?: object                 // extra props for FieldWrapper { config?, ...rest }
- * - user?: any, flags?: any               // optional context
- * - ruleEngine?: (field, ctx)=>{hidden,disabled,required,derived}
- * - mountWhenHidden?: boolean = true      // keep mounted when hidden
- */
 export default function FieldController({
   field,
   wrap = true,
@@ -117,7 +110,7 @@ export default function FieldController({
   ruleEngine,
   mountWhenHidden = true,
 }) {
-  const { control, setValue, getValues } = useFormContext();
+  const { control, setValue, getValues, formState } = useFormContext();
 
   // watch only what we need: the field itself declared dependsOn
   const depList = field?.options?.dependsOn || [];
@@ -128,7 +121,9 @@ export default function FieldController({
 
   const values = getValues(); // RHF snapshot for rules/derive
   const ruleState = React.useMemo(
-    () => (typeof ruleEngine === "function" ? ruleEngine(field, { values, user, flags }) : evaluateRules(field, { values })),
+    () => (typeof ruleEngine === "function"
+      ? ruleEngine(field, { values, user, flags })
+      : evaluateRules(field, { values })),
     [field, values, user, flags, ruleEngine]
   );
 
@@ -137,8 +132,7 @@ export default function FieldController({
     if (ruleState.derived !== undefined) {
       setValue(field.id, ruleState.derived, { shouldValidate: true, shouldDirty: true });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ruleState.derived]);
+  }, [ruleState.derived, field.id, setValue]);
 
   // compute “required” from rules validators
   const requiredBySchema = (field.validations || []).some((v) => v.type === "required");
@@ -162,7 +156,44 @@ export default function FieldController({
     layout: (wrapperCfgIn && wrapperCfgIn.layout) || field.layout || "top",
   };
 
-  // render with RHF Controller
+  // ──────────────────────────────
+  // SPECIAL CASE: CAPTCHA
+  // ──────────────────────────────
+  if (field.type === "captcha") {
+    // Let CaptchaBox own its RHF Controller & business logic (generate, refresh, clear, focus, validate).
+    const body = (
+      <CaptchaBox
+        control={control}
+        cfg={{
+          name: field.id,
+          length: field.length || field.props?.length || 6,
+          // Allow per-field tweaks to flow into the captcha:
+          ...field.config,
+        }}
+        errors={formState.errors}
+        classes={wrapperProps?.classes}
+      />
+    );
+
+    if (!wrap) return body;
+
+    return (
+      <FieldWrapper
+        {...wrapperRest}
+        label={field.label}
+        required
+        error={formState.errors?.[field.id]}
+        helper={field.helperText}
+        config={wrapperCfg}
+      >
+        {body}
+      </FieldWrapper>
+    );
+  }
+
+  // ──────────────────────────────
+  // DEFAULT PATH: single RHF Controller
+  // ──────────────────────────────
   return (
     <Controller
       name={field.id}
@@ -175,7 +206,7 @@ export default function FieldController({
       }
       control={control}
       render={({ field: rhf, fieldState }) => {
-        const errorObj = fieldState.error;              // RHF error object (for wrapper)
+        const errorObj = fieldState.error; // RHF error object (for wrapper)
         const body = renderFieldByType(field, {
           rhf,
           error: errorObj,
@@ -193,7 +224,7 @@ export default function FieldController({
             {...wrapperRest}
             label={field.label}
             required={required}
-            error={errorObj}                // pass the OBJECT to wrapper (it normalizes to string)
+            error={errorObj} // pass the OBJECT to wrapper (it normalizes to string)
             helper={field.helperText}
             config={wrapperCfg}
           >
@@ -233,7 +264,6 @@ function materializeNestedField(child, idx, parentPath) {
   return { ...child, id, rules, options };
 }
 
-
 /** choose the right atom/molecule for this field */
 function renderFieldByType(field, { rhf, error, disabled, required, hidden, ctxDeps, depsReady }) {
   if (hidden) return null;
@@ -242,12 +272,44 @@ function renderFieldByType(field, { rhf, error, disabled, required, hidden, ctxD
   const inputCommon = { disabled, required, error: !!error };
 
   switch (field.type) {
+    // ⛔️ captcha handled above
+
+    case "file":
+    case "upload":
+      const multiple = !!field.props?.multiple;
+      return (
+        <UploadInput
+          name={rhf.name}
+          value={multiple ? (Array.isArray(rhf.value) ? rhf.value : []) : (rhf.value ?? null)}
+          onChange={(next) => rhf.onChange(next)}
+          onBlur={rhf.onBlur}
+          disabled={disabled}
+          required={required}
+          error={!!error}
+          helperText={error?.message || field.helperText}
+          multiple={multiple}
+          accept={field.props?.accept}
+          maxFiles={field.props?.maxFiles}
+          maxSizeMB={field.props?.maxSizeMB}
+          defaultValue={
+            field.defaultValue !== undefined
+              ? field.defaultValue
+              : field.type === "checkbox"
+                ? false
+                : (field.type === "file" || field.type === "upload")
+                  ? (field.props?.multiple ? [] : null)
+                  : ""
+          }
+        />
+      );
+
+
     case "checkbox":
       return (
         <Checkbox
           name={rhf.name}
           checked={!!rhf.value}
-          onChange={(ev) => rhf.onChange(ev.target.checked)}
+          onChange={(next) => rhf.onChange(next)}  // <- boolean, not event
           onBlur={rhf.onBlur}
           inputRef={rhf.ref}
           label={field.inlineLabel || field.label}
@@ -324,8 +386,7 @@ function renderFieldByType(field, { rhf, error, disabled, required, hidden, ctxD
         />
       );
 
-    case "repeater":
-      // Default row shape for “Add”
+    case "repeater": {
       const makeDefaultRow = () => {
         const o = {};
         (field.item?.fields || []).forEach((c) => {
@@ -340,7 +401,7 @@ function renderFieldByType(field, { rhf, error, disabled, required, hidden, ctxD
       };
       return (
         <Repeater
-          name={rhf.name} 
+          name={rhf.name}
           min={field.min ?? 0}
           max={field.max ?? 99}
           addLabel={field.addLabel || "Add"}
@@ -364,10 +425,10 @@ function renderFieldByType(field, { rhf, error, disabled, required, hidden, ctxD
           )}
         />
       );
+    }
 
     case "date":
     case "datepicker":
-      // Ensure app is wrapped in <LocalizationProvider dateAdapter={AdapterDayjs}>
       return (
         <DatePicker
           rhf={rhf}

@@ -17,8 +17,12 @@ const LOADERS = {
   person:      () => import("@mui/icons-material/Person"),
   campaign:    () => import("@mui/icons-material/Campaign"),
   edit:        () => import("@mui/icons-material/Edit"),
+  uploadFileIcon: () => import("@mui/icons-material/UploadFile"),
+  deleteIcon:  () => import("@mui/icons-material/Delete"),
+  refresh:     () => import("@mui/icons-material/Refresh"),
+  add:         () => import("@mui/icons-material/Add"),
+  remove:      () => import("@mui/icons-material/Remove"),
 };
-
 /** 2) Aliases */
 const ALIASES = {
   bell: "notifications",

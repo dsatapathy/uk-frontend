@@ -3,7 +3,7 @@ import { moduleMap } from "./moduleRegistry";
 import landingLogo from "../public/assets/images/landing_logo.png";
 // build the route list to match enabled modules
 const enabled = Object.keys(moduleMap);
-const basePaths = { auth: "/login", landing: "/landing", bpa: "/bpa", tl: "/tl", wns: "/wns" };
+const basePaths = { auth: "/login", landing: "/landing", bpa: "/bpa", member: "/member" };
 const defaultModules = enabled.map(k => ({ key: k, basePath: basePaths[k] || `/${k}` }));
 const moduleRegistry = Object.fromEntries(defaultModules.map((m) => [m.key, moduleMap[m.key]]));
 // Only defaults/registry are used; source/endpoints are ignored here.
