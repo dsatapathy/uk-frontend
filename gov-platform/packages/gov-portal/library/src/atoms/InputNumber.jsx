@@ -73,13 +73,13 @@ function roundToStep(n, step = 1, anchor = 0) {
 function coerceNumberFromInput(raw) {
   if (raw == null) return null;
   const s = String(raw).trim();
-  if (s === "" || s === "-" || s === "+" || s === "." || s === ",") return null; // partials allowed while typing
+  if (s === "" || s === "-" || s === "+" || s === "." || s === ",") return undefined; // partials allowed while typing
   // common sanitization: allow one decimal separator; treat comma as decimal if present
   const normalized = s
     .replace(/[^0-9,.\-+]/g, "")  // strip grouping chars/spaces
     .replace(",", ".");           // prefer dot
   const n = Number(normalized);
-  return Number.isFinite(n) ? n : null;
+  return Number.isFinite(n) ? n : undefined;
 }
 function makeFormatter(format) {
   if (typeof format === "function") return format;
@@ -125,12 +125,12 @@ export default function InputNumber({
   const fmt = React.useMemo(() => makeFormatter(format), [format]);
 
   // Manage a display buffer so we can show partial user input during edit
-  const [display, setDisplay] = React.useState(() => fmt(value ?? null));
+  const [display, setDisplay] = React.useState(() => fmt(value ?? undefined));
   const [focused, setFocused] = React.useState(false);
 
   // keep display in sync if value changes externally and input not focused
   React.useEffect(() => {
-    if (!focused) setDisplay(fmt(value ?? null));
+    if (!focused) setDisplay(fmt(value ?? undefined));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value, fmt, focused]);
 
@@ -147,9 +147,9 @@ export default function InputNumber({
     let n = currentValue;
     if (cfg.clampOnBlur) n = clamp(n, min, max);
     if (cfg.roundToStepOnBlur && typeof step === "number") n = roundToStep(n, step, typeof min === "number" ? min : 0);
-    setDisplay(fmt(n ?? null));
+    setDisplay(fmt(n ?? undefined));
     // also push back any clamped/rounded change
-    if (n !== currentValue) onChange?.(n ?? null);
+    if (n !== currentValue) onChange?.(n);
   };
 
   const handleBlur = (e) => {

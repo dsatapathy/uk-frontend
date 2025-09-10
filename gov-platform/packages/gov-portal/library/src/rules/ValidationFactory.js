@@ -34,6 +34,13 @@ const DEFAULT_OPTS = {
 
 /* ---------------- helpers ---------------- */
 
+function evalExpr(expr, values) {
+  if (!expr || typeof expr !== "string") return false;
+  try { /* eslint-disable no-new-func */
+    return !!new Function("values", `return !!(${expr});`)(values);
+  } catch { return false; }
+}
+
 function isEmpty(v) {
   return (
     v === null ||
@@ -207,7 +214,7 @@ function applyValidatorsToFieldSchema(base, field, opts) {
 
   // collect cross-field rules for superRefine
   const cross = vlist.filter((vv) =>
-    ["sameas", "requiredif"].includes(String(vv.type || "").toLowerCase())
+    ["sameas", "requiredif", "requiredifonvalue"].includes(String(vv.type || "").toLowerCase())
   );
 
   return { schema: sch, cross };
@@ -252,6 +259,17 @@ export function buildZodFromSchema(schema, options) {
       const { schema: fieldZ, cross } = buildFieldZod(f, opts);
       shape[f.id] = fieldZ;
       cross.forEach((v) => crossRules.push({ fieldId: f.id, v, field: f }));
+      // NEW: turn UI rules.require into a cross validator
+      const reqRules = (f.rules || []).filter(
+        (r) => r && r.action === "require" && typeof r.when === "string" && r.when.trim()
+      );
+      for (const r of reqRules) {
+        crossRules.push({
+          fieldId: f.id,
+          v: { type: "requireIfExpr", whenExpr: r.when, message: r.message },
+          field: f,
+        });
+      }
     });
   });
 
@@ -261,10 +279,20 @@ export function buildZodFromSchema(schema, options) {
 
   // add cross-field validations
   return obj.superRefine((data, ctx) => {
+    console.log("superRefine", { data, ctx });
     for (const { fieldId, v } of crossRules) {
       const type = String(v?.type || "").toLowerCase();
       const msg = v?.message;
-
+      if (type === "requireifexpr") {
+        const cond = evalExpr(v.whenExpr, data);
+        if (cond) {
+          const val = data[fieldId];
+          const ok = !(isEmpty(val) || val === false);
+          if (!ok) {
+            ctx.addIssue({ code: z.ZodIssueCode.custom, path: [fieldId], message: msg || DEFAULT_OPTS.messages.required });
+          }
+        }
+      }
       if (type === "sameas") {
         // { type: "sameAs", other: "values.password" }
         const otherPath = String(v.other || "");
