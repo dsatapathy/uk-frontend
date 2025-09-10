@@ -90,7 +90,7 @@ export const updateMemberProfileSchema = {
           label: "Aadhaar Card Picture",
           helperText: "Attach Aadhaar front photo (image only).",
           rules: [
-            { when: "!!values.aadhaarNo", action: "require" }
+            { when: "!!values.addhaarNo", action: "require" }
           ],
           props: {
             multiple: false,

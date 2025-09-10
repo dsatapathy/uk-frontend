@@ -393,8 +393,8 @@ function renderFieldByType(field, { rhf, error, disabled, required, hidden, ctxD
         <AsyncAutocomplete
           field={field}
           rhf={{
-            value: rhf.value ?? null,
-            onChange: (v) => rhf.onChange(v),
+            value: rhf.value ?? "",
+            onChange: (v) => rhf.onChange(v ?? ""),
             onBlur: rhf.onBlur,
             name: rhf.name,
             ref: rhf.ref,

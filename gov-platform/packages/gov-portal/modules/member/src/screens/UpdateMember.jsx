@@ -56,6 +56,8 @@ export default function UpdateMember() {
                 entityId: "member-profile",
                 autosaveMs: 800,
                 ui,
+                validationSchema: updateMemberProfileSchema,
+                defaultsSchema: updateMemberProfileSchema,
             }}
         />
     );

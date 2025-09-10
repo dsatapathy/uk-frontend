@@ -93,7 +93,7 @@ function makeVisibilityAwareResolver(zodSchema, formSchema) {
   const base = zodResolver(zodSchema);
   return async (values, context, options) => {
     const res = await base(values, context, options);
-
+    console.log("base resolver result", res);
     const hidden = collectHiddenFieldIds(formSchema, values);
 
     // 1) strip errors for hidden fields
@@ -111,6 +111,13 @@ function makeVisibilityAwareResolver(zodSchema, formSchema) {
 
     return res;
   };
+}
+
+function buildEffectExpr(field, action) {
+  const exprs = (field.rules || [])
+    .filter((r) => r.action === action && typeof r.when === "string" && r.when.trim())
+    .map((r) => `(${r.when})`);
+  return exprs.length ? exprs.join(" || ") : "false";
 }
 
 /* ------------------------------- Component ------------------------------- */

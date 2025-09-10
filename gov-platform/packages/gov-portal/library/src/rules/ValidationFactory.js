@@ -94,6 +94,37 @@ function baseForField(field, opts) {
       let s = z.preprocess((v) => toDate(v), z.date({ invalid_type_error: "Invalid date" }));
       return allowEmpty ? s.optional() : s;
     }
+       case "file":
+   case "upload": {
+     // RHF value is a File-like object for single, or an array for multiple.
+     const isEmpty = (v) =>
+       v == null || v === "" || (Array.isArray(v) && v.length === 0);
+
+     // accept any file-like value (File/Blob/object/url string) — we'll enforce constraints via refine
+     const unit = z.any();
+     let s = field.props?.multiple ? z.array(unit) : unit;
+
+     // Optional constraints
+     const maxMB = field.props?.maxSizeMB;
+     if (maxMB) {
+       const cap = maxMB * 1024 * 1024;
+       const okSize = (f) =>
+         f == null ||
+         typeof f !== "object" ||
+         !("size" in f) ||
+         (typeof f.size === "number" && f.size <= cap);
+       s = field.props?.multiple
+         ? s.refine((arr) => arr.every(okSize), `Max ${maxMB} MB per file`)
+         : s.refine(okSize, `Max ${maxMB} MB`);
+     }
+
+     // Required vs optional
+     if (allowEmpty) {
+       return s.optional();
+     } else {
+       return s.refine((v) => !isEmpty(v), { message: "Required" });
+     }
+   }
     // strings: text/password/email/tel/url/textarea/autocomplete/…
     default: {
       let s = z
