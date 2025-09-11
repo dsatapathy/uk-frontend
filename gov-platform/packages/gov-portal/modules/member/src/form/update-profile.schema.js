@@ -12,7 +12,14 @@ export const updateMemberProfileSchema = {
       id: "livelihood",
       title: "Livelihood & Economic Activities",
       fields: [
-        { id: "addhaarNo", type: "text", label: "Adhar No", validations: [{ type: "required" }], props: { min: 0, step: 1 }, config: { inputMode: "numeric" }, grid: { span: { xs: 12, sm: 6, md: 4 } }, props: { placeholder: "Enter Adhar No" } },
+        { id: "addhaarNo", 
+          type: "text", 
+          label: "Adhar No", 
+          validations: [{ type: "required" }], 
+          config: { inputMode: "numeric" }, 
+          grid: { span: { xs: 12, sm: 6, md: 4 } }, 
+          props: { placeholder: "Enter Adhar No", min: 0, step: 1 } 
+        },
 
         { id: "landOwnership", type: "radio-group", label: "Land Ownership", options: { items: [{ label: "Yes", value: "Yes" }, { label: "No", value: "No" }] }, validations: [{ type: "required" }], grid: { span: { xs: 12, sm: 6, md: 4 } }, placeholder: "Select an option" },
         { id: "totalLand", type: "text", label: "Total Land (Nali)", validations: [{ type: "required" }], props: { min: 0, step: 1 }, config: { inputMode: "numeric" }, rules: [{ when: "values.landOwnership === 'No'", action: "hide" }], grid: { span: { xs: 12, sm: 6, md: 4 } }, props: { placeholder: "Enter total land owned" } },

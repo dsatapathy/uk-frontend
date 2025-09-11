@@ -163,7 +163,7 @@ export default function DynamicForm({
   const methods = useForm({
     resolver,                         // << was: zodResolver(zodSchema)
     mode: "onSubmit",
-    reValidateMode: "onChange",
+    reValidateMode: "onSubmit",
     defaultValues: formDefaults,
   });
 
@@ -240,7 +240,7 @@ export default function DynamicForm({
           const secDeps = extractRuleDepsFromField(sec);
 
           return (
-            <InlineCondition                         // SECTION show/hide
+            <InlineCondition
               key={sec.id}
               when={secShowExpr}
               then={{ show: true }}
@@ -248,7 +248,7 @@ export default function DynamicForm({
               deps={secDeps}
               config={{ keepMountedWhenHidden: false, collapseHidden: true, allowStringExpr: true }}
             >
-              <InlineCondition                       // SECTION disable (one wrapper)
+              <InlineCondition
                 when={secDisableExpr}
                 then={{ disable: true, className: "sectionDisabled" }}
                 else={{}}
@@ -272,7 +272,7 @@ export default function DynamicForm({
                       const fieldShowExpr = buildShowExpr(f);
                       const fieldDeps = extractRuleDepsFromField(f);
                       return (
-                        <InlineCondition                 // FIELD show/hide only
+                        <InlineCondition
                           key={f.id}
                           when={fieldShowExpr}
                           then={{ show: true }}
