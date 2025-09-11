@@ -2,11 +2,57 @@ import React from "react";
 import { getComponent } from "@gov/core";
 import { updateMemberProfileSchema } from "../form/update-profile.schema";
 import { updateMemberProfileSteps } from "../form/update-profile.steps";
+
+// 0-based index: step2 => index 1, step4 => index 3
+const actionPolicy = (step, ctx) => {
+  const isFirst = ctx.index === 0;
+  const isLast = ctx.index === ctx.total - 1;
+  const base = isFirst ? ["draft", "next"]
+    : isLast ? ["prev", "draft", "submit"]
+      : ["prev", "draft", "next"];
+  // Always list the custom IDs; showWhen will decide visibility
+  return [...base, "customStep2", "customStep4"];
+};
+
+const actions = {
+  draft: { label: "Save Draft" },
+  next: { requiresValid: true },
+  submit: { label: "Submit", requiresValid: true },
+
+  // 👇 will appear only on step 2 (index 1)
+  customStep2: {
+    id: "customStep2",
+    label: "Validate SHG",
+    variant: "outlined",
+    color: "info",
+    showWhen: ({ index }) => index === 1,
+    onClick: ({ getValues }) => {
+      const v = getValues?.();
+      // …do whatever you need with v…
+      console.log("Step 2 custom:", v);
+    },
+  },
+
+  // 👇 will appear only on step 4 (index 3)
+  customStep4: {
+    id: "customStep4",
+    label: "Verify KYC",
+    color: "secondary",
+    requiresValid: true,        // optional: enforce step validation first
+    showWhen: ({ index }) => index === 3,
+    onClick: ({ getValues }) => {
+      const v = getValues?.();
+      console.log("Step 4 custom:", v);
+    },
+  },
+};
+
+
 const ui = {
   padding: 2,
   grid: {
     cols: { xs: 1, sm: 2, md: 12, lg: 2, xl: 2 },
-    gap:  { xs: "s2", md: "s2" },
+    gap: { xs: "s2", md: "s2" },
   },
   // section wrappers
   sections: {
@@ -27,38 +73,50 @@ const ui = {
   // field containers
   fieldLayout: "top",
   fieldWrapper: {
-    dense: true, 
+    dense: true,
     requiredMark: "asterisk",
-    labelWidth: 220, 
+    labelWidth: 220,
   },
 };
 
 export default function UpdateMember() {
-    const DynamicForm = getComponent("DynamicForm");
-    const ConfigStepperMUI = getComponent("ConfigStepperMUI");
-    const formApiRef = React.useRef(null);
+  const DynamicForm = getComponent("DynamicForm");
+  const ConfigStepperMUI = getComponent("ConfigStepperMUI");
+  const formApiRef = React.useRef(null);
 
-    return (
-        <ConfigStepperMUI
-            schema={updateMemberProfileSchema}
-            DynamicForm={DynamicForm}
-            formApiRef={formApiRef}
-            steps={updateMemberProfileSteps}
-            getStepActions={(step, ctx) =>
-                ctx.index === ctx.total - 1
-                    ? ["prev", "save", "draft", "submit"]
-                    : ["prev", "save", "next", "draft"]
-            }
-            onSave={(vals) => console.log("SAVE", vals)}
-            onDraft={(vals) => console.log("DRAFT", vals)}
-            onSubmit={(vals) => console.log("SUBMIT", vals)}
-            formProps={{
-                entityId: "member-profile",
-                autosaveMs: 800,
-                ui,
-                validationSchema: updateMemberProfileSchema,
-                defaultsSchema: updateMemberProfileSchema,
-            }}
-        />
-    );
+  // Strategy A: gate via showWhen (clean + scalable)
+  const getStepActions = (step, ctx) => {
+    const isFirst = ctx.index === 0;
+    const isLast  = ctx.index === ctx.total - 1;
+    const base = isFirst ? ["draft", "next"]
+               : isLast  ? ["prev", "draft", "submit"]
+                         : ["prev", "draft", "next"];
+    // just list IDs; visibility handled by actions[...].showWhen
+    return [...base, "customStep2", "customStep4"];
+  };
+
+  return (
+    <ConfigStepperMUI
+      schema={updateMemberProfileSchema}
+      steps={updateMemberProfileSteps}
+      DynamicForm={DynamicForm}
+      formApiRef={formApiRef}
+
+      // ✅ pass registry here
+      actions={actions}
+      getStepActions={getStepActions}
+
+      onSave={(vals, ctx) => console.log("SAVE", vals, ctx)}
+      onDraft={(vals, ctx) => console.log("DRAFT", vals, ctx)}
+      onSubmit={(vals, ctx) => console.log("SUBMIT", vals, ctx)}
+
+      formProps={{
+        entityId: "member-profile",
+        autosaveMs: 800,
+        ui,
+        validationSchema: updateMemberProfileSchema,
+        defaultsSchema: updateMemberProfileSchema,
+      }}
+    />
+  );
 }
