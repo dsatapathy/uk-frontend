@@ -10,3 +10,7 @@ export const loadUpdateMember = asDefault(
     () => import("./UpdateMember.jsx"),
     "UpdateMember"
 );
+export const loadMemberList = asDefault(
+    () => import("./MemberList.jsx"),
+    "MemberList"
+);

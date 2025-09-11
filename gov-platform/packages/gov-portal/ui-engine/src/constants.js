@@ -13,8 +13,6 @@ export const DEFAULT_THEME = {
     MuiAutocomplete: {
       styleOverrides: {
         root: {
-          // If an InlineCondition wrapper above sets aria-disabled,
-          // dim and block interactions for everything under this root.
           '[aria-disabled="true"] &': {
             opacity: 0.65,
             pointerEvents: "none",
@@ -22,8 +20,6 @@ export const DEFAULT_THEME = {
           },
         },
         inputRoot: {
-          // When Autocomplete itself is disabled (disabled={true}),
-          // MUI adds .Mui-disabled class on the inputRoot.
           '&.Mui-disabled .MuiOutlinedInput-notchedOutline': {
             borderColor: 'var(--field-border, var(--g-border))',
           },
