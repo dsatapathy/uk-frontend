@@ -83,29 +83,14 @@ export default function UpdateMember() {
   const DynamicForm = getComponent("DynamicForm");
   const ConfigStepperMUI = getComponent("ConfigStepperMUI");
   const formApiRef = React.useRef(null);
-
-  // Strategy A: gate via showWhen (clean + scalable)
-  const getStepActions = (step, ctx) => {
-    const isFirst = ctx.index === 0;
-    const isLast  = ctx.index === ctx.total - 1;
-    const base = isFirst ? ["draft", "next"]
-               : isLast  ? ["prev", "draft", "submit"]
-                         : ["prev", "draft", "next"];
-    // just list IDs; visibility handled by actions[...].showWhen
-    return [...base, "customStep2", "customStep4"];
-  };
-
-  return (
+    return (
     <ConfigStepperMUI
       schema={updateMemberProfileSchema}
       steps={updateMemberProfileSteps}
       DynamicForm={DynamicForm}
       formApiRef={formApiRef}
-
-      // ✅ pass registry here
       actions={actions}
-      getStepActions={getStepActions}
-
+      getStepActions={actionPolicy}
       onSave={(vals, ctx) => console.log("SAVE", vals, ctx)}
       onDraft={(vals, ctx) => console.log("DRAFT", vals, ctx)}
       onSubmit={(vals, ctx) => console.log("SUBMIT", vals, ctx)}
