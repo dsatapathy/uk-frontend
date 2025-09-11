@@ -10,6 +10,33 @@ export const DEFAULT_THEME = {
   shape: { borderRadius: 12 },
 
   components: {
+    MuiAutocomplete: {
+      styleOverrides: {
+        root: {
+          // If an InlineCondition wrapper above sets aria-disabled,
+          // dim and block interactions for everything under this root.
+          '[aria-disabled="true"] &': {
+            opacity: 0.65,
+            pointerEvents: "none",
+            filter: "grayscale(0.1)",
+          },
+        },
+        inputRoot: {
+          // When Autocomplete itself is disabled (disabled={true}),
+          // MUI adds .Mui-disabled class on the inputRoot.
+          '&.Mui-disabled .MuiOutlinedInput-notchedOutline': {
+            borderColor: 'var(--field-border, var(--g-border))',
+          },
+        },
+        paper: {
+          // dropdown panel
+          '[aria-disabled="true"] &': {
+            pointerEvents: "none",
+            opacity: 0.65,
+          },
+        },
+      },
+    },
     MuiButton: {
       styleOverrides: {
         root: {
@@ -54,6 +81,15 @@ export const DEFAULT_THEME = {
     },
 
     MuiInputLabel: {
+      root: {
+        // ... your existing Paper styles
+        '[aria-disabled="true"] &': {
+          boxShadow: "none",
+          filter: "grayscale(0.1)",
+          opacity: 0.65,
+          pointerEvents: "none",
+        },
+      },
       styleOverrides: {
         root: {
           color: "var(--field-label, rgba(15,23,42,.8))",
@@ -106,6 +142,15 @@ export const DEFAULT_THEME = {
     },
     MuiSwitch: {
       styleOverrides: {
+        root: {
+          // ... your existing Paper styles
+          '[aria-disabled="true"] &': {
+            boxShadow: "none",
+            filter: "grayscale(0.1)",
+            opacity: 0.65,
+            pointerEvents: "none",
+          },
+        },
         switchBase: {
           "&.Mui-checked": { color: "var(--g-primary)" },
           "&.Mui-checked + .MuiSwitch-track": {

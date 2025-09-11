@@ -234,60 +234,71 @@ export default function DynamicForm({
   return (
     <FormProvider {...methods}>
       <DSBox component="form" onSubmit={submit} noValidate sx={{ p: ui?.padding ?? 0 }}>
-        {(schema?.sections || []).map((sec) => (
-          <FieldGroup
-            key={sec.id}
-            id={sec.id}
-            title={sec.title}
-            description={sec.description}
-            collapsible={ui?.sections?.collapsible ?? false}
-            defaultOpen={ui?.sections?.defaultOpen ?? true}
-            config={ui?.sectionCard}
-          >
-            <FormGrid
-              cols={ui?.grid?.cols ? ui?.grid?.cols : { xs: 1, sm: 2, md: 12 }}
-              gap={ui?.grid?.gap ?? { xs: "s2", md: "s3" }}
-              areas={ui?.grid?.areas?.[sec.id]}
+        {(schema?.sections || []).map((sec) => {
+          const secShowExpr = buildShowExpr(sec);
+          const secDisableExpr = buildEffectExpr(sec, "disable");
+          const secDeps = extractRuleDepsFromField(sec);
+
+          return (
+            <InlineCondition                         // SECTION show/hide
+              key={sec.id}
+              when={secShowExpr}
+              then={{ show: true }}
+              else={{ show: false }}
+              deps={secDeps}
+              config={{ keepMountedWhenHidden: false, collapseHidden: true, allowStringExpr: true }}
             >
-              {(sec.fields || []).map((f) => {
-                const whenExpr = buildShowExpr(f);
-                const deps = extractRuleDepsFromField(f);
-                return (
-                  <InlineCondition
-                    key={f.id}
-                    when={whenExpr}
-                    then={{ show: true }}
-                    else={{ show: false }}
-                    deps={deps}
-                    config={{
-                      keepMountedWhenHidden: false,
-                      collapseHidden: true,
-                      allowStringExpr: true,
-                    }}
+              <InlineCondition                       // SECTION disable (one wrapper)
+                when={secDisableExpr}
+                then={{ disable: true, className: "sectionDisabled" }}
+                else={{}}
+                deps={secDeps}
+                config={{ allowStringExpr: true }}
+              >
+                <FieldGroup
+                  id={sec.id}
+                  title={sec.title}
+                  description={sec.description}
+                  collapsible={ui?.sections?.collapsible ?? false}
+                  defaultOpen={ui?.sections?.defaultOpen ?? true}
+                  config={ui?.sectionCard}
+                >
+                  <FormGrid
+                    cols={ui?.grid?.cols ? ui?.grid?.cols : { xs: 1, sm: 2, md: 12 }}
+                    gap={ui?.grid?.gap ?? { xs: "s2", md: "s3" }}
+                    areas={ui?.grid?.areas?.[sec.id]}
                   >
-                    <FormGrid.Item
-                      span={f.grid?.span}
-                      rowSpan={f.grid?.rowSpan}
-                      area={f.grid?.area}
-                    >
-                      <FieldController
-                        field={f}
-                        user={user}
-                        flags={flags}
-                        wrap
-                        wrapperProps={{
-                          layout: ui?.fieldLayout ?? "top",
-                          config: ui?.fieldWrapper,
-                        }}
-                        mountWhenHidden={false}
-                      />
-                    </FormGrid.Item>
-                  </InlineCondition>
-                );
-              })}
-            </FormGrid>
-          </FieldGroup>
-        ))}
+                    {(sec.fields || []).map((f) => {
+                      const fieldShowExpr = buildShowExpr(f);
+                      const fieldDeps = extractRuleDepsFromField(f);
+                      return (
+                        <InlineCondition                 // FIELD show/hide only
+                          key={f.id}
+                          when={fieldShowExpr}
+                          then={{ show: true }}
+                          else={{ show: false }}
+                          deps={fieldDeps}
+                          config={{ keepMountedWhenHidden: false, collapseHidden: true, allowStringExpr: true }}
+                        >
+                          <FormGrid.Item span={f.grid?.span} rowSpan={f.grid?.rowSpan} area={f.grid?.area}>
+                            <FieldController
+                              field={f}
+                              user={user}
+                              flags={flags}
+                              wrap
+                              wrapperProps={{ layout: ui?.fieldLayout ?? "top", config: ui?.fieldWrapper }}
+                              mountWhenHidden={false}
+                            />
+                          </FormGrid.Item>
+                        </InlineCondition>
+                      );
+                    })}
+                  </FormGrid>
+                </FieldGroup>
+              </InlineCondition>
+            </InlineCondition>
+          );
+        })}
 
         {!hideDefaultActions && (
           <DSBox sx={{ display: "flex", gap: 2, mt: 2, flexWrap: "wrap" }}>

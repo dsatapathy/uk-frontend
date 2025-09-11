@@ -21,3 +21,27 @@ hr { border: 0; border-top: 1px solid var(--g-border); }
 .u-surface-2 { @include surface(2); }
 .u-surface-3 { @include surface(3); }
 .u-focus     { @include focus-ring(); }
+[aria-disabled="true"] .MuiAutocomplete-root .MuiOutlinedInput-root,
+[aria-disabled="true"] .MuiAutocomplete-root .MuiInputBase-root,
+[aria-disabled="true"] .MuiAutocomplete-paper {
+  opacity: 0.65;
+  pointer-events: none;
+  filter: grayscale(0.1);
+}
+
+/* 2) When disabled via MUI prop (disabled={true}) */
+.MuiAutocomplete-root .MuiOutlinedInput-root.Mui-disabled,
+.MuiAutocomplete-root .MuiInputBase-root.Mui-disabled {
+  opacity: 0.65;
+  pointer-events: none;
+  filter: grayscale(0.1);
+}
+
+/* Label/helper too, for consistent dim */
+[aria-disabled="true"] .MuiInputLabel-root,
+[aria-disabled="true"] .MuiFormHelperText-root,
+.MuiFormControl-root.Mui-disabled .MuiInputLabel-root,
+.MuiFormControl-root.Mui-disabled .MuiFormHelperText-root {
+  opacity: 0.65;
+  filter: grayscale(0.1);
+}
