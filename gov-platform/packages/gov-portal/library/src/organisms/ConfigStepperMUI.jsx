@@ -29,7 +29,7 @@ function pickFieldsFromOneSection(section, fieldIds = []) {
 }
 
 function buildSchemaForStep(fullSchema, step) {
-  // step can specify either sections:[ids] or a single section + fieldIds
+  // step can specify either sections:[ids] or a single section  fieldIds
   if (step.sections && step.sections.length) return pickSections(fullSchema, step.sections);
   if (step.section && step.fieldIds) {
     const section = (fullSchema.sections || []).find((s) => s.id === step.section);
@@ -115,9 +115,35 @@ export default function ConfigStepperMUI({
   const baseActions = React.useMemo(() => ({
     prev: { id: "prev", label: "Previous", variant: "outlined", color: "inherit", onClick: () => go(index - 1) },
     next: { id: "next", label: "Next", variant: "contained", color: "primary", requiresValid: true, onClick: async () => (await triggerStep()) && go(index + 1) },
-    save: { id: "save", label: "Save", variant: "outlined", color: "primary", onClick: async () => onSave?.(formApiRef?.current?.getValues?.(), ctx) },
-    draft: { id: "draft", label: "Save Draft", variant: "outlined", color: "secondary", onClick: async () => onDraft?.(formApiRef?.current?.getValues?.(), ctx) },
-    submit: { id: "submit", label: "Submit", variant: "contained", color: "success", requiresValid: true, onClick: async () => (await triggerAll()) && onSubmit?.(formApiRef?.current?.getValues?.(), ctx) },
+    save: {
+      id: "save", label: "Save", variant: "outlined", color: "primary",
+      onClick: async () => {
+        const api = formApiRef?.current;
+        const vals = api?.getValues?.();
+        const payload = api?.buildPayload ? api.buildPayload(vals) : vals;
+        onSave?.(payload, ctx);
+      }
+    },
+    draft: {
+      id: "draft", label: "Save Draft", variant: "outlined", color: "secondary",
+      onClick: async () => {
+        const api = formApiRef?.current;
+        const vals = api?.getValues?.();
+        const payload = api?.buildPayload ? api.buildPayload(vals) : vals;
+        onDraft?.(payload, ctx);
+      }
+    },
+    submit: {
+      id: "submit", label: "Submit", variant: "contained", color: "success",
+      requiresValid: true,
+      onClick: async () => {
+        if (!(await triggerAll())) return;
+        const api = formApiRef?.current;
+        const vals = api?.getValues?.();
+        const payload = api?.buildPayload ? api.buildPayload(vals) : vals;
+        onSubmit?.(payload, ctx);
+      }
+    },
   }), [go, index, triggerStep, triggerAll, onSave, onDraft, onSubmit, formApiRef, ctx]);
 
   function resolveActions() {
@@ -190,7 +216,7 @@ export default function ConfigStepperMUI({
         radius={0}
         sx={{
           position: "sticky",
-          bottom: { xs: "calc(env(safe-area-inset-bottom, 0px) + 4px)", sm: 50 },
+          bottom: { xs: "calc(env(safe-area-inset-bottom, 0px)  4px)", sm: 50 },
           borderTop: (t) => `1px solid ${t.palette.divider}`,
           background: (t) => t.palette.background.paper,
           px: { xs: 2, md: 3 },

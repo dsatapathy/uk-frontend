@@ -120,6 +120,108 @@ function buildEffectExpr(field, action) {
   return exprs.length ? exprs.join(" || ") : "false";
 }
 
+const isNil = (v) => v === undefined || v === null || v === "";
+function setDeep(obj, path, value) {
+  const parts = String(path).split(".");
+  let cur = obj;
+  for (let i = 0; i < parts.length - 1; i++) {
+    const k = parts[i];
+    if (!cur[k] || typeof cur[k] !== "object") cur[k] = {};
+    cur = cur[k];
+  }
+  cur[parts[parts.length - 1]] = value;
+}
+function passWhen(expr, values) {
+  if (!expr) return true;
+  try { return !!new Function("values", `return !!(${expr});`)(values); } catch { return true; }
+}
+function applyTransform(v, t) {
+  if (!t) return v;
+  if (t === "int") return v === "" ? null : parseInt(v, 10);
+  if (t === "float") return v === "" ? null : parseFloat(v);
+  if (t === "bool") return !!v;
+  return v;
+}
+function mapUsingSchemaOutput(schema, flatValues) {
+  const out = {};
+  for (const sec of schema?.sections || []) {
+    const so = sec.output || {};
+    const secKey = so.key || sec.id;
+    const isArray = so.type === "array";
+    let bucket = isArray ? [] : {};
+    for (const f of sec.fields || []) {
+      const fo = f.output || {};
+      if (fo.drop) continue;
+      if (fo.when && !passWhen(fo.when, flatValues)) continue;
+      const raw = flatValues[f.id];
+      if (isNil(raw)) continue;
+      const val = applyTransform(raw, fo.transform);
+      const isUpload = f.type === "upload" || f.type === "file";
+      const shouldCollect = fo.collect || (so.collect === "uploads" && isUpload) || fo.path === "[]";
+      if (isArray && shouldCollect) {
+        bucket.push(fo.itemShape === "pair" ? { id: f.id, value: val } : { id: f.id, value: val });
+      } else {
+        const path = fo.path || `${secKey}.${f.id}`;
+        if (path.includes(".")) setDeep(out, path, val);
+        else {
+          if (isArray) bucket.push({ [path]: val });
+          else bucket[path] = val;
+        }
+      }
+    }
+    if (isArray ? bucket.length : Object.keys(bucket).length) {
+      if (!isArray) out[secKey] = { ...(out[secKey] || {}), ...bucket };
+      else out[secKey] = bucket;
+    }
+  }
+  return out;
+}
+
+// map fieldId -> default value (from schema or type)
+function buildDefaultMap(schema) {
+  const out = {};
+  (schema?.sections || []).forEach((sec) => {
+    (sec.fields || []).forEach((f) => {
+      out[f.id] = f.defaultValue !== undefined
+        ? f.defaultValue
+        : (TYPE_DEFAULTS[f.type] ?? TYPE_DEFAULTS.default);
+    });
+  });
+  return out;
+}
+
+// collect explicit (options.dependsOn) and implicit (rules: values.*) deps
+function buildDependencyGraph(schema) {
+  const childrenOf = new Map(); // parentId -> Set(childIds)
+  const ensure = (k) => { if (!childrenOf.has(k)) childrenOf.set(k, new Set()); return childrenOf.get(k); };
+  (schema?.sections || []).forEach((sec) => {
+    (sec.fields || []).forEach((f) => {
+      const explicit = (f.options?.dependsOn || [])
+        .filter((d) => d.startsWith("values."))
+        .map((d) => d.slice(7)); // "values.district" -> "district"
+      const implicit = extractRuleDepsFromField(f); // from rule.when strings you already parse
+      const allParents = new Set([...explicit, ...implicit]);
+      allParents.forEach((p) => ensure(p).add(f.id));
+    });
+  });
+  return childrenOf;
+}
+
+function flattenDependents(childrenOf, startIds) {
+  const out = new Set();
+  const visit = (id) => {
+    const kids = childrenOf.get(id);
+    if (!kids) return;
+    kids.forEach((k) => {
+      if (out.has(k)) return;
+      out.add(k);
+      visit(k);
+    });
+  };
+  startIds.forEach(visit);
+  return Array.from(out);
+}
+
 /* ------------------------------- Component ------------------------------- */
 export default function DynamicForm({
   schema,
@@ -135,6 +237,7 @@ export default function DynamicForm({
   hideDefaultActions = false,
   formApiRef,
   onValuesChange,
+  output = "flat", // "flat" | "bySection" | "schema"
 }) {
   const dispatch = useDispatch();
 
@@ -167,8 +270,14 @@ export default function DynamicForm({
     defaultValues: formDefaults,
   });
 
-  const { handleSubmit, formState, reset, getValues, setValue, trigger, watch } = methods;
+  const { handleSubmit, formState, reset, getValues, setValue, trigger, watch, clearErrors } = methods;
+  // ── defaults & dependency graph ──────────────────────────────────────────
+  const defaultMap = React.useMemo(() => buildDefaultMap(schemaForValidation), [schemaForValidation]);
+  const depGraph = React.useMemo(() => buildDependencyGraph(schemaForValidation), [schemaForValidation]);
 
+  // Keep previous snapshots to detect changes / newly-hidden fields
+  const prevHiddenRef = React.useRef(new Set());
+  const prevValuesRef = React.useRef(getValues());
   React.useEffect(() => {
     if (draft?.values) reset((prev) => ({ ...prev, ...draft.values }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -191,28 +300,67 @@ export default function DynamicForm({
   const autosaveTimerRef = React.useRef();
   React.useEffect(() => {
     const sub = watch((vals, meta) => {
+      let didBulkReset = false;
+      // 1) If a single field changed, reset all of its dependents (recursive)
+      const changed = meta?.name ? [meta.name] : [];
+      if (changed.length) {
+        const toReset = flattenDependents(depGraph, changed);
+        toReset.forEach((fid) => {
+          if (fid in vals) {
+            if (vals[fid] !== defaultMap[fid]) {
+              didBulkReset = true;
+              setValue(fid, defaultMap[fid], { shouldValidate: false, shouldDirty: false });
+            }
+            clearErrors(fid);
+            // NOTE: do NOT unregister; keep field mounted so UI updates gracefully
+          }
+        });
+      }
+
+      // 2) If some fields became hidden due to rules, reset them
+      const hiddenNow = collectHiddenFieldIds(schemaForValidation, vals); // you already have this
+      // compute newly hidden = now - prev
+      const prevHidden = prevHiddenRef.current;
+      hiddenNow.forEach((fid) => {
+        if (!prevHidden.has(fid) && fid in vals) {
+          if (vals[fid] !== defaultMap[fid]) {
+            didBulkReset = true;
+            setValue(fid, defaultMap[fid], { shouldValidate: false, shouldDirty: false });
+          }
+          clearErrors(fid);
+        }
+      });
+      prevHiddenRef.current = hiddenNow;
+      prevValuesRef.current = vals;
+
       onValuesChange?.(vals, meta);
+      // If we were bulk-resetting, let RHF settle, then schedule one autosave.
       window.clearTimeout(autosaveTimerRef.current);
       autosaveTimerRef.current = window.setTimeout(() => {
         const updatedAt = Date.now();
         try {
-          dispatch(saveDraft({ key: formKey, values: vals, updatedAt }));
+          dispatch(saveDraft({ key: formKey, values: getValues(), updatedAt }));
           dispatch(setLastSavedAt(updatedAt));
-        } catch {
-          /* no-op */
-        }
-      }, autosaveMs);
+        } catch { }
+      }, didBulkReset ? Math.max(autosaveMs, 600) : autosaveMs);
     });
     return () => {
       window.clearTimeout(autosaveTimerRef.current);
       sub.unsubscribe();
     };
-  }, [watch, autosaveMs, dispatch, formKey, onValuesChange]);
+  }, [watch, autosaveMs, dispatch, formKey, onValuesChange, depGraph, defaultMap, schemaForValidation, setValue, clearErrors]);
 
   const submit = handleSubmit(async (vals) => {
     dispatch(setSubmitting(true));
     try {
-      await onSubmit?.(vals);
+      // still useful when the form is used without the stepper
+      const payload =
+        output === "schema"
+          ? mapUsingSchemaOutput(schemaForValidation, vals)
+          : output === "bySection"
+            ? mapUsingSchemaOutput({ sections: (schemaForValidation?.sections || []).map(s => ({ ...s, output: { key: s.id, type: "object" } })) }, vals)
+            : vals;
+      await onSubmit?.(payload);
       // dispatch(clearDraft(formKey));
     } finally {
       dispatch(setSubmitting(false));
@@ -223,6 +371,16 @@ export default function DynamicForm({
     formApiRef,
     () => ({
       getValues: () => getValues(),
+      // Let parent format however it wants without firing a submit
+      buildPayload: (vals) => {
+        const v = vals ?? getValues();
+        if (output === "schema") return mapUsingSchemaOutput(schemaForValidation, v);
+        if (output === "bySection") {
+          const shaped = { sections: (schemaForValidation?.sections || []).map(s => ({ ...s, output: { key: s.id, type: "object" } })) };
+          return mapUsingSchemaOutput(shaped, v);
+        }
+        return v; // "flat"
+      },
       setValue: (p, v, opts) => setValue(p, v, opts),
       trigger: (names, opts) => trigger(names, opts),
       reset: (vals) => reset(vals),

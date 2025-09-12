@@ -101,6 +101,7 @@ export default function UpdateMember() {
         ui,
         validationSchema: updateMemberProfileSchema,
         defaultsSchema: updateMemberProfileSchema,
+        output: "schema",
       }}
     />
   );

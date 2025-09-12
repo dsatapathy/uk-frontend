@@ -99,7 +99,7 @@ function evaluateRules(field, { values }) {
 }
 
 /** ── NEW: derive dependencies from rule expressions ── */
-const RULE_PATH_RE = /values\.([a-zA-Z0-9_.])/g;
+const RULE_PATH_RE = /values\.([a-zA-Z0-9_.]+)/g;
 function extractRuleDeps(field) {
   const out = new Set();
   (field.rules || []).forEach((r) => {
@@ -153,6 +153,18 @@ export default function FieldController({
     [field, values, user, flags, ruleEngine]
   );
 
+  React.useEffect(() => {
+    if (!depsResolved(depList, values, user)) {
+      // parent(s) missing; clear this field to default
+      const def = field.defaultValue !== undefined
+        ? field.defaultValue
+        : (field.type === "checkbox" ? false : "");
+      setValue(field.id, def, { shouldValidate: false, shouldDirty: false });
+      clearErrors(field.id);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [JSON.stringify(buildDeps(depList, values, user))]);
+
   // apply derived / revalidate when required flips on
   React.useEffect(() => {
     if (ruleState.derived !== undefined) {
@@ -162,7 +174,7 @@ export default function FieldController({
       // prompt immediate validation so user sees error right away if empty
       // (no await needed; RHF batches internally)
       // eslint-disable-next-line @typescript-eslint/no-floating-promises
-      trigger(field.id);
+      // trigger(field.id);
     }
   }, [ruleState.derived, ruleState.required, field.id, setValue, trigger]);
 
