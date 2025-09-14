@@ -1,173 +1,111 @@
 import * as React from "react";
-import s from "@gov/styles/library/organism/FormGrid.module.scss";
-
-const BPS = ["xs", "sm", "md", "lg", "xl"];
-
-const DEFAULT_CFG = {
-  cols: { xs: 1, sm: 2, md: 3, lg: 3, xl: 4 },
-  gap:  { xs: "s2", sm: "s2", md: "s2", lg: "s2", xl: "s2" },
-  rowGap: null,
-  columnGap: null,
-  flow: "row dense",
-  autoRows: "minmax(3rem, auto)",
-  autoCols: "auto",
-  areas: null,
-};
+import Grid from "@mui/material/Grid";
+import InlineCondition from "../form/InlineCondition";
 
 const isObj = (v) => v && typeof v === "object" && !Array.isArray(v);
-
-function toResponsive(input, fallback) {
-  if (input == null) return fallback;
-  if (!isObj(input)) return Object.fromEntries(BPS.map((bp) => [bp, input]));
-  const out = { ...fallback };
-  for (const bp of BPS) if (input[bp] != null) out[bp] = input[bp];
+const GAP_MAP = { s0: 0, s1: 1, s2: 2, s3: 3, s4: 4 };
+const mapTokenToNumber = (v) => (typeof v === "string" ? (GAP_MAP[v] ?? null) : typeof v === "number" ? v : null);
+const eachBP = (obj, fn) => {
+  const bps = ["xs", "sm", "md", "lg", "xl"];
+  const out = {};
+  for (const bp of bps) if (obj?.[bp] != null) out[bp] = fn(obj[bp]);
   return out;
+};
+
+function normalizeGaps({ gap, rowGap, columnGap }) {
+  const row = rowGap ?? gap ?? 0;
+  const col = columnGap ?? gap ?? 0;
+  const toNum = (v) => (isObj(v) ? eachBP(v, mapTokenToNumber) : mapTokenToNumber(v));
+  const rowNum = toNum(row);
+  const colNum = toNum(col);
+
+  const hasString =
+    (isObj(row) && Object.values(row).some((v) => typeof v === "string")) ||
+    (isObj(col) && Object.values(col).some((v) => typeof v === "string")) ||
+    typeof row === "string" || typeof col === "string";
+
+  const hasNull =
+    (isObj(rowNum) && Object.values(rowNum).some((v) => v == null)) ||
+    (isObj(colNum) && Object.values(colNum).some((v) => v == null)) ||
+    rowNum == null || colNum == null;
+
+  return { rowNum, colNum, hasString, hasNull };
 }
 
-function gapToCss(v) {
-  if (v == null) return null;
-  if (typeof v === "number") return `${v}px`;
-  if (/^\d/.test(v) || /rem|px|em|%$/.test(String(v))) return String(v);
-  return `var(--g-${v})`;
+/* ---- Item ---- */
+export function Item({ span = 12, children, ...rest }) {
+  const s = typeof span === "number" || span === "all" ? { xs: span } : (span || {});
+  const conv = (v) => (v === "all" ? 12 : typeof v === "number" ? v : undefined);
+  return (
+    <Grid
+      item
+      xs={conv(s.xs ?? 12)}
+      sm={conv(s.sm ?? s.xs ?? 12)}
+      md={conv(s.md ?? s.sm ?? s.xs ?? 12)}
+      lg={conv(s.lg ?? s.md ?? s.sm ?? s.xs ?? 12)}
+      xl={conv(s.xl ?? s.lg ?? s.md ?? s.sm ?? s.xs ?? 12)}
+      {...rest}
+    >
+      {children}
+    </Grid>
+  );
 }
+Item.displayName = "FormGridItem";
 
-function rowsToTemplate(val) {
-  if (val == null) return null;
-  if (typeof val === "string") return val;
-  if (Array.isArray(val)) {
-    if (Array.isArray(val[0])) return val.map((row) => `"${row.join(" ")}"`).join(" ");
-    return val.map((r) => (r.includes('"') ? r : `"${r}"`)).join(" ");
-  }
-  return null;
-}
-
-/* Item — renders nothing if its child is null/empty */
-export function Item({ area, span = 1, rowSpan, children, style, className }) {
-  const hasContent = React.Children.toArray(children).some(Boolean);
-  if (!hasContent) return null;
-
-  const spanMap = typeof span === "number" || span === "all" ? Object.fromEntries(BPS.map((bp) => [bp, span])) : (span || {});
-  const rowSpanMap = typeof rowSpan === "number" || rowSpan === "all" ? Object.fromEntries(BPS.map((bp) => [bp, rowSpan])) : (rowSpan || {});
-  const areaMap = isObj(area) ? area : Object.fromEntries(BPS.map((bp) => [bp, area || ""]));
-
-  const styleVars = {
-    "--fgd-area": areaMap.xs || "",
-    "--fgd-area-sm": areaMap.sm ?? areaMap.xs ?? "",
-    "--fgd-area-md": areaMap.md ?? areaMap.sm ?? areaMap.xs ?? "",
-    "--fgd-area-lg": areaMap.lg ?? areaMap.md ?? areaMap.sm ?? areaMap.xs ?? "",
-    "--fgd-area-xl": areaMap.xl ?? areaMap.lg ?? areaMap.md ?? areaMap.sm ?? areaMap.xs ?? "",
-
-    "--fgd-span": spanMap.xs === "all" ? "all" : (spanMap.xs || 1),
-    "--fgd-span-sm": spanMap.sm === "all" ? "all" : (spanMap.sm ?? spanMap.xs ?? 1),
-    "--fgd-span-md": spanMap.md === "all" ? "all" : (spanMap.md ?? spanMap.sm ?? spanMap.xs ?? 1),
-    "--fgd-span-lg": spanMap.lg === "all" ? "all" : (spanMap.lg ?? spanMap.md ?? spanMap.sm ?? spanMap.xs ?? 1),
-    "--fgd-span-xl": spanMap.xl === "all" ? "all" : (spanMap.xl ?? spanMap.lg ?? spanMap.md ?? spanMap.sm ?? spanMap.xs ?? 1),
-
-    "--fgd-row-span": rowSpanMap.xs === "all" ? "all" : (rowSpanMap.xs || 1),
-    "--fgd-row-span-sm": rowSpanMap.sm === "all" ? "all" : (rowSpanMap.sm ?? rowSpanMap.xs ?? 1),
-    "--fgd-row-span-md": rowSpanMap.md === "all" ? "all" : (rowSpanMap.md ?? rowSpanMap.sm ?? rowSpanMap.xs ?? 1),
-    "--fgd-row-span-lg": rowSpanMap.lg === "all" ? "all" : (rowSpanMap.lg ?? rowSpanMap.md ?? rowSpanMap.sm ?? rowSpanMap.xs ?? 1),
-    "--fgd-row-span-xl": rowSpanMap.xl === "all" ? "all" : (rowSpanMap.xl ?? rowSpanMap.lg ?? rowSpanMap.md ?? rowSpanMap.sm ?? rowSpanMap.xs ?? 1),
-    ...style,
-  };
-
-  const cls = [s.item, className].filter(Boolean).join(" ");
-  return <div className={cls} style={styleVars}>{children}</div>;
-}
-
-/* FormGrid */
+/* ---- FormGrid ---- */
 export default function FormGrid({
-  as: As = "div",
-  cols,
-  gap,
-  rowGap,
-  columnGap,
-  flow,
-  autoRows,
-  autoCols,
-  areas,
-  children,
-  className,
-  style,
-  config,
-  ...rest
+  columns: columnsProp,    // support both
+  cols,                    // alias
+  gap, rowGap, columnGap, spacing,
+  children, className, style, sx, ...rest
 }) {
-  const cfg = React.useMemo(() => {
-    const base = { ...DEFAULT_CFG, ...(config || {}) };
-    const colsR = toResponsive(cols ?? base.cols, base.cols);
-    const gapR  = toResponsive(gap ?? base.gap, base.gap);
-    const rowGR = rowGap != null ? toResponsive(rowGap, base.rowGap) : null;
-    const colGR = columnGap != null ? toResponsive(columnGap, base.columnGap) : null;
+  const columns = columnsProp ?? cols ?? { xs: 12, sm: 12, md: 12, lg: 12, xl: 12 };
 
-    const ar = areas ?? base.areas;
-    const areasR = isObj(ar)
-      ? Object.fromEntries(BPS.map((bp) => [bp, rowsToTemplate(ar[bp])]))
-      : Object.fromEntries(BPS.map((bp, i) => [bp, rowsToTemplate(i === 0 ? ar : null)]));
+  const primary = { gap: gap ?? spacing, rowGap: rowGap ?? spacing, columnGap: columnGap ?? spacing };
+  const { rowNum, colNum, hasString, hasNull } = normalizeGaps(primary);
+  const usePropsGaps = !hasString && !hasNull;
 
-    return { cols: colsR, gap: gapR, rowGap: rowGR, columnGap: colGR, flow: flow ?? base.flow, autoRows: autoRows ?? base.autoRows, autoCols: autoCols ?? base.autoCols, areas: areasR };
-  }, [cols, gap, rowGap, columnGap, flow, autoRows, autoCols, areas, config]);
-
-  const vars = {
-    "--fgd-cols": String(cfg.cols.xs),
-    "--fgd-cols-sm": String(cfg.cols.sm),
-    "--fgd-cols-md": String(cfg.cols.md),
-    "--fgd-cols-lg": String(cfg.cols.lg),
-    "--fgd-cols-xl": String(cfg.cols.xl),
-
-    "--fgd-gap": gapToCss(cfg.gap.xs),
-    "--fgd-gap-sm": gapToCss(cfg.gap.sm),
-    "--fgd-gap-md": gapToCss(cfg.gap.md),
-    "--fgd-gap-lg": gapToCss(cfg.gap.lg),
-    "--fgd-gap-xl": gapToCss(cfg.gap.xl),
-
-    "--fgd-row-gap": cfg.rowGap ? gapToCss(cfg.rowGap.xs) : undefined,
-    "--fgd-row-gap-sm": cfg.rowGap ? gapToCss(cfg.rowGap.sm) : undefined,
-    "--fgd-row-gap-md": cfg.rowGap ? gapToCss(cfg.rowGap.md) : undefined,
-    "--fgd-row-gap-lg": cfg.rowGap ? gapToCss(cfg.rowGap.lg) : undefined,
-    "--fgd-row-gap-xl": cfg.rowGap ? gapToCss(cfg.rowGap.xl) : undefined,
-
-    "--fgd-col-gap": cfg.columnGap ? gapToCss(cfg.columnGap.xs) : undefined,
-    "--fgd-col-gap-sm": cfg.columnGap ? gapToCss(cfg.columnGap.sm) : undefined,
-    "--fgd-col-gap-md": cfg.columnGap ? gapToCss(cfg.columnGap.md) : undefined,
-    "--fgd-col-gap-lg": cfg.columnGap ? gapToCss(cfg.columnGap.lg) : undefined,
-    "--fgd-col-gap-xl": cfg.columnGap ? gapToCss(cfg.columnGap.xl) : undefined,
-
-    "--fgd-areas": cfg.areas?.xs || "none",
-    "--fgd-areas-sm": cfg.areas?.sm || "none",
-    "--fgd-areas-md": cfg.areas?.md || "none",
-    "--fgd-areas-lg": cfg.areas?.lg || "none",
-    "--fgd-areas-xl": cfg.areas?.xl || "none",
-
-    "--fgd-auto-rows": cfg.autoRows,
-    "--fgd-auto-cols": cfg.autoCols,
-  };
-
-  const nodes = React.Children.map(children, (child) => {
-    if (!React.isValidElement(child)) return child;
-
-    // If child itself rendered null (e.g., hidden FieldController), just return null.
-    // This prevents creating an empty wrapper.
-    if (child === null) return null;
-
-    const advertisedArea = child.props?.area || child.props?.grid?.area;
-    const advertisedSpan = child.props?.gridSpan || child.props?.span || child.props?.grid?.span;
-    const advertisedRowSpan = child.props?.rowSpan || child.props?.grid?.rowSpan;
-
-    if (!advertisedArea && !advertisedSpan && !advertisedRowSpan) return child;
-
-    return (
-      <Item area={advertisedArea} span={advertisedSpan} rowSpan={advertisedRowSpan}>
-        {child}
-      </Item>
-    );
-  });
-
-  const cls = [s.root, className].filter(Boolean).join(" ");
+  const gridProps = usePropsGaps
+    ? {
+        rowSpacing: isObj(rowNum) ? rowNum : (rowNum ?? 0),
+        columnSpacing: isObj(colNum) ? colNum : (colNum ?? 0),
+        sx,
+      }
+    : {
+        rowSpacing: 0,
+        columnSpacing: 0,
+        sx: { ...sx, rowGap: isObj(primary.rowGap) ? primary.rowGap : (primary.rowGap ?? 0), columnGap: isObj(primary.columnGap) ? primary.columnGap : (primary.columnGap ?? 0) },
+      };
 
   return (
-    <As className={cls} style={{ ...vars, gridAutoFlow: cfg.flow, ...style }} {...rest}>
-      {nodes}
-    </As>
+    <Grid container columns={columns} className={className} style={style} {...gridProps} {...rest}>
+      {React.Children.map(children, (child, idx) => {
+        if (!React.isValidElement(child)) return child;
+
+        // InlineCondition → let it render <Item> directly (no wrapper) or null
+        if (child.type?.displayName === "InlineCondition") {
+          const span = child.props?.span ?? 12;
+          return (
+            <InlineCondition
+              {...child.props}
+              noWrapper
+              config={{ ...(child.props.config || {}), keepMountedWhenHidden: false }}
+            >
+              {({ active }) => (active ? <Item key={child.key ?? idx} span={span}>{child.props.children}</Item> : null)}
+            </InlineCondition>
+          );
+        }
+
+        // Already an Item → keep as-is (ensure key)
+        if (child.type === Item || child.type?.displayName === "FormGridItem") {
+          return React.cloneElement(child, { key: child.key ?? idx });
+        }
+
+        // Any other node → wrap in Item
+        const span = child.props?.span ?? 12;
+        return <Item key={child.key ?? idx} span={span}>{child}</Item>;
+      })}
+    </Grid>
   );
 }
 

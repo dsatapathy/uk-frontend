@@ -93,7 +93,6 @@ function makeVisibilityAwareResolver(zodSchema, formSchema) {
   const base = zodResolver(zodSchema);
   return async (values, context, options) => {
     const res = await base(values, context, options);
-    console.log("base resolver result", res);
     const hidden = collectHiddenFieldIds(formSchema, values);
 
     // 1) strip errors for hidden fields
@@ -425,6 +424,8 @@ export default function DynamicForm({
                     cols={ui?.grid?.cols ? ui?.grid?.cols : { xs: 1, sm: 2, md: 12 }}
                     gap={ui?.grid?.gap ?? { xs: "s2", md: "s3" }}
                     areas={ui?.grid?.areas?.[sec.id]}
+                    columnGap={{ xs: 1, md: 4 }}
+                    rowGap={{ xs: 1, md: 2 }}
                   >
                     {(sec.fields || []).map((f) => {
                       const fieldShowExpr = buildShowExpr(f);
@@ -432,13 +433,14 @@ export default function DynamicForm({
                       return (
                         <InlineCondition
                           key={f.id}
+                          span={f.grid?.span}
                           when={fieldShowExpr}
                           then={{ show: true }}
                           else={{ show: false }}
                           deps={fieldDeps}
                           config={{ keepMountedWhenHidden: false, collapseHidden: true, allowStringExpr: true }}
                         >
-                          <FormGrid.Item span={f.grid?.span} rowSpan={f.grid?.rowSpan} area={f.grid?.area}>
+                          {/* <FormGrid.Item span={f.grid?.span} rowSpan={f.grid?.rowSpan} area={f.grid?.area}> */}
                             <FieldController
                               field={f}
                               user={user}
@@ -447,7 +449,7 @@ export default function DynamicForm({
                               wrapperProps={{ layout: ui?.fieldLayout ?? "top", config: ui?.fieldWrapper }}
                               mountWhenHidden={false}
                             />
-                          </FormGrid.Item>
+                          {/* </FormGrid.Item> */}
                         </InlineCondition>
                       );
                     })}

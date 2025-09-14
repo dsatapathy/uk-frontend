@@ -39,7 +39,7 @@
 /* The card (MUI Card/Paper wrapper) */
 .authCard {
   position: relative;
-
+  background: linear-gradient(180deg, #62B34799 0%, #3B9B5999 50%, #025F4899 100%);
   /* never exceed viewport width */
   width: 100%;
   max-width: var(--login-card-w, 480px);

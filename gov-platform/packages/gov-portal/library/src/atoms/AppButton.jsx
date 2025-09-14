@@ -25,7 +25,6 @@ const AppButton = React.forwardRef(function AppButton(
   },
   ref
 ) {
-  console.log("AppButton COlor", color);
   const content = children ?? label;
 
   // margin / spacing logic only

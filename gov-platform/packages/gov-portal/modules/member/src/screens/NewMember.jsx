@@ -6,8 +6,10 @@ const ui = {
   // form padding
   padding: 2,
   grid: {
-    cols: { xs: 1, sm: 2, md: 12, lg: 2, xl: 2 },
-    gap:  { xs: "s2", md: "s2" },
+    grid: {
+    cols:{ xs: 12, sm: 12, md: 12, lg: 12, xl: 12 },
+    gap: { xs: "s2", md: "s2" },
+  },
     // OPTIONAL: only if you want to hand-place fiel    ds in a section
     // areas: {
     //   registration: [

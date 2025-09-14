@@ -51,7 +51,6 @@ function warnOnce(msg) {
 
 function resolveFromManifest(relPath) {
   const p = normalize(relPath);
-  console.log(`resolveFromManifest: looking for "${relPath}" normalized to "${p}"`);
   // Fast exact matches
   const exact = INDEX.get(p) || INDEX.get("./" + p) || INDEX.get("../" + p);
   if (exact) return exact;

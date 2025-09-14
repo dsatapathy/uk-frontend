@@ -119,18 +119,16 @@ export default function InlineCondition({
   children,
   className,
   style,
+  noWrapper = false,                // NEW: allow wrapperless render
 }) {
   const cfg = React.useMemo(() => ({ ...DEFAULT_CFG, ...(config || {}) }), [config]);
 
-  // form context (values for predicate)
   const methods = useFormContext?.();
-  // watch only requested deps for performance; fall back to entire form if none.
-  useWatch({ name: deps.length ? deps : undefined }); // re-render on deps change
+  useWatch({ name: deps.length ? deps : undefined });
   const values = methods?.getValues ? methods.getValues() : {};
 
   const ctx = React.useMemo(
     () => ({ values, user: context?.user, flags: context?.flags, env: context?.env }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [JSON.stringify(deps.map((d) => get(values, d))), context?.user, context?.flags, context?.env]
   );
 
@@ -143,6 +141,9 @@ export default function InlineCondition({
   const readOnly = !!effects.readOnly;
   const preserveSpace = !!effects.preserveSpace;
 
+  // If hidden & not keeping mounted → remove from DOM entirely
+  if (hidden && !cfg.keepMountedWhenHidden && !preserveSpace) return null;
+
   const pass = cfg.passProps.reduce((acc, key) => {
     if (key === "hidden") acc.hidden = hidden;
     if (key === "disabled") acc.disabled = disabled;
@@ -151,14 +152,35 @@ export default function InlineCondition({
     return acc;
   }, {});
 
+  const renderKids =
+    typeof children === "function"
+      ? children({ active, effects: { hidden, disabled, required, readOnly } })
+      : children;
+
+  // noWrapper → don't add a <div>; inject props/styles into children directly
+  if (noWrapper) {
+    return React.Children.map(renderKids, (child) => {
+      if (!React.isValidElement(child)) return child;
+      return React.cloneElement(child, {
+        ...pass,
+        className: [child.props.className, effects.className].filter(Boolean).join(" ") || undefined,
+        style: {
+          ...(child.props.style || {}),
+          ...(effects.style || {}),
+          ...(disabled ? { opacity: cfg.reduceOpacityWhenDisabled } : {}),
+        },
+        "aria-hidden": hidden || undefined,
+        "aria-disabled": disabled || undefined,
+      });
+    });
+  }
+
   const rootCls = [
     s.root,
     hidden ? (cfg.collapseHidden && !preserveSpace ? s.hiddenCollapse : s.hiddenReserve) : "",
     disabled ? s.isDisabled : "",
     className,
-  ]
-    .filter(Boolean)
-    .join(" ");
+  ].filter(Boolean).join(" ");
 
   const rootStyle = {
     ...(style || {}),
@@ -166,13 +188,6 @@ export default function InlineCondition({
     ...(disabled ? { opacity: cfg.reduceOpacityWhenDisabled } : {}),
   };
 
-  // children can be a render function
-  const renderKids =
-    typeof children === "function"
-      ? children({ active, effects: { hidden, disabled, required, readOnly } })
-      : children;
-
-  // shallow-inject props to direct children
   const injected = React.Children.map(renderKids, (child) => {
     if (!React.isValidElement(child)) return child;
     return React.cloneElement(child, {
@@ -181,17 +196,13 @@ export default function InlineCondition({
     });
   });
 
-  // If not keeping mounted and hidden, render nothing
-  if (hidden && !cfg.keepMountedWhenHidden && !preserveSpace) return null;
-
   return (
-    <div
-      className={rootCls}
-      style={rootStyle}
-      aria-hidden={hidden || undefined}
-      aria-disabled={disabled || undefined}
-    >
+    <div className={rootCls} style={rootStyle} aria-hidden={hidden || undefined} aria-disabled={disabled || undefined}>
       {injected}
     </div>
   );
 }
+
+
+
+InlineCondition.displayName = "InlineCondition";

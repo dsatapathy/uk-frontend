@@ -10,8 +10,39 @@ const moduleRegistry = Object.fromEntries(defaultModules.map((m) => [m.key, modu
 start({
   target: "#root",
   base: "/uk-portal/",
-  brand: { logo : landingLogo , title: "UK Portal" },
-  layout: { component: "AuthBlank" },
+  brand: { logo: landingLogo, title: "UK Portal" },
+  layout: {
+    component: "AuthBlank", 
+    backgroungImg: `
+    /* Sharp, angled facets for the diamond-cut effect */
+    linear-gradient(
+      165deg,
+      transparent 45%,
+      var(--crystal-highlight, rgba(236, 253, 245, 0.2)) 50%, /* Sharp highlight edge */
+      var(--crystal-shadow, rgba(20, 83, 45, 0.15)) 52%,       /* Subtle shadow edge */
+      transparent 60%
+    ),
+    linear-gradient(
+      -40deg,
+      transparent 30%,
+      var(--crystal-highlight, rgba(236, 253, 245, 0.15)) 48%, /* Second highlight facet */
+      transparent 60%
+    ),
+    linear-gradient(
+      20deg,
+      transparent 40%,
+      var(--crystal-shadow, rgba(20, 83, 45, 0.1)) 55%,        /* A wider, softer shadow facet */
+      transparent 70%
+    ),
+
+    /* The original 3-stop base gradient for color foundation */
+    linear-gradient(
+      180deg,
+      var(--sidebar-bg-top, #aed581) 0%,    /* Light Banana Leaf Green */
+      var(--sidebar-bg-mid, #9ccc65) 46%,     /* Medium Banana Leaf Green */
+      var(--sidebar-bg-bottom, #8bc34a) 100%  /* Richer Banana Leaf Green */
+    )
+  ` },
   app: {
     name: "UK Portal",
     logo: "/assets/uk-logo.svg",
@@ -22,13 +53,13 @@ start({
   },
 
   theme: {
-palette: {
-    mode: "light",
-    primary:   { main: "#16a34a" },
-    secondary: { main: "#15803d", contrastText: "#ffffff" },
-    background: { default: "#f9fafb" },
-  },
-  shape: { borderRadius: 8 }
+    palette: {
+      mode: "light",
+      primary: { main: "#16a34a" },
+      secondary: { main: "#15803d", contrastText: "#ffffff" },
+      background: { default: "#f9fafb" },
+    },
+    shape: { borderRadius: 8 }
   },
   // --- Authentication ---
   http: { baseURL: "http://localhost:3001/api/" },
@@ -57,7 +88,8 @@ palette: {
     guards: {
       isAuthenticated: (ctx) => !!ctx.tokens.access,
       hasAnyRole: (ctx, roles) => roles.includes(ctx.user.role),
-      hasAllPerms: (ctx, perms) => perms.every((p) => ctx.user.permissions?.includes(p))    },
+      hasAllPerms: (ctx, perms) => perms.every((p) => ctx.user.permissions?.includes(p))
+    },
     onAuthFail: "/login"
   },
   publicPaths: ["/register"],

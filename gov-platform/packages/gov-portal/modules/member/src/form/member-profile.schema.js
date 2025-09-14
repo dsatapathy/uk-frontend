@@ -22,7 +22,7 @@ export const memberProfileSchema = {
             ]
           },
           validations: [{ type: "required" }],
-          grid: { span: { xs: 12, sm: 6, md: 4 }, }
+          grid: { span: { xs: 12, sm: 6, md: 4 } }
         },
         {
           id: "district",
