@@ -224,7 +224,7 @@ export default function ConfigStepperMUI({
         radius={0}
         sx={{
           position: "sticky",
-          bottom: { xs: "calc(env(safe-area-inset-bottom, 0px) + 4px)", sm: 50 },
+          bottom: { xs: "-15px", sm: 50 },
           borderTop: (t) => `1px solid ${t.palette.divider}`,
           background: (t) => t.palette.background.paper,
           px: { xs: 2, md: 3 },

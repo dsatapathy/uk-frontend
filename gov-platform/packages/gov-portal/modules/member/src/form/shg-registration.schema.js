@@ -77,74 +77,86 @@ export const shgRegistrationSchema = {
           grid: { span: { xs: 12, sm: 6, md: 4 }, }
         },
         {
-          "id": "clf",
-          "type": "autocomplete",
-          "label": "CLF",
-          "description": "Select CLF In The Block From The Dropdown",
-          "dependsOn": ["block"],
-          "options": {
-            "endpointKey": "clfsByBlock",
-            "labelKey": "name",
-            "valueKey": "code",
-            "params": { "blockCode": "$form.block" }
+          id: "clf",
+          type: "autocomplete",
+          label: "CLF",
+          options: {
+            endpointKey: "clfs",
+            labelKey: "name",
+            valueKey: "id",
+            dependsOn: ["values.block"],
+            dependsOnHint: "Select Block first"
           },
-          "onChange": { "reset": ["vo", "shgName", "shgCode"] },
-          "grid": { "span": { "xs": 12, "sm": 6, "md": 4 } },
-          "validations": [{ "type": "required" }]
+          validations: [{ type: "required" }],
+          grid: { span: { xs: 12, sm: 6, md: 4 } }
         },
         {
-          "id": "vo",
-          "type": "autocomplete",
-          "label": "VO",
-          "description": "Select VO Under The CLF From The Dropdown",
-          "dependsOn": ["clf"],
-          "options": {
-            "endpointKey": "vosByClf",
-            "labelKey": "name",
-            "valueKey": "code",
-            "params": { "clfCode": "$form.clf" }
+          id: "vo",
+          type: "autocomplete",
+          label: "VO",
+          options: {
+            endpointKey: "vos",
+            labelKey: "name",
+            valueKey: "id",
+            dependsOn: ["values.clf"],
+            dependsOnHint: "Select CLF first"
           },
-          "onChange": { "reset": ["shgName", "shgCode"] },
-          "grid": { "span": { "xs": 12, "sm": 6, "md": 4 } },
-          "validations": [{ "type": "required" }]
+          validations: [{ type: "required" }],
+          grid: { span: { xs: 12, sm: 6, md: 4 } }
         },
         {
-          "id": "shgName",
-          "type": "autocomplete",
-          "label": "SHG Name",
-          "description": "Select SHG In The VO From The Dropdown",
-          "dependsOn": ["vo"],
-          "options": {
-            "endpointKey": "shgsByVo",
-            "labelKey": "name",
-            "valueKey": "name",
-            "params": { "voCode": "$form.vo" }
+          id: "shg",
+          type: "autocomplete",
+          label: "SHG",
+          options: {
+            endpointKey: "shgs",
+            labelKey: "name",
+            valueKey: "id",
+            dependsOn: ["values.vo"],
+            dependsOnHint: "Select VO first"
           },
-          "grid": { "span": { "xs": 12, "sm": 6, "md": 4 } },
-          "validations": [{ "type": "required" }]
+          validations: [{ type: "required" }],
+          grid: { span: { xs: 12, sm: 6, md: 4 } }
         },
         {
-          "id": "shgCode",
-          "type": "autocomplete",
-          "label": "SHG Code",
-          "description": "Select SHG Code In The VO From The Dropdown",
-          "dependsOn": ["vo"],
-          "options": {
-            "endpointKey": "shgCodesByVo",
-            "labelKey": "code",
-            "valueKey": "code",
-            "params": { "voCode": "$form.vo" }
+          id: "shgCode",
+          type: "number",
+          label: "SHG Code",
+          validations: [{ type: "required" }],
+          props: { min: 0, step: 1 },
+          config: { inputMode: "numeric" },
+          grid: { span: { xs: 12, sm: 6, md: 4 } }
+        },
+        // ADD flow field
+        {
+          id: "memberName",
+          type: "text",
+          label: "Name of Member",
+          validations: [{ type: "required" }],
+          rules: [{ when: "values.action === 'update'", action: "hide" }],
+          grid: { span: { xs: 12, sm: 6, md: 4 } },
+        },
+        // UPDATE flow field
+        {
+          id: "memberToUpdate",
+          type: "autocomplete",
+          label: "Select Member to Update",
+          options: {
+            endpointKey: "shgMembers", labelKey: "name", valueKey: "id",
+            dependsOn: ["values.shg"], dependsOnHint: "Select SHG first",
           },
-          "grid": { "span": { "xs": 12, "sm": 6, "md": 4 } },
-          "validations": [{ "type": "required" }]
+          validations: [{ type: "required" }],
+          rules: [{ when: "values.action !== 'update'", action: "hide" }],
+          grid: { span: { xs: 12, sm: 6, md: 4 } },
         },
         {
-          "id": "dateOfRegistration",
-          "type": "datepicker",
-          "label": "Date Of Registration",
-          "config": { "displayFormat": "dd-MM-yyyy" },
-          "grid": { "span": { "xs": 12, "sm": 6, "md": 4 } },
-          "validations": [{ "type": "required" }]
+          id: "shgJoinDate",
+          type: "date",
+          label: "Date of SHG Joining",
+          validations: [{ type: "required" }],
+          props: { format: "DD/MM/YYYY" },
+          config: { valueKind: "iso", outputFormat: "YYYY-MM-DD" },
+          grid: { span: { xs: 12, sm: 6, md: 4 } }
         },
         {
           "id": "address",

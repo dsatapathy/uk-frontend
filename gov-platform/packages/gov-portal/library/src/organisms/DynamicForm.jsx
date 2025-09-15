@@ -20,6 +20,7 @@ import {
 
 import { buildZodFromSchema } from "../rules/ValidationFactory.js";
 import InlineCondition from "../form/InlineCondition.jsx";
+import { borderRadius } from "@mui/system";
 
 /* -------------------------------- helpers -------------------------------- */
 const TYPE_DEFAULTS = { checkbox: false, default: "" };
@@ -581,7 +582,41 @@ export default function DynamicForm({
           );
         })}
 
-        {!hideDefaultActions && (
+        {/* sticky footer actions (matches the stepper look/behavior) */}
+        {!hideDefaultActions && (ui?.stickyActions ?? true) && (
+          <DSBox
+            sx={{
+              position: "sticky",
+              bottom: { xs: "-15px", sm: "40px" },
+              borderRadius: 0,
+              borderTop: (t) => `1px solid ${t.palette.divider}`,
+              background: (t) => t.palette.background.paper,
+              px: { xs: 2, md: 3 },
+              py: 2,
+              zIndex: 1,
+              display: "flex",
+              gap: 2,
+              flexWrap: "wrap",
+              justifyContent: { xs: "center", sm: "flex-end" },
+            }}
+          >
+            <AppButton type="submit" variant="contained">
+              {ui?.submitLabel || "Submit"}
+            </AppButton>
+            {ui?.showReset !== false && (
+              <AppButton
+                type="button"
+                variant="outlined"
+                onClick={() => reset(formDefaults)}
+              >
+                {ui?.resetLabel || "Reset"}
+              </AppButton>
+            )}
+          </DSBox>
+        )}
+
+        {/* legacy non-sticky fallback if you really want it */}
+        {!hideDefaultActions && (ui?.stickyActions === false) && (
           <DSBox sx={{ display: "flex", gap: 2, mt: 2, flexWrap: "wrap" }}>
             <AppButton type="submit" variant="contained">
               {ui?.submitLabel || "Submit"}

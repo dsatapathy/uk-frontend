@@ -10,6 +10,7 @@ const ui = {
     cols:{ xs: 12, sm: 12, md: 12, lg: 12, xl: 12 },
     gap: { xs: "s2", md: "s2" },
   },
+  stickyActions: true,
   // section wrappers
   sections: {
     collapsible: false,
