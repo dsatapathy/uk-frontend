@@ -31,6 +31,8 @@ export function FieldRenderer({ control, field, errors, classes, globalStyle }) 
     type = "text",
     name,
     label,
+    labelColor,
+    labelSx,
     placeholder,
     icon,
     required,
@@ -53,7 +55,9 @@ export function FieldRenderer({ control, field, errors, classes, globalStyle }) 
 
   const errObj = errors?.[name];
   const errMsg = errObj?.message || "";
-
+  const labelColorSx = labelColor
+  ? { color: labelColor, "&.Mui-focused": { color: labelColor }, "&.Mui-error": { color: labelColor } }
+  : {};
   // ---------- Checkbox (kept as-is with inline label) ----------
   if (type === "checkbox") {
     return (
@@ -85,7 +89,7 @@ export function FieldRenderer({ control, field, errors, classes, globalStyle }) 
               error={!!errObj}
               disabled={!!disabled}
             >
-              {label ? <FormLabel htmlFor={name}>{label}</FormLabel> : null}
+              {label ? <FormLabel htmlFor={name} sx={{ ...labelColorSx, ...(labelSx || {}) }} >{label}</FormLabel> : null}
 
               <TextField
                 id={name}
@@ -170,7 +174,7 @@ export function FieldRenderer({ control, field, errors, classes, globalStyle }) 
               error={!!errObj}
               disabled={!!disabled}
             >
-              {label ? <FormLabel htmlFor={name}>{label}</FormLabel> : null}
+              {label ? <FormLabel htmlFor={name} sx={{ ...labelColorSx, ...(labelSx || {}) }}>{label}</FormLabel> : null}
 
               <InputText
                 id={name}

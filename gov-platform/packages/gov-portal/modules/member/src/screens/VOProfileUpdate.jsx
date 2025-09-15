@@ -33,7 +33,7 @@ const ui = {
     },
 };
 
-export default function MemberList() {
+export default function VOProfileUpdate() {
     const DynamicForm = getComponent("DynamicForm");
     return (
         <DynamicForm

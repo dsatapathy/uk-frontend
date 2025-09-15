@@ -11,8 +11,9 @@ import { Controller, useFormContext } from "react-hook-form";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import InputText from "../atoms/InputText"; // adjust the path if needed
 
-export default function CaptchaBox({ control, cfg = {}, errors, classes }) {
+export default function CaptchaBox({ control, cfg = {}, errors, classes, field }) {
   const { setValue, trigger } = useFormContext?.() || {};
+  const { labelSx } = field;  
   const s = classes || {};
   const name = cfg.name || "captcha";
   const length = cfg.length || 6;
@@ -69,7 +70,7 @@ export default function CaptchaBox({ control, cfg = {}, errors, classes }) {
           error={false}
           sx={{ width: { xs: "100%", md: 220 }, flexShrink: 0 }}
         >
-          <FormLabel htmlFor={`${name}-display`}>
+          <FormLabel htmlFor={`${name}-display`} sx={{ ...(labelSx || {}) }}>
             {cfg.captchaLabel || "Captcha"}
           </FormLabel>
 
@@ -119,7 +120,7 @@ export default function CaptchaBox({ control, cfg = {}, errors, classes }) {
               error={!!errObj}
               sx={{ flexGrow: 1, minWidth: 0 }}
             >
-              <FormLabel htmlFor={name}>
+              <FormLabel htmlFor={name} sx={{ ...(labelSx || {}) }}>
                 {cfg.label || "Enter captcha"}
               </FormLabel>
 

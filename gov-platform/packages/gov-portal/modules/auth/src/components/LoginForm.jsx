@@ -117,7 +117,7 @@ function LoginFormInner({ config, onSubmit, onSuccess, components, classes, sche
               <C.FieldRenderer key={f.name} control={control} field={f} errors={errors} classes={s} />
             ))}
             {config.captcha?.provider === "dev" ? (
-              <C.CaptchaBox control={control} cfg={config.captcha} errors={errors} classes={s} />
+              <C.CaptchaBox control={control} cfg={config.captcha} errors={errors} classes={s} field={config?.captcha} />
             ) : null}
           </div>
 

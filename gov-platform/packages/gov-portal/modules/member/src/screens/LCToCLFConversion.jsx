@@ -79,7 +79,7 @@ const ui = {
   },
 };
 
-export default function UpdateMember() {
+export default function LCToCLFConversion() {
   const DynamicForm = getComponent("DynamicForm");
   const ConfigStepperMUI = getComponent("ConfigStepperMUI");
   const formApiRef = React.useRef(null);

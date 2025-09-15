@@ -58,8 +58,10 @@
 /* Brand: scale down gracefully on short viewports */
 .brand {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  justify-content: center;
   align-items: center;
+  gap: 12px;
   // margin-bottom: clamp(8px, 2vh, 16px);
 
   .brandLogo {
@@ -75,6 +77,13 @@
   .brandSubtitle {
     font-size: clamp(0.8rem, 1.8vh, 0.95rem);
     color: #666;
+  }
+}
+
+@media (max-width: 600px) {
+  .brand {
+    flex-direction: column;
+    text-align: center;          /* optional, looks nicer */
   }
 }
 

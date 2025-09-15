@@ -1,16 +1,47 @@
-// widgets/index.js (optional)
+// widgets/index.js
 import { asDefault } from "@gov/core";
 
-export const loadNewMember = asDefault(
-    () => import("./NewMember.jsx"),
-    "NewMember"
+export const loadBeneficiaryMemberProfile = asDefault(
+  () => import("./BeneficiaryMemberProfile.jsx"),
+  "BeneficiaryMemberProfile"
 );
 
-export const loadUpdateMember = asDefault(
-    () => import("./UpdateMember.jsx"),
-    "UpdateMember"
+export const loadSHGProfileUpdate = asDefault(
+  () => import("./SHGProfileUpdate.jsx"),
+  "SHGProfileUpdate"
 );
-export const loadMemberList = asDefault(
-    () => import("./MemberList.jsx"),
-    "MemberList"
+
+export const loadVOProfileUpdate = asDefault(
+  () => import("./VOProfileUpdate.jsx"),
+  "VOProfileUpdate"
+);
+
+export const loadCLFLCProfileUpdate = asDefault(
+  () => import("./CLFLCProfileUpdate.jsx"),
+  "CLFLCProfileUpdate"
+);
+
+export const loadLeaderProfileUpdate = asDefault(
+  () => import("./LeaderProfileUpdate.jsx"),
+  "LeaderProfileUpdate"
+);
+
+export const loadShareholderProfileUpdate = asDefault(
+  () => import("./ShareholderProfileUpdate.jsx"),
+  "ShareholderProfileUpdate"
+);
+
+export const loadFPOProfileUpdate = asDefault(
+  () => import("./FPOProfileUpdate.jsx"),
+  "FPOProfileUpdate"
+);
+
+export const loadPGProfileUpdate = asDefault(
+  () => import("./PGProfileUpdate.jsx"),
+  "PGProfileUpdate"
+);
+
+export const loadLCToCLFConversion = asDefault(
+  () => import("./LCToCLFConversion.jsx"),
+  "LCToCLFConversion"
 );

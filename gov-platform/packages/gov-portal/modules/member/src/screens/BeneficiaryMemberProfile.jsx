@@ -42,7 +42,7 @@ const ui = {
   },
 };
 
-export default function NewMember() {
+export default function BeneficiaryMemberProfile() {
     const DynamicForm = getComponent("DynamicForm");
     const ConfigStepperMUI = getComponent("ConfigStepperMUI");
     const formApiRef = React.useRef(null);
