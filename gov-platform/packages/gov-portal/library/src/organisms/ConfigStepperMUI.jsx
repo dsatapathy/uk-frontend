@@ -208,6 +208,8 @@ export default function ConfigStepperMUI({
           schema={stepSchema}
           hideDefaultActions
           formApiRef={formApiRef}
+          validationSchema={schema}
+          defaultsSchema={schema}
         />
       </Paper>
 

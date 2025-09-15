@@ -267,6 +267,7 @@ export default function DynamicForm({
     mode: "onSubmit",
     reValidateMode: "onSubmit",
     defaultValues: formDefaults,
+    shouldUnregister: false,
   });
 
   const { handleSubmit, formState, reset, getValues, setValue, trigger, watch, clearErrors } = methods;

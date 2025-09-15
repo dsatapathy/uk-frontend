@@ -15,12 +15,15 @@ export const memberProfileSchema = {
           id: "action",
           type: "radio-group",
           label: "Action",
-          options: { items: [
-            { label: "Add New Member", value: "add" },
-            { label: "Update Existing", value: "update" }
-          ]},
+          defaultValue: "add",                     // ✅ start in Add flow
+          options: {
+            items: [
+              { label: "Add New Member", value: "add" },
+              { label: "Update Existing", value: "update" },
+            ]
+          },
           validations: [{ type: "required" }],
-          grid: { span: { xs: 12, sm: 6, md: 4 } }
+          grid: { span: { xs: 12, sm: 6, md: 4 } },
         },
         {
           id: "district",
@@ -56,7 +59,7 @@ export const memberProfileSchema = {
             endpointKey: "gps",
             labelKey: "name",
             valueKey: "code",
-            dependsOn: ["values.district","values.block"],
+            dependsOn: ["values.district", "values.block"],
             dependsOnHint: "Select District and Block first"
           },
           validations: [{ type: "required" }],
@@ -70,7 +73,7 @@ export const memberProfileSchema = {
             endpointKey: "villages",
             labelKey: "name",
             valueKey: "code",
-            dependsOn: ["values.district","values.block","values.gp"],
+            dependsOn: ["values.district", "values.block", "values.gp"],
             dependsOnHint: "Select District, Block and GP first"
           },
           validations: [{ type: "required" }],
@@ -135,20 +138,8 @@ export const memberProfileSchema = {
           config: { inputMode: "numeric" },
           grid: { span: { xs: 12, sm: 6, md: 4 } }
         },
-        {
-          id: "memberName",
-          type: "autocomplete",
-          label: "Name of Member",
-          options: {
-            endpointKey: "shgMembers",
-            labelKey: "name",
-            valueKey: "id",
-            dependsOn: ["values.shg"],
-            dependsOnHint: "Select SHG first"
-          },
-          validations: [{ type: "required" }],
-          grid: { span: { xs: 12, sm: 6, md: 4 } }
-        },
+        
+
         {
           id: "shgJoinDate",
           type: "date",
@@ -352,7 +343,8 @@ export const memberProfileSchema = {
         { id: "uncultivatedLand", type: "number", label: "Uncultivated land (Nali)", props: { min: 0, step: 1 }, config: { inputMode: "numeric" }, rules: [{ when: "values.landOwnership === 'No'", action: "hide" }], grid: { span: { xs: 12, sm: 6, md: 4 } } },
 
         // NOTE: MultiSelect expects static items. If you need async here, add an async-multi component later.
-        { id: "majorCrops", type: "multiselect", label: "Major Crops Grown",
+        {
+          id: "majorCrops", type: "multiselect", label: "Major Crops Grown",
           options: { items: [] /* e.g. [{label:'Wheat', value:'wheat'}] */ },
           validations: [{ type: "required" }],
           rules: [{ when: "values.landOwnership === 'No'", action: "hide" }],
@@ -368,7 +360,8 @@ export const memberProfileSchema = {
         { id: "wageLabour", type: "autocomplete", label: "Wage Labour", options: { endpointKey: "wageLabourTypes", labelKey: "label", valueKey: "value" }, validations: [{ type: "required" }], grid: { span: { xs: 12, sm: 6, md: 4 } } },
 
         { id: "migration", type: "radio-group", label: "Migration (Self or Family)", options: { items: [{ label: "Yes", value: "Yes" }, { label: "No", value: "No" }] }, validations: [{ type: "required" }], grid: { span: { xs: 12, sm: 6, md: 4 } } },
-        { id: "migrationPurpose", type: "autocomplete", label: "Migration Purpose",
+        {
+          id: "migrationPurpose", type: "autocomplete", label: "Migration Purpose",
           options: { endpointKey: "migrationPurposes", labelKey: "label", valueKey: "value" },
           rules: [{ when: "values.migration !== 'Yes'", action: "hide" }, { when: "values.migration === 'Yes'", action: "require" }],
           grid: { span: { xs: 12, sm: 6, md: 4 } }

@@ -15,6 +15,7 @@ export const memberProfileSchema = {
           id: "action",
           type: "radio-group",
           label: "Action",
+          defaultValue: "add",
           options: {
             items: [
               { label: "Add New Member", value: "add" },
@@ -137,19 +138,27 @@ export const memberProfileSchema = {
           config: { inputMode: "numeric" },
           grid: { span: { xs: 12, sm: 6, md: 4 } }
         },
+        // ADD flow field
         {
           id: "memberName",
-          type: "autocomplete",
+          type: "text",
           label: "Name of Member",
+          validations: [{ type: "required" }],
+          rules: [{ when: "values.action === 'update'", action: "hide" }],
+          grid: { span: { xs: 12, sm: 6, md: 4 } },
+        },
+        // UPDATE flow field
+        {
+          id: "memberToUpdate",
+          type: "autocomplete",
+          label: "Select Member to Update",
           options: {
-            endpointKey: "shgMembers",
-            labelKey: "name",
-            valueKey: "id",
-            dependsOn: ["values.shg"],
-            dependsOnHint: "Select SHG first"
+            endpointKey: "shgMembers", labelKey: "name", valueKey: "id",
+            dependsOn: ["values.shg"], dependsOnHint: "Select SHG first",
           },
           validations: [{ type: "required" }],
-          grid: { span: { xs: 12, sm: 6, md: 4 } }
+          rules: [{ when: "values.action !== 'update'", action: "hide" }],
+          grid: { span: { xs: 12, sm: 6, md: 4 } },
         },
         {
           id: "shgJoinDate",
@@ -415,7 +424,7 @@ export const memberProfileSchema = {
             maxFiles: 1,                   // enforced anyway by multiple:false, but explicit is fine
             maxSizeMB: 5                   // e.g. 5 MB cap
           },
-          grid: { span: { xs: 12, sm: 6, md: 4 } }
+          grid: { span: { xs: 12, sm: 12, md: 12 } }
         },
 
         {
@@ -433,7 +442,7 @@ export const memberProfileSchema = {
             { when: "values.pwd !== 'Yes'", action: "hide" },
             { when: "values.pwd === 'Yes'", action: "require" }
           ],
-          grid: { span: { xs: 12, sm: 6, md: 4 } }
+          grid: { span: { xs: 12, sm: 12, md: 12 } }
         },
 
         {
@@ -448,10 +457,10 @@ export const memberProfileSchema = {
             maxFiles: 1,
             maxSizeMB: 5
           },
-          grid: { span: { xs: 12, sm: 6, md: 4 } }
+          grid: { span: { xs: 12, sm: 12, md: 12 } }
         },
-        { id: "valueChainMapping", type: "autocomplete", label: "Value Chain Mapping", options: { endpointKey: "catalog/valueChains", labelKey: "label", valueKey: "value" }, validations: [{ type: "required" }], grid: { span: { xs: 12, sm: 6, md: 4 } } },
-        { id: "pgMapping", type: "autocomplete", label: "PG Mapping", options: { endpointKey: "catalog/pgMappings", labelKey: "label", valueKey: "value" }, validations: [{ type: "required" }], grid: { span: { xs: 12, sm: 6, md: 4 } } },
+        { id: "valueChainMapping", type: "autocomplete", label: "Value Chain Mapping", options: { endpointKey: "catalog/valueChains", labelKey: "label", valueKey: "value" }, validations: [{ type: "required" }], grid: { span: { xs: 12, sm: 6, md: 6 } } },
+        { id: "pgMapping", type: "autocomplete", label: "PG Mapping", options: { endpointKey: "catalog/pgMappings", labelKey: "label", valueKey: "value" }, validations: [{ type: "required" }], grid: { span: { xs: 12, sm: 6, md: 6 } } },
 
         { id: "undertaking", type: "checkbox", label: "I confirm the information provided is correct", validations: [{ type: "required" }], grid: { span: { xs: 12 } } }
       ]

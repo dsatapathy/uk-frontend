@@ -1,4 +1,4 @@
-// member-profile.steps.js
+// member-profile.steps.js — stepper flow
 export const memberProfileSteps = [
   { id: "registration", label: "Registration & Location", sections: ["registration"] },
   { id: "association",  label: "Association",             sections: ["association"] },
@@ -7,5 +7,5 @@ export const memberProfileSteps = [
   { id: "household",    label: "Household",               sections: ["household"] },
   { id: "livelihood",   label: "Livelihood",              sections: ["livelihood"] },
   { id: "income",       label: "Income & Finance",        sections: ["income"] },
-  { id: "documents",    label: "Documents & Mapping",     sections: ["documents"] }
+  { id: "documents",    label: "Documents & Mapping",     sections: ["documents"] },
 ];
