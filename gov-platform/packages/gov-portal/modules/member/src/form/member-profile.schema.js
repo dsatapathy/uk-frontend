@@ -452,9 +452,9 @@ export const memberProfileSchema = {
           helperText: "Attach Aadhaar front photo (image only).",
           validations: [{ type: "required" }],
           props: {
-            multiple: false,
+            multiple: true,
             accept: "image/*",
-            maxFiles: 1,
+            maxFiles: 5,
             maxSizeMB: 5
           },
           grid: { span: { xs: 12, sm: 12, md: 12 } }

@@ -1,3 +1,4 @@
+import { http } from "../bootstrap";
 import { useRQQuery, useRQMutation } from "../rq";
 
 export function useOptions(
@@ -42,3 +43,15 @@ export function useSubmitForm(formId, entityId) {
     method: "post",
   });
 }
+const accept304 = (s) => (s >= 200 && s < 300) || s === 304;
+export async function getMemberProfile(memberId, { signal } = {}) {
+  if (memberId == null || String(memberId).trim() === "") return null; // soft guard
+  const resp = await http().request({
+    url: `/members/${memberId}`,
+    method: "get",
+    signal,                 // allows React Query (or AbortController) to cancel
+    validateStatus: accept304,
+  });
+  return resp.data;
+}
+

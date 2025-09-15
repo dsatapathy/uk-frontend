@@ -14,7 +14,7 @@ function depsReady(deps = {}) {
     return true;
   });
 }
-
+const has = (v) => v !== undefined && v !== null && v !== "";
 export default function AsyncAutocomplete({
   field,
   rhf,
@@ -43,11 +43,12 @@ export default function AsyncAutocomplete({
     []
   );
 
+  const shouldLoad = !hidden && !disabled && ready && (open || (rhf.value ?? "") !== "");
   const { data = [], isLoading, isFetching } = useOptions(endpointKey, {
     query,
     deps,
     endpoint: endpointOverride,
-    enabled: open && !hidden && !disabled && ready, // 👈 gate by open + deps
+    enabled: shouldLoad, // 👈 also when a value exists
   });
 
   // Optional: clear stale value when parent cleared
@@ -55,8 +56,10 @@ export default function AsyncAutocomplete({
     if (!ready && rhf.value != null) rhf.onChange(null);
   }, [ready]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const selected = data.find((o) => o?.[valueKey] === rhf?.value) || null;
-  if (hidden) return null;
+  const selected =
+    data.find((o) => o?.[valueKey] === rhf?.value) ||
+    // Optional fallback so label shows even before options load:
+    (has(rhf.value) ? { [valueKey]: rhf.value, [labelKey]: String(rhf.value) } : null); if (hidden) return null;
 
   return (
     <Autocomplete
@@ -70,7 +73,9 @@ export default function AsyncAutocomplete({
       loading={(isLoading || isFetching) && open && ready}
       disabled={disabled || !ready}
       getOptionLabel={(o) => o?.[labelKey] ?? ""}
-      isOptionEqualToValue={(opt, val) => opt?.[valueKey] === val?.[valueKey]}
+      isOptionEqualToValue={(opt, val) =>
+        opt?.[valueKey] === (val && typeof val === "object" ? val[valueKey] : val)
+      }
       renderInput={(params) => (
         <TextField
           {...params}

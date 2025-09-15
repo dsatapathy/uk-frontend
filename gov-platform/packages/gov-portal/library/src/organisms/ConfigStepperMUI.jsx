@@ -147,19 +147,24 @@ export default function ConfigStepperMUI({
   }), [go, index, triggerStep, triggerAll, onSave, onDraft, onSubmit, formApiRef, ctx]);
 
   function resolveActions() {
+    const env = { ...ctx, getValues: formApiRef?.current?.getValues };
     const idsOrObjs = (typeof getStepActions === "function")
-      ? getStepActions(step, { ...ctx, getValues: formApiRef?.current?.getValues })
+      ? getStepActions(step, env)
       : ["prev", "save", "next", "draft", "submit"];
     const merged = idsOrObjs.map((x) =>
       typeof x === "string"
         ? { ...baseActions[x], ...(actions[x] || {}) }
-        : x.id
+        : x?.id
           ? { ...(baseActions[x.id] || {}), ...(actions[x.id] || {}), ...x }
           : x
     );
+
     return merged
-      .filter((a) => evalCond(a.showWhen ?? true, { ...ctx, getValues: formApiRef?.current?.getValues }))
-      .map((a) => ({ ...a, disabled: !evalCond(a.disableWhen == null ? true : !a.disableWhen, { ...ctx, getValues: formApiRef?.current?.getValues }) }));
+      .filter((a) => evalCond(a?.showWhen ?? true, env))
+      .map((a) => ({
+        ...a,
+        disabled: !!evalCond(a?.disableWhen ?? false, env),
+      }));
   }
 
   const resolvedActions = React.useMemo(() => resolveActions(), [actions, getStepActions, ctx, baseActions]);
@@ -210,6 +215,7 @@ export default function ConfigStepperMUI({
           formApiRef={formApiRef}
           validationSchema={schema}
           defaultsSchema={schema}
+          output="bySection"
         />
       </Paper>
 
@@ -218,7 +224,7 @@ export default function ConfigStepperMUI({
         radius={0}
         sx={{
           position: "sticky",
-          bottom: { xs: "calc(env(safe-area-inset-bottom, 0px)  4px)", sm: 50 },
+          bottom: { xs: "calc(env(safe-area-inset-bottom, 0px) + 4px)", sm: 50 },
           borderTop: (t) => `1px solid ${t.palette.divider}`,
           background: (t) => t.palette.background.paper,
           px: { xs: 2, md: 3 },

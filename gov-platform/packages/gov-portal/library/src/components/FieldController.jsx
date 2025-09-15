@@ -253,6 +253,8 @@ export default function FieldController({
           ? field.defaultValue
           : field.type === "checkbox"
             ? false
+            : (field.type === "file" || field.type === "upload")
+            ? (field.props?.multiple ? [] : null)
             : ""
       }
       control={control}

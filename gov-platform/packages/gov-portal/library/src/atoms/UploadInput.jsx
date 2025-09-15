@@ -1,61 +1,148 @@
 // atoms/UploadInput.jsx
 import * as React from "react";
-import { IconButton, List, ListItem, ListItemText } from "@mui/material";
+import { IconButton, Tooltip } from "@mui/material";
 import DSBox from "./DSBox";
 import AppButton from "./AppButton";
 import TypographyX from "./TypographyX";
 import { getIcon } from "../utils/icons";
 import { get } from "lodash";
 
+// ---------- utils ----------
+const isDefined = (v) => v !== undefined && v !== null;
+const isAcceptableItem = (x) =>
+  x instanceof File || (x && typeof x === "object");
 
+const toArray = (value, multiple) => {
+  if (!multiple) return isAcceptableItem(value) ? [value] : [];
+  if (Array.isArray(value)) return value.filter(isAcceptableItem);
+  return isAcceptableItem(value) ? [value] : [];
+};
+
+const formatSize = (bytes) => {
+  const n = Number(bytes);
+  if (!Number.isFinite(n) || n < 0) return "";
+  const KB = 1024, MB = KB * 1024, GB = MB * 1024;
+  if (n >= GB) return `${(n / GB).toFixed(2)} GB`;
+  if (n >= MB) return `${(n / MB).toFixed(2)} MB`;
+  if (n >= KB) return `${(n / KB).toFixed(1)} KB`;
+  return `${n} B`;
+};
+
+const downloadLocalFile = (file) => {
+  const url = URL.createObjectURL(file);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = file.name || "download";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1500);
+};
+
+// ---------- component ----------
 export default function UploadInput({
   name,
-  value,
+  value,                  // File | Array<File> | server descriptors
   onChange,
   multiple = false,
-  accept,            // e.g. "image/*,.pdf"
-  maxFiles,          // number
-  maxSizeMB,         // number
+  accept,
+  maxFiles,
+  maxSizeMB,
   disabled,
   required,
   error,
   helperText,
   showList = true,
+
+  // server descriptor keys
+  fileKeys = { label: "name", size: "size", url: "url", id: "id" },
+  getDownloadUrl,         // (item) => url
 }) {
   const inputRef = React.useRef(null);
 
-  const pick = (e) => {
-    const files = Array.from(e.target.files || []);
-    if (!files.length) return;
+  // Internal mirror so UI updates immediately even if parent is slow
+  const [filesUI, setFilesUI] = React.useState(() => toArray(value, multiple));
 
-    let next = multiple ? [...(Array.isArray(value) ? value : [])] : null;
-
-    files.forEach((f) => {
-      if (maxSizeMB && f.size > maxSizeMB * 1024 * 1024) return;
-      if (multiple) next.push(f);
-      else next = f;
-    });
-
-    if (multiple && maxFiles && next.length > maxFiles) {
-      next = next.slice(0, maxFiles);
-    }
-    onChange?.(next);
-    // reset input so re-selecting same file works
-    e.target.value = "";
-  };
-
-  const removeAt = (idx) => {
-    if (!multiple) onChange?.(null);
-    else {
-      const arr = Array.isArray(value) ? value.slice() : [];
-      arr.splice(idx, 1);
-      onChange?.(arr);
-    }
-  };
+  // Keep internal state in sync with parent whenever it changes
+  React.useEffect(() => {
+    setFilesUI(toArray(value, multiple));
+  }, [value, multiple]);
 
   const browse = () => inputRef.current?.click();
 
-  const files = multiple ? (Array.isArray(value) ? value : []) : (value ? [value] : []);
+  const emitChange = (arr) => {
+    // normalize payload for parent
+    const next = multiple ? arr : (arr[0] ?? null);
+    console.log('next', arr, next);
+    setFilesUI(arr);        // optimistic UI
+    onChange?.(next);       // inform RHF/parent
+  };
+
+  const pick = (e) => {
+  const picked = Array.from(e.target.files || []);
+  if (!picked.length) return;
+
+  // Start from current UI list so multiple selections accumulate
+  let next = multiple ? filesUI.slice() : [];
+
+  // Skip oversized files
+  const addable = maxSizeMB
+    ? picked.filter((f) => f.size <= maxSizeMB * 1024 * 1024)
+    : picked;
+
+  if (multiple) {
+    // Add all newly picked files
+    next.push(...addable);
+
+    // Optional: dedupe by (name, size, lastModified)
+    const seen = new Set();
+    next = next.filter((f) => {
+      const key = `${f.name}-${f.size}-${f.lastModified || 0}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+
+    // IMPORTANT: keep the *newest* N files if maxFiles is set
+    if (Number(maxFiles) > 0 && next.length > maxFiles) {
+      next = next.slice(-maxFiles);
+    }
+  } else {
+    // Single-file mode: take the last picked (most recent)
+    next = addable.length ? [addable[addable.length - 1]] : [];
+  }
+
+  emitChange(next);
+  // Allow re-selecting the same file again
+  e.target.value = "";
+};
+
+
+  const removeAt = (idx) => {
+    if (!multiple) {
+      emitChange([]);
+      return;
+    }
+    const arr = filesUI.slice();
+    arr.splice(idx, 1);
+    emitChange(arr);
+  };
+
+  const handleDownload = (item) => {
+    if (item instanceof File) {
+      downloadLocalFile(item);
+      return;
+    }
+    const url = get(item, fileKeys.url) || (typeof getDownloadUrl === "function" ? getDownloadUrl(item) : null);
+    if (!url) return;
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = get(item, fileKeys.label) || "download";
+    a.target = "_blank";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  };
 
   return (
     <DSBox sx={{ width: "100%" }}>
@@ -69,6 +156,7 @@ export default function UploadInput({
         onChange={pick}
         disabled={disabled}
       />
+
       <AppButton
         variant="outlined"
         onClick={browse}
@@ -78,30 +166,96 @@ export default function UploadInput({
         {multiple ? "Select files" : "Select file"}
       </AppButton>
 
-      {helperText || error ? (
-        <TypographyX variant="caption" sx={{ ml: 1, color: error ? "error.main" : "text.secondary" }}>
+      {(helperText || error) && (
+        <TypographyX
+          variant="caption"
+          sx={{ ml: 1, color: error ? "error.main" : "text.secondary" }}
+        >
           {helperText}
         </TypographyX>
-      ) : null}
+      )}
 
-      {showList && files.length > 0 && (
-        <List dense sx={{ mt: 1 }}>
-          {files.map((f, i) => (
-            <ListItem
-              key={i}
-              secondaryAction={
-                <IconButton edge="end" aria-label="remove" onClick={() => removeAt(i)}>
-                  {getIcon("deleteIcon")}
-                </IconButton>
-              }
-            >
-              <ListItemText
-                primary={f.name}
-                secondary={`${(f.size / (1024 * 1024)).toFixed(2)} MB`}
-              />
-            </ListItem>
-          ))}
-        </List>
+      {showList && filesUI.length > 0 && (
+        <DSBox
+          sx={{
+            display: "flex",
+            flexWrap: "wrap",
+            columnGap: 1,
+            rowGap: 1,
+            mt: 1,
+          }}
+        >
+          {filesUI.map((item, i) => {
+            const isFile = item instanceof File;
+            const name = isFile ? item.name : (get(item, fileKeys.label) ?? "file");
+            const size = isFile ? item.size : get(item, fileKeys.size);
+            const hasDownload = isFile || !!get(item, fileKeys.url) || !!getDownloadUrl;
+
+            return (
+              <DSBox
+                key={`${name}-${i}`}
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1,
+                  px: 1.25,
+                  py: 1,
+                  border: (t) => `1px dashed ${t.palette.divider}`,
+                  borderRadius: 1.5,
+                  minWidth: 260,
+                  maxWidth: "100%",
+                  backgroundColor: (t) => t.palette.background.paper,
+                }}
+              >
+                <DSBox aria-hidden sx={{ display: "flex", alignItems: "center" }}>
+                  {getIcon("fileIcon")}
+                </DSBox>
+
+                <DSBox sx={{ flex: 1, minWidth: 0 }}>
+                  <TypographyX
+                    variant="body2"
+                    noWrap
+                    title={name}
+                    sx={{ fontWeight: 600 }}
+                  >
+                    {name}
+                  </TypographyX>
+                  <TypographyX variant="caption" color="text.secondary">
+                    {formatSize(size)}
+                  </TypographyX>
+                </DSBox>
+
+                {hasDownload && (
+                  <Tooltip title="Download">
+                    <span>
+                      <IconButton
+                        size="small"
+                        onClick={() => handleDownload(item)}
+                        disabled={disabled}
+                        aria-label={`Download ${name}`}
+                      >
+                        {getIcon("downloadIcon")}
+                      </IconButton>
+                    </span>
+                  </Tooltip>
+                )}
+
+                <Tooltip title="Remove">
+                  <span>
+                    <IconButton
+                      size="small"
+                      onClick={() => removeAt(i)}
+                      disabled={disabled || (required && filesUI.length === 1)}
+                      aria-label={`Remove ${name}`}
+                    >
+                      {getIcon("deleteIcon")}
+                    </IconButton>
+                  </span>
+                </Tooltip>
+              </DSBox>
+            );
+          })}
+        </DSBox>
       )}
     </DSBox>
   );

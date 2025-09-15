@@ -24,6 +24,85 @@ import InlineCondition from "../form/InlineCondition.jsx";
 /* -------------------------------- helpers -------------------------------- */
 const TYPE_DEFAULTS = { checkbox: false, default: "" };
 
+function fileToDescriptor(f) {
+  if (!(f instanceof File)) return f; // allow server objects
+  const { name, size, type, lastModified } = f;
+  return { __fileDraft__: true, name, size, type, lastModified };
+}
+
+function makeDraftSerializable(schema, flatValues) {
+  const out = { ...flatValues };
+  (schema?.sections || []).forEach((sec) => {
+    (sec.fields || []).forEach((fld) => {
+      if (fld.type === "file" || fld.type === "upload") {
+        const v = out[fld.id];
+        if (Array.isArray(v)) out[fld.id] = v.map(fileToDescriptor);
+        else out[fld.id] = fileToDescriptor(v);
+      }
+    });
+  });
+  return out;
+}
+
+// --- helpers to support section-grouped defaults ----------------------------
+function getDeep(root, path) {
+  return String(path || "")
+    .split(".")
+    .reduce((a, k) => (a == null ? a : a[k]), root);
+}
+
+/** Looks like { [sectionId or section.output.key]: { ...fields } } ? */
+function looksSectioned(schema, obj) {
+  if (!obj || typeof obj !== "object") return false;
+  const secKeys = new Set(
+    (schema?.sections || []).map((s) => (s.output?.key ? s.output.key : s.id))
+  );
+  return Object.keys(obj).some((k) => secKeys.has(k));
+}
+
+/**
+ * Flatten section-grouped input into RHF flat { [fieldId]: value } shape.
+ * - Reads direct values: sectionValues[fieldId]
+ * - If field has output.path, also tries reading relative to the section group,
+ *   and (fallback) absolute from the full sectioned object.
+ */
+function flattenFromSectioned(schema, sectioned) {
+  const out = {};
+  for (const sec of schema?.sections || []) {
+    const secKey = sec.output?.key || sec.id;
+    const group = sectioned?.[secKey];
+    if (!group || typeof group !== "object") continue;
+
+    for (const f of sec.fields || []) {
+      // 1) direct: { [secKey]: { [fieldId]: value } }
+      if (Object.prototype.hasOwnProperty.call(group, f.id)) {
+        out[f.id] = group[f.id];
+        continue;
+      }
+
+      // 2) custom path support (relative to section OR absolute)
+      const fo = f.output || {};
+      if (fo.path) {
+        const p = String(fo.path);
+        // relative path if it starts with `${secKey}.`
+        const rel = p.startsWith(secKey + ".") ? p.slice(secKey.length + 1) : p;
+        const valRel = getDeep(group, rel);
+        if (valRel !== undefined) {
+          out[f.id] = valRel;
+          continue;
+        }
+        // absolute fallback from entire "sectioned" object
+        const valAbs = getDeep(sectioned, p);
+        if (valAbs !== undefined) {
+          out[f.id] = valAbs;
+          continue;
+        }
+      }
+    }
+  }
+  return out;
+}
+
 function defaultsFromSchema(schema) {
   const out = {};
   (schema?.sections || []).forEach((sec) => {
@@ -253,7 +332,20 @@ export default function DynamicForm({
 
   const formDefaults = React.useMemo(() => {
     const base = defaultsFromSchema(schemaForDefaults);
-    return { ...base, ...(draft?.values || {}), ...(defaultValues || {}) };
+    let merged = { ...base };
+    // Draft (usually flat), but allow sectioned just in case
+    if (draft?.values) {
+      merged = looksSectioned(schemaForDefaults, draft.values)
+        ? { ...merged, ...flattenFromSectioned(schemaForDefaults, draft.values) }
+        : { ...merged, ...draft.values };
+    }
+    // Caller-provided defaults can be flat OR sectioned
+    if (defaultValues) {
+      merged = looksSectioned(schemaForDefaults, defaultValues)
+        ? { ...merged, ...flattenFromSectioned(schemaForDefaults, defaultValues) }
+        : { ...merged, ...defaultValues };
+    }
+    return merged;
   }, [schemaForDefaults, defaultValues, draft]);
 
   // ▼▼▼ CHANGED: use visibility-aware resolver
@@ -278,10 +370,14 @@ export default function DynamicForm({
   // Keep previous snapshots to detect changes / newly-hidden fields
   const prevHiddenRef = React.useRef(new Set());
   const prevValuesRef = React.useRef(getValues());
+  const didHydrateFromDraft = React.useRef(false);
   React.useEffect(() => {
-    if (draft?.values) reset((prev) => ({ ...prev, ...draft.values }));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [draft?.updatedAt]);
+    // hydrate once on mount (or when switching entityId/schema)
+    if (!didHydrateFromDraft.current && draft?.values) {
+      reset((prev) => ({ ...prev, ...draft.values }), { keepDirty: true });
+      didHydrateFromDraft.current = true;
+    }
+  }, [draft?.values, reset]);
 
   React.useEffect(() => {
     dispatch(
@@ -339,7 +435,9 @@ export default function DynamicForm({
       autosaveTimerRef.current = window.setTimeout(() => {
         const updatedAt = Date.now();
         try {
-          dispatch(saveDraft({ key: formKey, values: getValues(), updatedAt }));
+          const live = getValues(); // still contains real File objects
+          const serializable = makeDraftSerializable(schemaForValidation, live);
+          dispatch(saveDraft({ key: formKey, values: serializable, updatedAt }));
           dispatch(setLastSavedAt(updatedAt));
         } catch { }
       }, didBulkReset ? Math.max(autosaveMs, 600) : autosaveMs);
@@ -383,8 +481,30 @@ export default function DynamicForm({
       },
       setValue: (p, v, opts) => setValue(p, v, opts),
       trigger: (names, opts) => trigger(names, opts),
-      reset: (vals) => reset(vals),
+      reset: (vals) =>
+        reset(
+          looksSectioned(schemaForValidation, vals)
+            ? flattenFromSectioned(schemaForValidation, vals)
+            : vals
+        ),
       getErrors: () => formState.errors,
+      /**
+ * Merge a bunch of values into the form in one shot (flat or sectioned).
+ * Keeps existing user edits unless you overwrite a key.
+ */
+      patch: (vals, opts = { shouldValidate: false, shouldDirty: false }) => {
+        const incoming = looksSectioned(schemaForValidation, vals)
+          ? flattenFromSectioned(schemaForValidation, vals)
+          : vals;
+        const merged = { ...getValues(), ...incoming };
+        // reset in one go ⇒ your watch(meta?.name) sees no single-field change,
+        // so dependent auto-resets won't fight your bulk patch.
+        reset(merged, { keepDirty: opts.shouldDirty });
+        if (opts.shouldValidate) {
+          // validate only touched fields or all, your call:
+          trigger(undefined, { shouldFocus: false });
+        }
+      },
     }),
     [getValues, setValue, trigger, reset, formState.errors]
   );
@@ -442,14 +562,14 @@ export default function DynamicForm({
                           config={{ keepMountedWhenHidden: false, collapseHidden: true, allowStringExpr: true }}
                         >
                           {/* <FormGrid.Item span={f.grid?.span} rowSpan={f.grid?.rowSpan} area={f.grid?.area}> */}
-                            <FieldController
-                              field={f}
-                              user={user}
-                              flags={flags}
-                              wrap
-                              wrapperProps={{ layout: ui?.fieldLayout ?? "top", config: ui?.fieldWrapper }}
-                              mountWhenHidden={false}
-                            />
+                          <FieldController
+                            field={f}
+                            user={user}
+                            flags={flags}
+                            wrap
+                            wrapperProps={{ layout: ui?.fieldLayout ?? "top", config: ui?.fieldWrapper }}
+                            mountWhenHidden={false}
+                          />
                           {/* </FormGrid.Item> */}
                         </InlineCondition>
                       );
