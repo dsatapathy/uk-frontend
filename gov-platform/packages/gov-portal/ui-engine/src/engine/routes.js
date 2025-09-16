@@ -33,7 +33,10 @@ export function registerGateAndBuildRoutes(app, manifests, redirects, Shell, aut
       exact: true,               // react-router-dom v5
       layout: "AutoShell",
       meta: { public: true },
-      page: { type: "ModuleGate", props: { moduleKey: "auth" } },
+      page: {
+        type: "ModuleGate",
+        props: { moduleKey: "auth", activateOn: [...publicSet] }
+      },
     });
   });
 

@@ -21,7 +21,7 @@ export function prefetchModule(moduleKey) {
 }
 
 export function makeModuleGate({ app, manifests }) {
-  return function ModuleGate({ moduleKey, renderLoading }) {
+  return function ModuleGate({ moduleKey, renderLoading, activateOn }) {
     const manifest = manifests.find((m) => m.key === moduleKey);
     if (!manifest) {
       return <div style={{ color: "crimson" }}>Unknown module: {moduleKey}</div>;
@@ -29,11 +29,14 @@ export function makeModuleGate({ app, manifests }) {
 
     // --- route-aware activation: only load when this gate is "active" for the URL
     const { pathname } = useLocation();
-    const base = manifest.basePath || "/";
-    const isActive =
-      base === "/"
-        ? pathname === "/"
-        : pathname === base || pathname.startsWith(base + "/");
+    const bases = Array.isArray(activateOn) && activateOn.length
+     ? activateOn
+     : [manifest.basePath || "/"];
+   const isActive = bases.some((base) =>
+     base === "/"
+       ? pathname === "/"
+       : pathname === base || pathname.startsWith(base + "/")
+   );
 
     // If gate is not active for current URL, don't import/register anything.
     if (!isActive) return null;

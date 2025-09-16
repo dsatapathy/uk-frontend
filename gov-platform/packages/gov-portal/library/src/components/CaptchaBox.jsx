@@ -13,7 +13,7 @@ import InputText from "../atoms/InputText"; // adjust the path if needed
 
 export default function CaptchaBox({ control, cfg = {}, errors, classes, field }) {
   const { setValue, trigger } = useFormContext?.() || {};
-  const { labelSx } = field;  
+  const { labelSx } = field;
   const s = classes || {};
   const name = cfg.name || "captcha";
   const length = cfg.length || 6;
@@ -34,7 +34,7 @@ export default function CaptchaBox({ control, cfg = {}, errors, classes, field }
     // clear user input + revalidate, then focus
     setValue?.(name, "");
     trigger?.(name);
-    try { inputRef.current?.focus?.(); } catch {}
+    try { inputRef.current?.focus?.(); } catch { }
   };
 
   const refreshBtn = (
@@ -46,7 +46,7 @@ export default function CaptchaBox({ control, cfg = {}, errors, classes, field }
       tabIndex={0}
       endIcon={<RefreshIcon fontSize="small" />}
     >
-      Refresh
+      {""}
     </Button>
   );
 
@@ -75,15 +75,16 @@ export default function CaptchaBox({ control, cfg = {}, errors, classes, field }
           </FormLabel>
 
           <InputText
+            key={code}
             id={`${name}-display`}
             name={`${name}-display`}
             value={code}
-            onChange={() => {}}
             readOnly
+            onChange={() => { }}
             suffix={refreshBtn}
             config={{
               variant: "outlined",
-              size: "sm",
+              size: "small",      // use MUI's "small" unless your InputText maps "sm"
               fullWidth: true,
               showClear: false,
               showPrefix: false,
@@ -94,8 +95,9 @@ export default function CaptchaBox({ control, cfg = {}, errors, classes, field }
             textFieldProps={{
               margin: "none",
               helperText: undefined,
-              InputProps: { readOnly: true, "aria-readonly": true },
+              // 👇 remove InputProps here to avoid overriding the adornment
             }}
+            inputProps={{ readOnly: true, "aria-readonly": true }}  // or keep `readOnly` prop above
           />
 
           {/* no helper text for display */}
