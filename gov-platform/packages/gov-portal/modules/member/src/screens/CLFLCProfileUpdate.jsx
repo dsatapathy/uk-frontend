@@ -1,7 +1,7 @@
 import React from "react";
 import { getComponent } from "@gov/core";
-import { updateMemberProfileSchema } from "../form/update-profile.schema";
-import { updateMemberProfileSteps } from "../form/update-profile.steps";
+import { memberProfileSchema } from "../form/update-profile.schema";
+import { memberProfileSteps } from "../form/member-profile.steps";
 
 // 0-based index: step2 => index 1, step4 => index 3
 const actionPolicy = (step, ctx) => {
@@ -85,8 +85,8 @@ export default function CLFLCProfileUpdate() {
   const formApiRef = React.useRef(null);
     return (
     <ConfigStepperMUI
-      schema={updateMemberProfileSchema}
-      steps={updateMemberProfileSteps}
+      schema={memberProfileSchema}
+      steps={memberProfileSteps}
       DynamicForm={DynamicForm}
       formApiRef={formApiRef}
       actions={actions}
@@ -99,8 +99,8 @@ export default function CLFLCProfileUpdate() {
         entityId: "member-profile",
         autosaveMs: 800,
         ui,
-        validationSchema: updateMemberProfileSchema,
-        defaultsSchema: updateMemberProfileSchema,
+        validationSchema: memberProfileSchema,
+        defaultsSchema: memberProfileSchema,
         output: "schema",
       }}
     />

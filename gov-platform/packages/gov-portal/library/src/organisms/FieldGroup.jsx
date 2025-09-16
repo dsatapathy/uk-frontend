@@ -73,7 +73,7 @@ export default function FieldGroup({
 
   // explicit props win over config
   const isCollapsible = typeof collapsible === "boolean" ? collapsible : cfg.collapsible;
-  const initialOpen   = typeof defaultOpen === "boolean" ? defaultOpen : cfg.defaultOpen;
+  const initialOpen = typeof defaultOpen === "boolean" ? defaultOpen : cfg.defaultOpen;
 
   const [open, setOpen] = React.useState(isCollapsible ? !!initialOpen : true);
   const toggle = () => {
@@ -119,17 +119,51 @@ export default function FieldGroup({
           cfg.header.align === "center" ? s["align--center"] : "",
           cfg.header.dense ? s["dense"] : "",
         ].join(" ")}
+        sx={{
+          backgroundImage: `
+      /* Sharp, angled facets for the diamond-cut effect */
+      linear-gradient(
+        165deg,
+        transparent 45%,
+        var(--crystal-highlight, rgba(236, 253, 245, 0.2)) 50%, /* Sharp highlight edge */
+        var(--crystal-shadow, rgba(20, 83, 45, 0.15)) 52%,       /* Subtle shadow edge */
+        transparent 60%
+      ),
+      linear-gradient(
+        -40deg,
+        transparent 30%,
+        var(--crystal-highlight, rgba(236, 253, 245, 0.15)) 48%, /* Second highlight facet */
+        transparent 60%
+      ),
+      linear-gradient(
+        20deg,
+        transparent 40%,
+        var(--crystal-shadow, rgba(20, 83, 45, 0.1)) 55%,        /* A wider, softer shadow facet */
+        transparent 70%
+      ),
+      /* The original 3-stop base gradient for color foundation */
+      linear-gradient(
+        180deg,
+        var(--sidebar-bg-top, #aed581) 0%,    /* Light Banana Leaf Green */
+        var(--sidebar-bg-mid, #9ccc65) 46%,     /* Medium Banana Leaf Green */
+        var(--sidebar-bg-bottom, #8bc34a) 100%  /* Richer Banana Leaf Green */
+      )
+    `,
+          backgroundSize: "cover",
+          backgroundRepeat: "no-repeat",
+          backgroundPosition: "center",
+        }}
         role={isCollapsible ? "button" : undefined}
         tabIndex={isCollapsible ? 0 : -1}
         onClick={isCollapsible ? toggle : undefined}
         onKeyDown={
           isCollapsible
             ? (e) => {
-                if (e.key === "Enter" || e.key === " ") {
-                  e.preventDefault();
-                  toggle();
-                }
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                toggle();
               }
+            }
             : undefined
         }
         aria-expanded={isCollapsible ? open : undefined}
