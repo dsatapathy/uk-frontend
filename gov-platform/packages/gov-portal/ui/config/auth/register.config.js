@@ -48,7 +48,7 @@ const registerConfig = {
   ],
 
   submit: { label: "Sign In", endpoint: "/api/auth/register", method: "POST" },
-  back: { label: "Back", redirect: "/uk-portal/login" },
+  back: { label: "Back", redirect: "/reap-mis/login" },
   onSuccessRoute: "/"
 };
 

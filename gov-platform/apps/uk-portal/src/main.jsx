@@ -9,7 +9,7 @@ const moduleRegistry = Object.fromEntries(defaultModules.map((m) => [m.key, modu
 // Only defaults/registry are used; source/endpoints are ignored here.
 start({
   target: "#root",
-  base: "/uk-portal/",
+  base: "/reap-mis/",
   brand: { logo: landingLogo, title: "UK Portal" },
   layout: {
     component: "AuthBlank", 
@@ -62,7 +62,7 @@ start({
     shape: { borderRadius: 8 }
   },
   // --- Authentication ---
-  http: { baseURL: "http://localhost:3001/api/" },
+  http: { baseURL: window.location.origin + "/api/" },
   auth: {
     strategy: "jwt",
     login: {

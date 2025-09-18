@@ -9,7 +9,7 @@ import {VersionedStorage} from "@gov/data"; // or the path where VersionedStorag
  *   3) Legacy fallback: old local/session accessKey
  *
  * Options:
- *   - loginPath: path to the login page (should be base-aware, e.g. "/uk-portal/login")
+ *   - loginPath: path to the login page (should be base-aware, e.g. "/reap-mis/login")
  *   - base: app base (e.g. "/uk-portal") to normalize public paths
  */
 export function ensureAuthGuard(routes, auth, { loginPath = "/login", base = "" } = {}) {

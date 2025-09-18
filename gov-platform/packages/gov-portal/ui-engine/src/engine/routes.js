@@ -7,14 +7,14 @@ export function registerGateAndBuildRoutes(app, manifests, redirects, Shell, aut
   registerModuleGate(app, manifests);
   const baseRoutes = buildLazyModuleRoutes(manifests, redirects);
 
-  // 1) Normalize paths with the app base (e.g. "/uk-portal")
+  // 1) Normalize paths with the app base (e.g. "/reap-mis")
   const base = app?.base || ""; // keep "" if you truly run at domain root
 
   const normalize = (p) => {
     if (!p) return p;
     // already base-prefixed or an absolute http(s) url → keep as-is
     if (base && p.startsWith(base)) return p;
-    // make "/login" -> "/uk-portal/login"
+    // make "/login" -> "/reap-mis/login"
     // return base && p.startsWith("/") ? base + p : p;
     return base && p.startsWith("/") ? p : p;
   };

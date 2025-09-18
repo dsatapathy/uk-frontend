@@ -55,7 +55,7 @@ function LoginInner({ loginConfig }) {
   const base = useBase(location.pathname);
   const stripBase = useStripBase(base);
 
-  const rawTarget = loginConfig?.onSuccessRoute || "/uk-portal/bpa";
+  const rawTarget = loginConfig?.onSuccessRoute;
   const target = stripBase(rawTarget);
 
   const mountedRef = React.useRef(true);

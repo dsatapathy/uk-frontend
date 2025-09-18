@@ -20,7 +20,7 @@ const devOnlySrcAliases = {
   "@gov/mod-landing": toFs(path.resolve(repoRoot, "packages/gov-portal/modules/landing/src")),
   "@gov/ui-engine": toFs(path.resolve(repoRoot, "packages/gov-portal/ui-engine/src")),
   "@gov/form-engine": toFs(path.resolve(repoRoot, "packages/gov-portal/formengine/src")),
-  "@gov/styles":      toFs(path.resolve(repoRoot, "packages/gov-portal/styles")),
+  "@gov/styles": toFs(path.resolve(repoRoot, "packages/gov-portal/styles")),
   "@gov/mod-member": toFs(path.resolve(repoRoot, "packages/gov-portal/modules/member/src"))
 };
 
@@ -47,15 +47,15 @@ export default defineConfig(({ command, mode }) => {
     enabled.some((mk) => id.includes(`/modules/${mk}/`));
 
   const alias = Object.entries(devOnlySrcAliases).map(([find, replacement]) => ({
-  find,
-  replacement,
-}));
+    find,
+    replacement,
+  }));
 
   const analyze =
     process.env.ANALYZE === "1" || String(process.env.ANALYZE).toLowerCase() === "true";
 
   return {
-    base: "/uk-portal/",
+    base: "/reap-mis/",
     plugins: [
       react(),
       ...(isServe ? [] : [visualizer({
@@ -87,12 +87,26 @@ export default defineConfig(({ command, mode }) => {
         "@tanstack/react-query-devtools",
       ],
     },
-    server: { fs: { allow: [repoRoot] }, port: 5173 },
-    css: { preprocessorOptions: { scss: {
-      // Add the repo's packages directory to SASS's include paths.
-      // This is helpful for resolving SCSS imports from other packages in the monorepo.
-      includePaths: [path.resolve(repoRoot, 'packages')],
-    }, } },
+    server: {
+  proxy: {
+    '/api': {
+      target: 'http://reap-mis-myapp-ukgv.casacam.net:9090',
+      changeOrigin: true,
+      secure: false,
+      // /api/... -> /reap-mis/api/v1/...
+      rewrite: (path) => path.replace(/^\/api(\/|$)/, '/reap-mis/api/v1$1'),
+    },
+  },
+},
+    css: {
+      preprocessorOptions: {
+        scss: {
+          // Add the repo's packages directory to SASS's include paths.
+          // This is helpful for resolving SCSS imports from other packages in the monorepo.
+          includePaths: [path.resolve(repoRoot, 'packages')],
+        },
+      }
+    },
     build: {
       outDir: "dist",
       emptyOutDir: true,

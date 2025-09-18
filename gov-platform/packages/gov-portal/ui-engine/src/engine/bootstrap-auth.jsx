@@ -7,6 +7,7 @@ import { appStore, FormEngineProvider } from "@gov/store";
 import { setAuth, setUser, clearAuth, setHydrated } from "@gov/store";
 import ThemeBridge from "../ThemeBridge";
 import { DEFAULT_THEME } from "../constants";
+import { AppConfigContext } from "./app-config-context";
 
 export function AppProviders({ cfg, http, storage, children }) {
   // expose store for guards/utilities
@@ -93,16 +94,18 @@ export function AppProviders({ cfg, http, storage, children }) {
   }
 
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <ThemeBridge />
-      <ReduxProvider store={appStore}>
-        <QueryClientProvider client={qc}>
-          <FormEngineProvider>
-            <AuthHydrator>{children}</AuthHydrator>
-          </FormEngineProvider>
-        </QueryClientProvider>
-      </ReduxProvider>
-    </ThemeProvider>
+    <AppConfigContext.Provider value={cfg} http={http} storage={storage}>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <ThemeBridge />
+        <ReduxProvider store={appStore}>
+          <QueryClientProvider client={qc}>
+            <FormEngineProvider>
+              <AuthHydrator>{children}</AuthHydrator>
+            </FormEngineProvider>
+          </QueryClientProvider>
+        </ReduxProvider>
+      </ThemeProvider>
+    </AppConfigContext.Provider>
   );
 }

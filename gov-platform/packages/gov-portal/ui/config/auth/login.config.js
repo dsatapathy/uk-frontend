@@ -17,7 +17,6 @@ const loginConfig = {
   },
 
   layout: { variant: "card", place: "center" },
-  api: { baseURL: "http://localhost:3001" },
 
   style: {
     layout: {
@@ -96,7 +95,7 @@ const loginConfig = {
   },
 
   submit: {
-    label: "Sign In", endpoint: "/api/auth/login", method: "POST", labelSx: {
+    label: "Sign In", endpoint: "auth/login", method: "POST", labelSx: {
       color: "#fff",
       fontWeight: 600,
       fontSize: "0.9rem",
@@ -104,8 +103,8 @@ const loginConfig = {
       mb: 0.5,                  // spacing below the label
     },
   },
-  register: { label: "Register", redirect: "/uk-portal/register" },
-  onSuccessRoute: "/uk-portal/landing",
+  register: { label: "Register", redirect: "/reap-mis/register" },
+  onSuccessRoute: "/reap-mis/landing",
 };
 
 export default loginConfig;

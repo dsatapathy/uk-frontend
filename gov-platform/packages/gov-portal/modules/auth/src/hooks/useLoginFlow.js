@@ -1,7 +1,9 @@
+import React, { createContext, useContext } from "react";
 import { useMemo } from "react";
 import { useAppDispatch } from "@gov/store";
 import { setAuth } from "@gov/store";
 import { http, makeAuthApi } from "@gov/data";
+import { useAppConfig } from "@gov/ui-engine";
 
 /**
  * loginCfg shape (same as your current config):
@@ -13,7 +15,7 @@ import { http, makeAuthApi } from "@gov/data";
  *     headers?: {...},                 // optional extra headers
  *     mapVars?: (vars) => ({...})      // optional payload mapper
  *   },
- *   onSuccessRoute?: "/uk-portal/landing",
+ *   onSuccessRoute?: "/reap-mis/landing",
  *   responseAdapter?: (raw) => ({ tokens, user }),   // optional
  *   rememberSelector?: (vars) => boolean,            // optional
  *   storage?: { namespace?: string, ttlSeconds?: number, mirrorToSession?: boolean } // optional (if using global storage, you can ignore)
@@ -22,9 +24,12 @@ import { http, makeAuthApi } from "@gov/data";
 
 export function useLoginFlow(loginCfg) {
   const dispatch = useAppDispatch();
-
-  const baseURL = loginCfg?.api?.baseURL || "";
-  const endpoint = loginCfg?.submit?.endpoint || "/api/auth/login";
+  const appCfg = useAppConfig();
+  // Merge any config provided via context (app-level) with hook-level config
+  loginCfg = useMemo(() => ({ ...(appCfg.auth?.login || {}), ...(appCfg?.http || {}), ...(loginCfg || {}) }), [appCfg, loginCfg]);
+  console.log("useLoginFlow config:", loginCfg);
+  const baseURL = loginCfg?.baseURL || "";
+  const endpoint = loginCfg?.submit?.endpoint || "/auth/login";
   const method = (loginCfg?.submit?.method || "POST").toUpperCase();
   const extraHeaders = loginCfg?.submit?.headers || {};
   const mapVars =
