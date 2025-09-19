@@ -79,8 +79,8 @@ export default function createHttp(cfg = {}, storage) {
           refreshPromise = (async () => {
             try {
               const { data } = await axios.post(refreshURL, {}, { withCredentials: true });
-              const token = data?.accessToken || data?.token;
-              const refreshToken = data?.refreshToken;
+              const token = data?.tokens?.accessToken || data?.token;
+              const refreshToken = data?.tokens?.refreshToken || data?.refreshToken;
               if (token) setTokens({ accessToken: token, refreshToken });
               return token;
             } catch (e) {

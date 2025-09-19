@@ -95,7 +95,7 @@ const loginConfig = {
   },
 
   submit: {
-    label: "Sign In", endpoint: "auth/login", method: "POST", labelSx: {
+    label: "Sign In", endpoint: "v1/auth/login", method: "POST", labelSx: {
       color: "#fff",
       fontWeight: 600,
       fontSize: "0.9rem",
@@ -103,8 +103,8 @@ const loginConfig = {
       mb: 0.5,                  // spacing below the label
     },
   },
-  register: { label: "Register", redirect: "/reap-mis/register" },
-  onSuccessRoute: "/reap-mis/landing",
+  register: { label: "Register", redirect: "/register" },
+  onSuccessRoute: "/landing",
 };
 
 export default loginConfig;

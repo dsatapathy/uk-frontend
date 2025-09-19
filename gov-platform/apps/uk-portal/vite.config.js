@@ -55,7 +55,7 @@ export default defineConfig(({ command, mode }) => {
     process.env.ANALYZE === "1" || String(process.env.ANALYZE).toLowerCase() === "true";
 
   return {
-    base: "/reap-mis/",
+    base: "/",
     plugins: [
       react(),
       ...(isServe ? [] : [visualizer({

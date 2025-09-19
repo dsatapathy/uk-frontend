@@ -8,13 +8,14 @@ export function makeAuthCore(httpClient, cfg, storage) {
     function getAuth() { return storage.get("auth"); }
     function clearAuth() { storage.remove("auth"); }
   
-    async function login(payload) {
-      const { data } = await httpClient.post(ep.login, payload);
-      const mapped = adapt(data);
-      const scope = rememberSelector(payload) ? "local" : "session";
-      setAuth(mapped, scope);
-      return mapped;
-    }
+  async function login(payload) {
+    const { data: res } = await httpClient.post(ep.login, payload);
+    const body = res?.data ?? res;
+    const mapped = adapt(body);
+    const scope = rememberSelector(payload) ? "local" : "session";
+    setAuth(mapped, scope);
+    return mapped;
+  }
   
     async function getMe() {
       const { data } = await httpClient.get(ep.me);

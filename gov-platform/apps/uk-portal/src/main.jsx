@@ -9,7 +9,7 @@ const moduleRegistry = Object.fromEntries(defaultModules.map((m) => [m.key, modu
 // Only defaults/registry are used; source/endpoints are ignored here.
 start({
   target: "#root",
-  base: "/reap-mis/",
+  base: "/",
   brand: { logo: landingLogo, title: "UK Portal" },
   layout: {
     component: "AuthBlank", 
@@ -62,7 +62,7 @@ start({
     shape: { borderRadius: 8 }
   },
   // --- Authentication ---
-  http: { baseURL: window.location.origin + "/api/" },
+  http: { baseURL: "http://reap-mis-myapp-ukgv.casacam.net:9090/reap-mis/api/" },
   auth: {
     strategy: "jwt",
     login: {
@@ -73,10 +73,10 @@ start({
     },
     publicPaths: ["/register", "/forgot", "/otp"],
     endpoints: {
-      login: "auth/login",
-      refresh: "auth/refresh",
-      logout: "auth/logout",
-      me: "auth/me"
+      login: "v1/auth/login",
+      refresh: "v1/auth/refresh",
+      logout: "v1/auth/logout",
+      me: "v1/auth/me"
     },
     tokens: {
       storage: "localStorage",

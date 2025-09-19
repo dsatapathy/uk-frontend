@@ -47,8 +47,8 @@ const registerConfig = {
       grid: { span: { xs: 12, md: 12 } } },
   ],
 
-  submit: { label: "Sign In", endpoint: "/api/auth/register", method: "POST" },
-  back: { label: "Back", redirect: "/reap-mis/login" },
+  submit: { label: "Sign In", endpoint: "v1/auth/register", method: "POST" },
+  back: { label: "Back", redirect: "/login" },
   onSuccessRoute: "/"
 };
 

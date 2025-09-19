@@ -1,9 +1,9 @@
 export const adapters = {
     default: (data) => ({
       tokens: {
-        accessToken: data?.accessToken || data?.token,
-        refreshToken: data?.refreshToken,
-        tokenType: data?.tokenType || "Bearer",
+        accessToken: data?.tokens?.accessToken || data?.token,
+        refreshToken: data?.tokens?.refreshToken || data?.refreshToken,
+        tokenType: data?.tokens?.tokenType || "Bearer",
       },
       user: data?.user,
     }),

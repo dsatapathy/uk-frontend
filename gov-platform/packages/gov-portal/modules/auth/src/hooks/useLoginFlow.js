@@ -47,9 +47,9 @@ export function useLoginFlow(loginCfg) {
         // Endpoints used by the service (we only need login here; others are defaults you can change later)
         endpoints: {
           login: endpoint,
-          me: "/api/auth/me",
-          logout: "/api/auth/logout",
-          refresh: "/api/auth/refresh",
+          me: "v1/auth/me",
+          logout: "v1/auth/logout",
+          refresh: "v1/auth/refresh",
         },
         // Decide local vs session from the payload (remember checkbox)
         rememberSelector:
@@ -62,9 +62,9 @@ export function useLoginFlow(loginCfg) {
             ? loginCfg.responseAdapter
             : (data) => ({
                 tokens: {
-                  accessToken: data?.accessToken || data?.token,
-                  refreshToken: data?.refreshToken,
-                  tokenType: data?.tokenType || "Bearer",
+                  accessToken: data?.tokens?.accessToken || data?.accessToken,
+                  refreshToken: data?.tokens?.refreshToken || data?.refreshToken,
+                  tokenType: data?.tokens?.tokenType || "Bearer",
                 },
                 user: data?.user,
               }),
