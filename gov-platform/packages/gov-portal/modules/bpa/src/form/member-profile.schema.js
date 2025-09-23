@@ -15,15 +15,15 @@ export const memberProfileSchema = {
           id: "action",
           type: "radio-group",
           label: "Action",
-          defaultValue: "add",                     // ✅ start in Add flow
+          defaultValue: "add",
           options: {
             items: [
               { label: "Add New Member", value: "add" },
-              { label: "Update Existing", value: "update" },
+              { label: "Update Existing", value: "update" }
             ]
           },
           validations: [{ type: "required" }],
-          grid: { span: { xs: 12, sm: 6, md: 4 } },
+          grid: { span: { xs: 12, sm: 6, md: 4 } }
         },
         {
           id: "district",
@@ -32,7 +32,12 @@ export const memberProfileSchema = {
           options: {
             endpointKey: "districts",
             labelKey: "name",
-            valueKey: "code"
+            valueKey: "code",
+            request: {
+              method: "post",
+              url: "v1/master/data",
+              bodyTemplate: { type: "district" }
+            }
           },
           validations: [{ type: "required" }],
           grid: { span: { xs: 12, sm: 6, md: 4 } }
@@ -46,7 +51,15 @@ export const memberProfileSchema = {
             labelKey: "name",
             valueKey: "code",
             dependsOn: ["values.district"],
-            dependsOnHint: "Select District first"
+            dependsOnHint: "Select District first",
+            request: {
+              method: "post",
+              url: "v1/master/data",
+              bodyTemplate: {
+                type: "block",
+                district: "$values.district"
+              }
+            }
           },
           validations: [{ type: "required" }],
           grid: { span: { xs: 12, sm: 6, md: 4 } }
@@ -60,7 +73,16 @@ export const memberProfileSchema = {
             labelKey: "name",
             valueKey: "code",
             dependsOn: ["values.district", "values.block"],
-            dependsOnHint: "Select District and Block first"
+            dependsOnHint: "Select District and Block first",
+            request: {
+              method: "post",
+              url: "v1/master/data",
+              bodyTemplate: {
+                type: "gp",
+                district: "$values.district",
+                block: "$values.block"
+              }
+            }
           },
           validations: [{ type: "required" }],
           grid: { span: { xs: 12, sm: 6, md: 4 } }
@@ -74,7 +96,17 @@ export const memberProfileSchema = {
             labelKey: "name",
             valueKey: "code",
             dependsOn: ["values.district", "values.block", "values.gp"],
-            dependsOnHint: "Select District, Block and GP first"
+            dependsOnHint: "Select District, Block and GP first",
+            request: {
+              method: "post",
+              url: "v1/master/data",
+              bodyTemplate: {
+                type: "village",
+                district: "$values.district",
+                block: "$values.block",
+                gp: "$values.gp"
+              }
+            }
           },
           validations: [{ type: "required" }],
           grid: { span: { xs: 12, sm: 6, md: 4 } }
@@ -138,7 +170,7 @@ export const memberProfileSchema = {
           config: { inputMode: "numeric" },
           grid: { span: { xs: 12, sm: 6, md: 4 } }
         },
-        
+
 
         {
           id: "shgJoinDate",
