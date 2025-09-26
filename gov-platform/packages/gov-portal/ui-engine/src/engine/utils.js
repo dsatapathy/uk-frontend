@@ -30,8 +30,8 @@ export function applySidebarMerge(defaults, fetched, strategy = "replace") {
 /*  STATIC IMPORT MAP – add any new modules you publish here           */
 /* ------------------------------------------------------------------ */
 export const KNOWN_IMPORTERS = {
-  "@gov/mod-auth":  () => import("@gov/mod-auth"),
-  "@gov/mod-bpa":   () => import("@gov/mod-bpa"),
+  // "@gov/mod-auth":  () => import("@gov/mod-auth"),
+  // "@gov/mod-bpa":   () => import("@gov/mod-bpa"),
 };
 
 export function resolveStaticLoader(m, registry) {
