@@ -8,8 +8,8 @@ import { registerGateAndBuildRoutes } from "./routes";
  * (Bare specifiers are OK here because they're static, not string-built.)
  */
 const KNOWN_IMPORTERS = {
-  "@gov/mod-auth":  () => import("@gov/mod-auth"),
-  "@gov/mod-bpa":   () => import("@gov/mod-bpa"),
+  // "@gov/mod-auth":  () => import("@gov/mod-auth"),
+  // "@gov/mod-bpa":   () => import("@gov/mod-bpa"),
   // add more keys if/when you publish new modules
 };
 

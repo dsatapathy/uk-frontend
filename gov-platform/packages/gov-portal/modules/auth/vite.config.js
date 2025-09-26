@@ -22,6 +22,7 @@ export default defineConfig({
         "@gov/core",
         "@gov/data",
         "@gov/store",
+        "@gov/ui-engine",
         "@hookform/resolvers",
         "react-hook-form",
         "zod",
