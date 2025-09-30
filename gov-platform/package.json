@@ -31,7 +31,7 @@
     "clean": "node tools/cli/clean.mjs",
     "clean:portal": "rimraf apps/*/dist packages/gov-portal/*/dist packages/gov-portal/modules/*/dist",
     "dedupe": "yarn yarn-deduplicate -s fewer yarn.lock",
-    "postinstall": "yarn run dedupe",
+    "postinstall": "echo 'Skipping dedupe for now'",
     "ws:info": "yarn workspaces info",
     "test": "yarn workspaces run test || true",
 
