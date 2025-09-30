@@ -47,7 +47,7 @@ export function useModuleList({
 } = {}) {
   return useRQQuery({
     key: ["modules", { query, page, ...deps }],
-    url: "v1/home/modules",
+    url: "/v1/home/modules",
     method: "get",
     params: { q: query, page, ...deps },
     deps,
