@@ -1,25 +1,6 @@
 import { http } from "../bootstrap";
 import { useRQQuery, useRQMutation } from "../rq";
 
-// export function useOptions(
-//   endpointKey,
-//   { query, page = 1, deps = {}, endpoint, enabled = true, staleTime = 10 * 60 * 1000 } = {}
-// ) {
-//   query = {
-// 		"type": "district"
-// 	};
-//   const url = endpoint || (endpointKey ? `${endpointKey}` : undefined);
-//   return useRQQuery({
-//     key: ["options", endpointKey || "custom"],
-//     url,
-//     method: "post",
-//     data: query,
-//     deps,
-//     enabled: enabled && !!url,
-//     staleTime,
-//   });
-// }
-
 export function useOptions(
   endpointKey,
   { query, page = 1, deps = {}, endpoint, enabled = true, staleTime = 10 * 60 * 1000 } = {}
