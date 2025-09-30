@@ -78,44 +78,6 @@ export default function UploadInput({
     onChange?.(next);       // inform RHF/parent
   };
 
-  //   const pick = (e) => {
-  //   const picked = Array.from(e.target.files || []);
-  //   if (!picked.length) return;
-
-  //   // Start from current UI list so multiple selections accumulate
-  //   let next = multiple ? filesUI.slice() : [];
-
-  //   // Skip oversized files
-  //   const addable = maxSizeMB
-  //     ? picked.filter((f) => f.size <= maxSizeMB * 1024 * 1024)
-  //     : picked;
-
-  //   if (multiple) {
-  //     // Add all newly picked files
-  //     next.push(...addable);
-
-  //     // Optional: dedupe by (name, size, lastModified)
-  //     const seen = new Set();
-  //     next = next.filter((f) => {
-  //       const key = `${f.name}-${f.size}-${f.lastModified || 0}`;
-  //       if (seen.has(key)) return false;
-  //       seen.add(key);
-  //       return true;
-  //     });
-
-  //     // IMPORTANT: keep the *newest* N files if maxFiles is set
-  //     if (Number(maxFiles) > 0 && next.length > maxFiles) {
-  //       next = next.slice(-maxFiles);
-  //     }
-  //   } else {
-  //     // Single-file mode: take the last picked (most recent)
-  //     next = addable.length ? [addable[addable.length - 1]] : [];
-  //   }
-
-  //   emitChange(next);
-  //   // Allow re-selecting the same file again
-  //   e.target.value = "";
-  // };
   const uploadFileToServer = async (file) => {
     const formData = new FormData();
     formData.append("file", file);
