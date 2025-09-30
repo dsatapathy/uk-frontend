@@ -132,7 +132,7 @@ export function useRQQuery(cfg = {}) {
         validateStatus,
       });
 
-      let payload = resp.data;
+      let payload = resp.data?.data || resp.data;
       if (selectPath) {
         payload = selectPath.split(".").reduce((acc, k) => (acc ? acc[k] : undefined), payload);
       }

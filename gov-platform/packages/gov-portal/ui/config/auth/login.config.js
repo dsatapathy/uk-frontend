@@ -95,7 +95,7 @@ const loginConfig = {
   },
 
   submit: {
-    label: "Sign In", endpoint: "v1/auth/login", method: "POST", labelSx: {
+    label: "Log In", endpoint: "v1/auth/login", method: "POST", labelSx: {
       color: "#fff",
       fontWeight: 600,
       fontSize: "0.9rem",
@@ -103,7 +103,7 @@ const loginConfig = {
       mb: 0.5,                  // spacing below the label
     },
   },
-  register: { label: "Register", redirect: "/register" },
+  // register: { label: "Register", redirect: "/register" },
   onSuccessRoute: "/landing",
 };
 

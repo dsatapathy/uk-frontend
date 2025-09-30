@@ -6,6 +6,7 @@ import useMediaQuery from "@mui/material/useMediaQuery";
 import { findAncestorsByPath, filterTreeByQuery, DRAWER_WIDTH } from "../utils/menu-utils";
 import TopBar from "./TopBar";
 import Sidebar from "./Sidebar";
+import { handleLogoutService } from "@gov/data";
 
 export default function ResponsiveNav({
   menu,
@@ -83,7 +84,7 @@ export default function ResponsiveNav({
           { id: "profile", label: "My Profile", icon: "user", onClick: () => onNavigate?.("/me") },
           { id: "settings", label: "Settings", icon: "settings", onClick: () => onNavigate?.("/settings") },
         ]}
-        onLogout={() => onNavigate?.("/logout")}
+        onLogout={handleLogoutService}
       />
 
       <Box

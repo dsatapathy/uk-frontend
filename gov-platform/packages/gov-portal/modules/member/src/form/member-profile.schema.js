@@ -30,54 +30,70 @@ export const memberProfileSchema = {
           type: "autocomplete",
           label: "District",
           options: {
-            endpointKey: "districts",
+            endpointKey: "v1/master/data",
             labelKey: "name",
-            valueKey: "code"
+            valueKey: "id",
+            query: { type: "districts" }  // This will be sent as query params
           },
           validations: [{ type: "required" }],
-          grid: { span: { xs: 12, sm: 6, md: 4 }, }
+          grid: { span: { xs: 12, sm: 6, md: 4 } }
         },
         {
           id: "block",
           type: "autocomplete",
           label: "Block",
           options: {
-            endpointKey: "blocks",
+            endpointKey: "v1/master/data",
             labelKey: "name",
-            valueKey: "code",
+            valueKey: "id",
+            query: { type: "blocks" },
             dependsOn: ["values.district"],
-            dependsOnHint: "Select District first"
+            dependsOnHint: "Select District first",
+            queryBuilder: (deps) => ({
+              type: "blocks",
+              id: deps.district
+            })
           },
           validations: [{ type: "required" }],
-          grid: { span: { xs: 12, sm: 6, md: 4 }, }
+          grid: { span: { xs: 12, sm: 6, md: 4 } }
         },
         {
           id: "gp",
           type: "autocomplete",
           label: "Gram Panchayat",
           options: {
-            endpointKey: "gps",
+            endpointKey: "v1/master/data",
             labelKey: "name",
-            valueKey: "code",
-            dependsOn: ["values.district", "values.block"],
-            dependsOnHint: "Select District and Block first"
+            valueKey: "id",
+            query: { type: "panchayats" },
+            dependsOn: ["values.block"],
+            dependsOnHint: "Select Block first",
+            queryBuilder: (deps) => ({
+              type: "panchayats",
+              id: deps.block
+            })
           },
           validations: [{ type: "required" }],
-          grid: { span: { xs: 12, sm: 6, md: 4 }, }
+          grid: { span: { xs: 12, sm: 6, md: 4 } }
         },
         {
           id: "village",
           type: "autocomplete",
           label: "Village",
           options: {
-            endpointKey: "villages",
+            endpointKey: "v1/master/data",
             labelKey: "name",
-            valueKey: "code",
-            dependsOn: ["values.district", "values.block", "values.gp"],
-            dependsOnHint: "Select District, Block and GP first"
+            valueKey: "id",
+            query: { type: "villages" },
+            dependsOn: ["values.gp"],
+            dependsOnHint: "Select Gram Panchayat first",
+            queryBuilder: (deps) => ({
+              type: "villages",
+              id: deps.gp
+            })
           },
           validations: [{ type: "required" }],
-          grid: { span: { xs: 12, sm: 6, md: 4 }, }
+          grid: { span: { xs: 12, sm: 6, md: 4 } }
         }
       ]
     },
@@ -92,11 +108,16 @@ export const memberProfileSchema = {
           type: "autocomplete",
           label: "CLF",
           options: {
-            endpointKey: "clfs",
+            endpointKey: "v1/master/data",
             labelKey: "name",
             valueKey: "id",
+            query: { type: "clf_profiles" },
             dependsOn: ["values.block"],
-            dependsOnHint: "Select Block first"
+            dependsOnHint: "Select Block first",
+            queryBuilder: (deps) => ({
+              type: "clf_profiles",
+              id: deps.block
+            })
           },
           validations: [{ type: "required" }],
           grid: { span: { xs: 12, sm: 6, md: 4 } }
@@ -106,11 +127,16 @@ export const memberProfileSchema = {
           type: "autocomplete",
           label: "VO",
           options: {
-            endpointKey: "vos",
+            endpointKey: "v1/master/data",
             labelKey: "name",
             valueKey: "id",
+            query: { type: "vo_profiles" },
             dependsOn: ["values.clf"],
-            dependsOnHint: "Select CLF first"
+            dependsOnHint: "Select CLF first",
+            queryBuilder: (deps) => ({
+              type: "vo_profiles",
+              id: deps.clf
+            })
           },
           validations: [{ type: "required" }],
           grid: { span: { xs: 12, sm: 6, md: 4 } }
@@ -120,20 +146,28 @@ export const memberProfileSchema = {
           type: "autocomplete",
           label: "SHG",
           options: {
-            endpointKey: "shgs",
+            endpointKey: "v1/master/data",
             labelKey: "name",
             valueKey: "id",
+            query: { type: "shg_profiles" },
             dependsOn: ["values.vo"],
-            dependsOnHint: "Select VO first"
+            dependsOnHint: "Select VO first",
+            queryBuilder: (deps) => ({
+              type: "shg_profiles",
+              id: deps.vo
+            })
           },
           validations: [{ type: "required" }],
           grid: { span: { xs: 12, sm: 6, md: 4 } }
         },
         {
           id: "shgCode",
-          type: "number",
+          type: "text",
           label: "SHG Code",
-          validations: [{ type: "required" }],
+          validations: [
+            { type: "required" },
+            { type: "pattern", value: "^\\d+$", message: "Invalid Input, Expecting Number" }
+          ],
           props: { min: 0, step: 1 },
           config: { inputMode: "numeric" },
           grid: { span: { xs: 12, sm: 6, md: 4 } }
@@ -153,10 +187,19 @@ export const memberProfileSchema = {
           type: "autocomplete",
           label: "Select Member to Update",
           options: {
-            endpointKey: "shgMembers", labelKey: "name", valueKey: "id",
-            dependsOn: ["values.shg"], dependsOnHint: "Select SHG first",
+            endpointKey: "v1/master/data",
+            query: { type: "member_profiles" }, 
+            labelKey: "name", 
+            valueKey: "id",
+            dependsOn: ["values.shg"], 
+            dependsOnHint: "Select SHG first",
+            queryBuilder: (deps) => ({
+              type: "member_profiles",
+              id: deps.shg
+            }),
           },
           validations: [{ type: "required" }],
+          
           rules: [{ when: "values.action !== 'update'", action: "hide" }],
           grid: { span: { xs: 12, sm: 6, md: 4 } },
         },
@@ -166,7 +209,7 @@ export const memberProfileSchema = {
           label: "Date of SHG Joining",
           validations: [{ type: "required" }],
           props: { format: "DD/MM/YYYY" },
-          config: { valueKind: "iso", outputFormat: "YYYY-MM-DD" },
+          config: { valueKind: "iso", outputFormat: "YYYY-MM-DD", disableFuture: true },
           grid: { span: { xs: 12, sm: 6, md: 4 } }
         },
         {
@@ -228,7 +271,12 @@ export const memberProfileSchema = {
           id: "rationType",
           type: "autocomplete",
           label: "Ration Card Type",
-          options: { endpointKey: "catalog/rationTypes", labelKey: "label", valueKey: "value" },
+          options: {
+            endpointKey: "v1/master/data",
+            labelKey: "label",
+            valueKey: "value",
+            query: { type: "ration_types" }
+          },
           validations: [{ type: "required" }],
           grid: { span: { xs: 12, sm: 6, md: 4 } }
         },
@@ -236,7 +284,12 @@ export const memberProfileSchema = {
           id: "education",
           type: "autocomplete",
           label: "Education",
-          options: { endpointKey: "catalog/educationLevels", labelKey: "label", valueKey: "value" },
+          options: {
+            endpointKey: "v1/master/data",
+            labelKey: "label",
+            valueKey: "value",
+            query: { type: "education_levels" }
+          },
           validations: [{ type: "required" }],
           grid: { span: { xs: 12, sm: 6, md: 4 } }
         }
@@ -254,7 +307,7 @@ export const memberProfileSchema = {
           label: "Date of Birth",
           validations: [{ type: "required" }],
           props: { format: "DD/MM/YYYY" },
-          config: { valueKind: "iso", outputFormat: "YYYY-MM-DD" },
+          config: { valueKind: "iso", outputFormat: "YYYY-MM-DD", disableFuture: true },
           grid: { span: { xs: 12, sm: 6, md: 4 } }
         },
         {
@@ -279,7 +332,12 @@ export const memberProfileSchema = {
           id: "socialCategory",
           type: "autocomplete",
           label: "Social Category",
-          options: { endpointKey: "catalog/socialCategories", labelKey: "label", valueKey: "value" },
+          options: {
+            endpointKey: "v1/master/data",
+            labelKey: "label",
+            valueKey: "value",
+            query: { type: "social_categories" }
+          },
           validations: [{ type: "required" }],
           grid: { span: { xs: 12, sm: 6, md: 4 } }
         },
@@ -295,7 +353,12 @@ export const memberProfileSchema = {
           id: "religion",
           type: "autocomplete",
           label: "Religion",
-          options: { endpointKey: "catalog/religions", labelKey: "label", valueKey: "value" },
+          options: {
+            endpointKey: "v1/master/data",
+            labelKey: "label",
+            valueKey: "value",
+            query: { type: "religions" }
+          },
           validations: [{ type: "required" }],
           grid: { span: { xs: 12, sm: 6, md: 4 } }
         },
@@ -303,7 +366,12 @@ export const memberProfileSchema = {
           id: "maritalStatus",
           type: "autocomplete",
           label: "Marital Status",
-          options: { endpointKey: "catalog/maritalStatuses", labelKey: "label", valueKey: "value" },
+          options: {
+            endpointKey: "v1/master/data",
+            labelKey: "label",
+            valueKey: "value",
+            query: { type: "marital_status" }
+          },
           validations: [{ type: "required" }],
           grid: { span: { xs: 12, sm: 6, md: 4 } }
         },
@@ -311,7 +379,12 @@ export const memberProfileSchema = {
           id: "seccCategory",
           type: "autocomplete",
           label: "POOR/SECC Category",
-          options: { endpointKey: "catalog/seccCategories", labelKey: "label", valueKey: "value" },
+          options: {
+            endpointKey: "v1/master/data",
+            labelKey: "label",
+            valueKey: "value",
+            query: { type: "poor_sec_categories" }
+          },
           validations: [{ type: "required" }],
           grid: { span: { xs: 12, sm: 6, md: 4 } }
         },
@@ -327,7 +400,12 @@ export const memberProfileSchema = {
           id: "tribal",
           type: "autocomplete",
           label: "Tribal Group",
-          options: { endpointKey: "catalog/tribalGroups", labelKey: "label", valueKey: "value" },
+          options: {
+            endpointKey: "v1/master/data",
+            labelKey: "label",
+            valueKey: "value",
+            query: { type: "tribal_groups" }
+          },
           validations: [{ type: "required" }],
           grid: { span: { xs: 12, sm: 6, md: 4 } }
         }
@@ -339,15 +417,116 @@ export const memberProfileSchema = {
       id: "household",
       title: "Household Profile",
       fields: [
-        { id: "hhSize", type: "number", label: "Household Size", validations: [{ type: "required" }], props: { min: 1, step: 1 }, config: { inputMode: "numeric" }, grid: { span: { xs: 12, sm: 6, md: 4 } } },
-        { id: "children05", type: "number", label: "No. of Children (0–5 yrs)", validations: [{ type: "required" }], props: { min: 0, step: 1 }, config: { inputMode: "numeric" }, grid: { span: { xs: 12, sm: 6, md: 4 } } },
-        { id: "schoolChildren", type: "number", label: "No. of School-Going Children", validations: [{ type: "required" }], props: { min: 0, step: 1 }, config: { inputMode: "numeric" }, grid: { span: { xs: 12, sm: 6, md: 4 } } },
-        { id: "headOfHousehold", type: "autocomplete", label: "Head of Household", options: { endpointKey: "catalog/hohOptions", labelKey: "label", valueKey: "value" }, validations: [{ type: "required" }], grid: { span: { xs: 12, sm: 6, md: 4 } } },
-        { id: "houseType", type: "autocomplete", label: "Type of House", options: { endpointKey: "catalog/houseTypes", labelKey: "label", valueKey: "value" }, validations: [{ type: "required" }], grid: { span: { xs: 12, sm: 6, md: 4 } } },
-        { id: "electricity", type: "radio-group", label: "Electricity Access", options: { items: [{ label: "Yes", value: "Yes" }, { label: "No", value: "No" }] }, validations: [{ type: "required" }], grid: { span: { xs: 12, sm: 6, md: 4 } } },
-        { id: "drinkingWater", type: "autocomplete", label: "Drinking Water Source", options: { endpointKey: "catalog/waterSources", labelKey: "label", valueKey: "value" }, validations: [{ type: "required" }], grid: { span: { xs: 12, sm: 6, md: 4 } } },
-        { id: "sanitation", type: "autocomplete", label: "Sanitation Facility", options: { endpointKey: "catalog/sanitationTypes", labelKey: "label", valueKey: "value" }, validations: [{ type: "required" }], grid: { span: { xs: 12, sm: 6, md: 4 } } },
-        { id: "lpg", type: "radio-group", label: "LPG", options: { items: [{ label: "Yes", value: "Yes" }, { label: "No", value: "No" }] }, validations: [{ type: "required" }], grid: { span: { xs: 12, sm: 6, md: 4 } } }
+        {
+          id: "hhSize",
+          type: "text",
+          label: "Household Size",
+          validations: [
+            { type: "required" },
+            { type: "pattern", value: "^\\d+$", message: "Invalid Input, Expecting Number" }
+          ],
+          props: { min: 1, step: 1 },
+          config: { inputMode: "numeric" },
+          grid: { span: { xs: 12, sm: 6, md: 4 } }
+        },
+        {
+          id: "children05",
+          type: "text",
+          label: "No. of Children (0–5 yrs)",
+          validations: [
+            { type: "required" },
+            { type: "pattern", value: "^\\d+$", message: "Invalid Input, Expecting Number" }
+          ],
+          props: { min: 0, step: 1 },
+          config: { inputMode: "numeric" },
+          grid: { span: { xs: 12, sm: 6, md: 4 } }
+        },
+        {
+          id: "schoolChildren",
+          type: "text",
+          label: "No. of School-Going Children",
+          validations: [
+            { type: "required" },
+            { type: "pattern", value: "^\\d+$", message: "Invalid Input, Expecting Number" }
+          ],
+          props: { min: 0, step: 1 },
+          config: { inputMode: "numeric" },
+          grid: { span: { xs: 12, sm: 6, md: 4 } }
+        },
+        {
+          id: "headOfHousehold",
+          type: "autocomplete",
+          label: "Head of Household",
+          options: {
+            endpointKey: "v1/master/data",
+            labelKey: "label",
+            valueKey: "value",
+            query: { type: "head_of_household" }
+          },
+          validations: [{ type: "required" }],
+          grid: { span: { xs: 12, sm: 6, md: 4 } }
+        },
+        {
+          id: "houseType",
+          type: "autocomplete",
+          label: "Type of House",
+          options: {
+            endpointKey: "v1/master/data",
+            labelKey: "label",
+            valueKey: "value",
+            query: { type: "house_types" }
+          },
+          validations: [{ type: "required" }],
+          grid: { span: { xs: 12, sm: 6, md: 4 } }
+        },
+        {
+          id: "electricity",
+          type: "radio-group",
+          label: "Electricity Access",
+          options: {
+            items: [{ label: "Yes", value: "Yes" },
+            { label: "No", value: "No" }]
+          },
+          validations: [{ type: "required" }],
+          grid: { span: { xs: 12, sm: 6, md: 4 } }
+        },
+        {
+          id: "drinkingWater",
+          type: "autocomplete",
+          label: "Drinking Water Source",
+          options: {
+            endpointKey: "v1/master/data",
+            labelKey: "label",
+            valueKey: "value",
+            query: { type: "water_source" }
+          },
+          validations: [{ type: "required" }],
+          grid: { span: { xs: 12, sm: 6, md: 4 } }
+        },
+        {
+          id: "sanitation",
+          type: "autocomplete",
+          label: "Sanitation Facility",
+          options: {
+            endpointKey: "v1/master/data",
+            labelKey: "label",
+            valueKey: "value",
+            query: { type: "sanitation_facilities" }
+          },
+          validations: [{ type: "required" }],
+          grid: { span: { xs: 12, sm: 6, md: 4 } }
+        },
+        {
+          id: "lpg",
+          type: "radio-group",
+          label: "LPG",
+          options: {
+            items: [{ label: "Yes", value: "Yes" },
+            { label: "No", value: "No" }]
+          },
+          validations: [{ type: "required" }],
+          grid: { span: { xs: 12, sm: 6, md: 4 } }
+        }
       ]
     },
 
@@ -356,11 +535,71 @@ export const memberProfileSchema = {
       id: "livelihood",
       title: "Livelihood & Economic Activities",
       fields: [
-        { id: "landOwnership", type: "radio-group", label: "Land Ownership", options: { items: [{ label: "Yes", value: "Yes" }, { label: "No", value: "No" }] }, validations: [{ type: "required" }], grid: { span: { xs: 12, sm: 6, md: 4 } } },
-        { id: "totalLand", type: "number", label: "Total Land (Nali)", validations: [{ type: "required" }], props: { min: 0, step: 1 }, config: { inputMode: "numeric" }, rules: [{ when: "values.landOwnership === 'No'", action: "hide" }], grid: { span: { xs: 12, sm: 6, md: 4 } } },
-        { id: "irrigatedLand", type: "number", label: "Irrigated land Area (Nali)", props: { min: 0, step: 1 }, config: { inputMode: "numeric" }, rules: [{ when: "values.landOwnership === 'No'", action: "hide" }], grid: { span: { xs: 12, sm: 6, md: 4 } } },
-        { id: "rainfedLand", type: "number", label: "Rainfed land Area (Nali)", props: { min: 0, step: 1 }, config: { inputMode: "numeric" }, rules: [{ when: "values.landOwnership === 'No'", action: "hide" }], grid: { span: { xs: 12, sm: 6, md: 4 } } },
-        { id: "uncultivatedLand", type: "number", label: "Uncultivated land (Nali)", props: { min: 0, step: 1 }, config: { inputMode: "numeric" }, rules: [{ when: "values.landOwnership === 'No'", action: "hide" }], grid: { span: { xs: 12, sm: 6, md: 4 } } },
+        {
+          id: "landOwnership",
+          type: "radio-group",
+          label: "Land Ownership",
+          options: {
+            items: [
+              { label: "Yes", value: "Yes" },
+              { label: "No", value: "No" }
+            ]
+          },
+          validations: [
+            { type: "required" }
+          ],
+          grid: {
+            span: { xs: 12, sm: 6, md: 4 }
+          }
+        },
+        {
+          id: "totalLand",
+          type: "text",
+          label: "Total Land (Nali)",
+          validations: [
+            { type: "required" },
+            { type: "pattern", value: "^\\d+$", message: "Invalid Input, Expecting Number" }
+          ],
+          // props: { min: 0, step: 1 }, 
+          // config: { inputMode: "numeric" }, 
+          rules: [{ when: "values.landOwnership === 'No'", action: "hide" }],
+          grid: { span: { xs: 12, sm: 6, md: 4 } }
+        },
+        {
+          id: "irrigatedLand",
+          type: "text",
+          label: "Irrigated land Area (Nali)",
+          validations: [
+            { type: "pattern", value: "^\\d+$", message: "Invalid Input, Expecting Number" }
+          ],
+          // props: { min: 0, step: 1 }, 
+          // config: { inputMode: "numeric" }, 
+          rules: [{ when: "values.landOwnership === 'No'", action: "hide" }],
+          grid: { span: { xs: 12, sm: 6, md: 4 } }
+        },
+        {
+          id: "rainfedLand",
+          type: "text",
+          label: "Rainfed land Area (Nali)",
+          validations: [
+            { type: "pattern", value: "^\\d+$", message: "Invalid Input, Expecting Number" }
+          ],
+          // props: { min: 0, step: 1 }, 
+          // config: { inputMode: "numeric" }, 
+          rules: [{ when: "values.landOwnership === 'No'", action: "hide" }],
+          grid: { span: { xs: 12, sm: 6, md: 4 } }
+        },
+        {
+          id: "uncultivatedLand",
+          type: "text",
+          label: "Uncultivated land (Nali)",
+          validations: [
+            { type: "pattern", value: "^\\d+$", message: "Invalid Input, Expecting Number" }
+          ],
+          // props: { min: 0, step: 1 }, 
+          // config: { inputMode: "numeric" }, 
+          rules: [{ when: "values.landOwnership === 'No'", action: "hide" }], grid: { span: { xs: 12, sm: 6, md: 4 } }
+        },
 
         // NOTE: MultiSelect expects static items. If you need async here, add an async-multi component later.
         // { id: "majorCrops", type: "multiselect", label: "Major Crops Grown",
@@ -371,19 +610,99 @@ export const memberProfileSchema = {
         // },
 
         { id: "ownsLivestock", type: "radio-group", label: "Owns Livestock", options: { items: [{ label: "Yes", value: "Yes" }, { label: "No", value: "No" }] }, validations: [{ type: "required" }], grid: { span: { xs: 12, sm: 6, md: 4 } } },
-        { id: "cowCount", type: "number", label: "Cow", props: { min: 0, step: 1 }, config: { inputMode: "numeric" }, rules: [{ when: "values.ownsLivestock !== 'Yes'", action: "hide" }, { when: "values.ownsLivestock === 'Yes'", action: "require" }], grid: { span: { xs: 12, sm: 6, md: 3 } } },
-        { id: "bullCount", type: "number", label: "Bull/Ox", props: { min: 0, step: 1 }, config: { inputMode: "numeric" }, rules: [{ when: "values.ownsLivestock !== 'Yes'", action: "hide" }], grid: { span: { xs: 12, sm: 6, md: 3 } } },
-        { id: "buffaloCount", type: "number", label: "Buffalo", props: { min: 0, step: 1 }, config: { inputMode: "numeric" }, rules: [{ when: "values.ownsLivestock !== 'Yes'", action: "hide" }, { when: "values.ownsLivestock === 'Yes'", action: "require" }], grid: { span: { xs: 12, sm: 6, md: 3 } } },
-
-        { id: "nonFarmActivity", type: "autocomplete", label: "Non-Farm Activities", options: { endpointKey: "catalog/nonFarmActivities", labelKey: "label", valueKey: "value" }, validations: [{ type: "required" }], grid: { span: { xs: 12, sm: 6, md: 4 } } },
-        { id: "wageLabour", type: "autocomplete", label: "Wage Labour", options: { endpointKey: "catalog/wageLabourTypes", labelKey: "label", valueKey: "value" }, validations: [{ type: "required" }], grid: { span: { xs: 12, sm: 6, md: 4 } } },
-
-        { id: "migration", type: "radio-group", label: "Migration (Self or Family)", options: { items: [{ label: "Yes", value: "Yes" }, { label: "No", value: "No" }] }, validations: [{ type: "required" }], grid: { span: { xs: 12, sm: 6, md: 4 } } },
         {
-          id: "migrationPurpose", type: "autocomplete", label: "Migration Purpose",
-          options: { endpointKey: "catalog/migrationPurposes", labelKey: "label", valueKey: "value" },
-          rules: [{ when: "values.migration !== 'Yes'", action: "hide" }, { when: "values.migration === 'Yes'", action: "require" }],
+          id: "cowCount",
+          type: "text",
+          label: "Cow",
+          validations: [
+            { type: "pattern", value: "^\\d+$", message: "Invalid Input, Expecting Number" }
+          ],
+          // props: { min: 0, step: 1 }, 
+          // config: { inputMode: "numeric" }, 
+          rules: [{ when: "values.ownsLivestock !== 'Yes'", action: "hide" }, { when: "values.ownsLivestock === 'Yes'", action: "require" }], grid: { span: { xs: 12, sm: 6, md: 3 } }
+        },
+        {
+          id: "bullCount",
+          type: "text",
+          label: "Bull/Ox",
+          validations: [
+            { type: "pattern", value: "^\\d+$", message: "Invalid Input, Expecting Number" }
+          ],
+          // props: { min: 0, step: 1 }, 
+          // config: { inputMode: "numeric" }, 
+          rules: [{ when: "values.ownsLivestock !== 'Yes'", action: "hide" }], grid: { span: { xs: 12, sm: 6, md: 3 } }
+        },
+        {
+          id: "buffaloCount",
+          type: "text",
+          label: "Buffalo",
+          validations: [
+            { type: "pattern", value: "^\\d+$", message: "Invalid Input, Expecting Number" }
+          ],
+          // props: { min: 0, step: 1 }, 
+          // config: { inputMode: "numeric" }, 
+          rules: [{ when: "values.ownsLivestock !== 'Yes'", action: "hide" }, { when: "values.ownsLivestock === 'Yes'", action: "require" }], grid: { span: { xs: 12, sm: 6, md: 3 } }
+        },
+
+        {
+          id: "nonFarmActivity",
+          type: "autocomplete",
+          label: "Non-Farm Activities",
+          options: {
+            endpointKey: "v1/master/data",
+            labelKey: "label",
+            valueKey: "value",
+            query: { type: "non_farm_activities" }
+          },
+          validations: [{ type: "required" }],
           grid: { span: { xs: 12, sm: 6, md: 4 } }
+        },
+        {
+          id: "wageLabour",
+          type: "autocomplete",
+          label: "Wage Labour",
+          options: {
+            endpointKey: "v1/master/data",
+            labelKey: "label",
+            valueKey: "value",
+            query: { type: "wage_labour_types" }
+          },
+          validations: [{ type: "required" }],
+          grid: { span: { xs: 12, sm: 6, md: 4 } }
+        },
+
+        {
+          id: "migration",
+          type: "radio-group",
+          label: "Migration (Self or Family)",
+          options: {
+            items: [{ label: "Yes", value: "Yes" },
+            { label: "No", value: "No" }]
+          },
+          validations: [{ type: "required" }],
+          grid: { span: { xs: 12, sm: 6, md: 4 } }
+        },
+        {
+          id: "migrationPurpose",
+          type: "autocomplete",
+          label: "Migration Purpose",
+          options: {
+            endpointKey: "v1/master/data",
+            labelKey: "label",
+            valueKey: "value",
+            query: { type: "migration_purposes" }
+          },
+          rules: [{ when: "values.migration !== 'Yes'", action: "hide" },
+          { when: "values.migration === 'Yes'", action: "require" }],
+          grid: { span: { xs: 12, sm: 6, md: 4 } }
+        },
+        {
+          id: "majorCropsGrown",
+          type: "text",
+          label: "Enter Major Crops Grown",
+          validations: [{ type: "required" }],
+          props: { maxLength: 100, placeholder: "Like Wheat, Rice, Potato etc." },
+          grid: { span: { xs: 12, sm: 6, md: 6 } }
         }
       ]
     },
@@ -393,16 +712,65 @@ export const memberProfileSchema = {
       id: "income",
       title: "Income & Financial Inclusion",
       fields: [
-        { id: "annualIncome", type: "autocomplete", label: "Annual Household Income (₹)", options: { endpointKey: "catalog/incomeBrackets", labelKey: "label", valueKey: "value" }, validations: [{ type: "required" }], grid: { span: { xs: 12, sm: 6, md: 4 } } },
-        { id: "majorIncomeSource", type: "autocomplete", label: "Major Source of Income", options: { endpointKey: "catalog/incomeSources", labelKey: "label", valueKey: "value" }, validations: [{ type: "required" }], grid: { span: { xs: 12, sm: 6, md: 4 } } },
-        { id: "savingsPerMonth", type: "number", label: "Saving (per-month/per-member)", validations: [{ type: "required" }], props: { min: 0, step: 1 }, config: { inputMode: "numeric" }, grid: { span: { xs: 12, sm: 6, md: 4 } } },
+        {
+          id: "annualIncome",
+          type: "autocomplete",
+          label: "Annual Household Income (₹)",
+          options: {
+            endpointKey: "v1/master/data",
+            labelKey: "label",
+            valueKey: "value",
+            query: { type: "income_brackets" }
+          },
+          validations: [{ type: "required" }], grid: { span: { xs: 12, sm: 6, md: 4 } }
+        },
+        {
+          id: "majorIncomeSource",
+          type: "autocomplete",
+          label: "Major Source of Income",
+          options: {
+            endpointKey: "v1/master/data",
+            labelKey: "label",
+            valueKey: "value",
+            query: { type: "income_source" }
+          },
+          validations: [{ type: "required" }],
+          grid: { span: { xs: 12, sm: 6, md: 4 } }
+        },
+        {
+          id: "savingsPerMonth",
+          type: "text",
+          label: "Saving (per-month/per-member)",
+          validations: [
+            { type: "required" },
+            { type: "pattern", value: "^\\d+$", message: "Invalid Input, Expecting Number" }
+          ],
+          // props: { min: 0, step: 1 }, 
+          // config: { inputMode: "numeric" }, 
+          grid: { span: { xs: 12, sm: 6, md: 4 } }
+        },
 
         { id: "hasBankAccount", type: "radio-group", label: "Bank Account Holder", options: { items: [{ label: "Yes", value: "Yes" }, { label: "No", value: "No" }] }, validations: [{ type: "required" }], grid: { span: { xs: 12, sm: 6, md: 4 } } },
 
         { id: "bankName", type: "text", label: "Benef. Bank Name", rules: [{ when: "values.hasBankAccount !== 'Yes'", action: "hide" }, { when: "values.hasBankAccount === 'Yes'", action: "require" }], props: { maxLength: 80 }, grid: { span: { xs: 12, sm: 6, md: 4 } } },
         { id: "accountNo", type: "text", label: "Benef. Account No", rules: [{ when: "values.hasBankAccount !== 'Yes'", action: "hide" }, { when: "values.hasBankAccount === 'Yes'", action: "require" }], props: { maxLength: 24 }, grid: { span: { xs: 12, sm: 6, md: 4 } } },
         { id: "branchName", type: "text", label: "Branch Name", rules: [{ when: "values.hasBankAccount !== 'Yes'", action: "hide" }, { when: "values.hasBankAccount === 'Yes'", action: "require" }], props: { maxLength: 80 }, grid: { span: { xs: 12, sm: 6, md: 4 } } },
-        { id: "accountType", type: "autocomplete", label: "Account Type", options: { endpointKey: "catalog/accountTypes", labelKey: "label", valueKey: "value" }, rules: [{ when: "values.hasBankAccount !== 'Yes'", action: "hide" }, { when: "values.hasBankAccount === 'Yes'", action: "require" }], grid: { span: { xs: 12, sm: 6, md: 4 } } },
+        {
+          id: "accountType",
+          type: "autocomplete",
+          label: "Account Type",
+          options: {
+            endpointKey: "v1/master/data",
+            labelKey: "label",
+            valueKey: "value",
+            query: { type: "account_types" }
+          },
+          rules: [
+            { when: "values.hasBankAccount !== 'Yes'", action: "hide" },
+            { when: "values.hasBankAccount === 'Yes'", action: "require" }
+          ],
+          grid: { span: { xs: 12, sm: 6, md: 4 } }
+        },
         { id: "ifsc", type: "text", label: "IFSC Code", rules: [{ when: "values.hasBankAccount !== 'Yes'", action: "hide" }, { when: "values.hasBankAccount === 'Yes'", action: "require" }], validations: [{ type: "pattern", value: "^[A-Z]{4}0[A-Z0-9]{6}$", message: "Invalid IFSC" }], props: { maxLength: 11 }, grid: { span: { xs: 12, sm: 6, md: 4 } } }
       ]
     },
@@ -452,15 +820,39 @@ export const memberProfileSchema = {
           helperText: "Attach Aadhaar front photo (image only).",
           validations: [{ type: "required" }],
           props: {
-            multiple: true,
+            multiple: false,
             accept: "image/*",
             maxFiles: 5,
             maxSizeMB: 5
           },
           grid: { span: { xs: 12, sm: 12, md: 12 } }
         },
-        { id: "valueChainMapping", type: "autocomplete", label: "Value Chain Mapping", options: { endpointKey: "catalog/valueChains", labelKey: "label", valueKey: "value" }, validations: [{ type: "required" }], grid: { span: { xs: 12, sm: 6, md: 6 } } },
-        { id: "pgMapping", type: "autocomplete", label: "PG Mapping", options: { endpointKey: "catalog/pgMappings", labelKey: "label", valueKey: "value" }, validations: [{ type: "required" }], grid: { span: { xs: 12, sm: 6, md: 6 } } },
+        {
+          id: "valueChainMapping",
+          type: "autocomplete",
+          label: "Value Chain Mapping",
+          options: {
+            endpointKey: "v1/master/data",
+            labelKey: "label",
+            valueKey: "value",
+            query: { type: "value_chain" },
+          },
+          validations: [{ type: "required" }],
+          grid: { span: { xs: 12, sm: 6, md: 6 } }
+        },
+        {
+          id: "pgMapping",
+          type: "autocomplete",
+          label: "PG Mapping",
+          options: {
+            endpointKey: "v1/master/data",
+            labelKey: "label",
+            valueKey: "value",
+            query: { type: "pg_mapping" },
+          },
+          validations: [{ type: "required" }],
+          grid: { span: { xs: 12, sm: 6, md: 6 } }
+        },
 
         { id: "undertaking", type: "checkbox", label: "I confirm the information provided is correct", validations: [{ type: "required" }], grid: { span: { xs: 12 } } }
       ]

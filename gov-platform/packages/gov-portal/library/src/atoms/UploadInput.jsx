@@ -6,7 +6,7 @@ import AppButton from "./AppButton";
 import TypographyX from "./TypographyX";
 import { getIcon } from "../utils/icons";
 import { get } from "lodash";
-
+import { http } from "../../../data/services/bootstrap";
 // ---------- utils ----------
 const isDefined = (v) => v !== undefined && v !== null;
 const isAcceptableItem = (x) =>
@@ -78,45 +78,53 @@ export default function UploadInput({
     onChange?.(next);       // inform RHF/parent
   };
 
-  const pick = (e) => {
+  const uploadFileToServer = async (file) => {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    // You should get the token from your auth context, localStorage, or however your app stores it
+    const token = http().getAccessToken(); 
+
+    const resp = await fetch("http://reap-mis-myapp-ukgv.casacam.net:9090/reap-mis/api/files/upload", {
+      method: "POST",
+      body: formData,
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        // 'Content-Type' should NOT be set when using FormData
+      }
+    });
+    if (!resp.ok) throw new Error("File upload failed");
+    alert("File uploaded successfully.");
+    const data = await resp.json();
+    return data.fileId;
+  };
+
+  const pick = async (e) => {
   const picked = Array.from(e.target.files || []);
   if (!picked.length) return;
 
-  // Start from current UI list so multiple selections accumulate
-  let next = multiple ? filesUI.slice() : [];
-
-  // Skip oversized files
   const addable = maxSizeMB
     ? picked.filter((f) => f.size <= maxSizeMB * 1024 * 1024)
     : picked;
 
-  if (multiple) {
-    // Add all newly picked files
-    next.push(...addable);
-
-    // Optional: dedupe by (name, size, lastModified)
-    const seen = new Set();
-    next = next.filter((f) => {
-      const key = `${f.name}-${f.size}-${f.lastModified || 0}`;
-      if (seen.has(key)) return false;
-      seen.add(key);
-      return true;
-    });
-
-    // IMPORTANT: keep the *newest* N files if maxFiles is set
-    if (Number(maxFiles) > 0 && next.length > maxFiles) {
-      next = next.slice(-maxFiles);
+  try {
+    const fileDescriptors = [];
+    for (const file of addable) {
+      const fileId = await uploadFileToServer(file);
+      fileDescriptors.push({
+        id: fileId,
+        name: file.name,
+        size: file.size,
+        // url: ... // if your API returns a download URL, add it here
+      });
     }
-  } else {
-    // Single-file mode: take the last picked (most recent)
-    next = addable.length ? [addable[addable.length - 1]] : [];
+    emitChange(multiple ? fileDescriptors : [fileDescriptors[0]]);
+  } catch (err) {
+    alert("File upload failed. Please try again.");
   }
 
-  emitChange(next);
-  // Allow re-selecting the same file again
   e.target.value = "";
 };
-
 
   const removeAt = (idx) => {
     if (!multiple) {

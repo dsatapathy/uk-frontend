@@ -4,7 +4,6 @@ import { TextField, Autocomplete, CircularProgress } from "@mui/material";
 import { debounce } from "../utils/debounce.js";
 import { useOptions } from "@gov/data";
 
-/* ----------------------------- helpers ----------------------------- */
 function depsReady(deps = {}) {
   const ks = Object.keys(deps || {});
   if (ks.length === 0) return true;
@@ -16,41 +15,6 @@ function depsReady(deps = {}) {
   });
 }
 const has = (v) => v !== undefined && v !== null && v !== "";
-
-// set nested path into obj: setDeep(obj, "a.b.c", 1)
-function setDeep(obj, path, value) {
-  const parts = String(path).split(".");
-  let cur = obj;
-  for (let i = 0; i < parts.length - 1; i++) {
-    const k = parts[i];
-    if (!cur[k] || typeof cur[k] !== "object") cur[k] = {};
-    cur = cur[k];
-  }
-  cur[parts[parts.length - 1]] = value;
-}
-
-/**
- * Build a `values` object from deps whose keys look like "values.*"
- * Also keep the flat deps so simple GET/param endpoints still work.
- * Example:
- *   { "values.district": "CTC", "values.block": "BK01" }
- * becomes:
- *   depsOut.values = { district: "CTC", block: "BK01" }
- */
-function normalizeDepsForTemplates(raw = {}) {
-  const out = { ...raw };
-  const values = {};
-  Object.entries(raw).forEach(([k, v]) => {
-    if (k.startsWith("values.")) {
-      const path = k.slice("values.".length); // "district" / "block" / "gp"
-      setDeep(values, path, v);
-    }
-  });
-  if (Object.keys(values).length > 0) out.values = { ...(out.values || {}), ...values };
-  return out;
-}
-
-/* --------------------------- component ---------------------------- */
 export default function AsyncAutocomplete({
   field,
   rhf,
@@ -61,19 +25,14 @@ export default function AsyncAutocomplete({
   contextDeps,
 }) {
   const [query, setQuery] = useState("");
-  const [open, setOpen] = useState(false); // only fetch when open
-
-  // Normalize deps so $values.* works in bodyTemplate
-  const rawDeps = contextDeps || {};
-  const deps = useMemo(() => normalizeDepsForTemplates(rawDeps), [rawDeps]);
-
+  const [open, setOpen] = useState(false);        // 👈 only fetch when open
+  const deps = contextDeps || {};
   const ready = depsReady(deps);
 
   const valueKey = field?.options?.valueKey || "value";
   const labelKey = field?.options?.labelKey || "label";
   const endpointKey = field?.options?.endpointKey;
-  const endpointOverride = field?.options?.endpoint; // string URL override
-  const requestOverride = field?.options?.request;   // { method, url, bodyTemplate, buildBody, buildParams, select }
+  const endpointOverride = field?.options?.endpoint;
 
   // Only update search query when user types (ignore 'reset', 'selectOption', etc.)
   const onInputChange = useMemo(
@@ -84,28 +43,46 @@ export default function AsyncAutocomplete({
     []
   );
 
+  // const shouldLoad = !hidden && !disabled && ready && (open || (rhf.value ?? "") !== "");
   const shouldLoad = !hidden && !disabled && ready && (open || (rhf.value ?? "") !== "");
+  const finalQuery = useMemo(() => {
+    // Get base query from field options
+    const baseQuery = field?.options?.query || {};
+
+    // Get dynamic query from queryBuilder if present
+    const dynamicQuery = field?.options?.queryBuilder ?
+      field.options.queryBuilder(deps) : {};
+
+    // Merge base query, dynamic query, and search query
+    return {
+      ...baseQuery,
+      ...dynamicQuery,
+      ...(query ? { search: query } : {})
+    };
+  }, [field?.options, deps, query]);
 
   const { data = [], isLoading, isFetching } = useOptions(endpointKey, {
-    query,
+    query: finalQuery,
     deps,
     endpoint: endpointOverride,
-    request: requestOverride,
-    enabled: shouldLoad, // also when a value exists, to resolve label
+    enabled: shouldLoad,
   });
+  // const { data = [], isLoading, isFetching } = useOptions(endpointKey, {
+  //   query,
+  //   deps,
+  //   endpoint: endpointOverride,
+  //   enabled: shouldLoad, // 👈 also when a value exists
+  // });
 
   // Optional: clear stale value when parent cleared
   useEffect(() => {
     if (!ready && rhf.value != null) rhf.onChange(null);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ready]);
+  }, [ready]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const selected =
     data.find((o) => o?.[valueKey] === rhf?.value) ||
     // Optional fallback so label shows even before options load:
-    (has(rhf.value) ? { [valueKey]: rhf.value, [labelKey]: String(rhf.value) } : null);
-
-  if (hidden) return null;
+    (has(rhf.value) ? { [valueKey]: rhf.value, [labelKey]: String(rhf.value) } : null); if (hidden) return null;
 
   return (
     <Autocomplete
@@ -118,7 +95,7 @@ export default function AsyncAutocomplete({
       onInputChange={onInputChange}
       loading={(isLoading || isFetching) && open && ready}
       disabled={disabled || !ready}
-      getOptionLabel={(o) => (o && o[labelKey] != null ? String(o[labelKey]) : "")}
+      getOptionLabel={(o) => o?.[labelKey] ?? ""}
       isOptionEqualToValue={(opt, val) =>
         opt?.[valueKey] === (val && typeof val === "object" ? val[valueKey] : val)
       }

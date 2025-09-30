@@ -2,6 +2,7 @@ import React from "react";
 import { memberProfileSchema } from "../form/member-profile.schema";
 import { memberProfileSteps } from "../form/member-profile.steps";
 import { getComponent } from "@gov/core";
+import { useSubmitData } from "@gov/data";
 
 // ✅ fix nesting
 const ui = {
@@ -177,11 +178,30 @@ function flatFromMock(p) {
   };
 }
 
+function flattenWithExceptions(obj, keepKeys = []) {
+  const result = {};
+  for (const key in obj) {
+    if (typeof obj[key] === "object" && obj[key] !== null && !Array.isArray(obj[key])) {
+      for (const subKey in obj[key]) {
+        if (keepKeys.includes(subKey)) {
+          result[subKey] = obj[key][subKey];
+        } else {
+          result[subKey] = obj[key][subKey];
+        }
+      }
+    } else {
+      result[key] = obj[key];
+    }
+  }
+  return result;
+}
+
 export default function BeneficiaryMemberProfile() {
   const DynamicForm = getComponent("DynamicForm");
   const ConfigStepperMUI = getComponent("ConfigStepperMUI");
   const formApiRef = React.useRef(null);
 
+  const submitMutation = useSubmitData();
   const handleValuesChange = React.useCallback((vals, meta) => {
     if (meta?.name !== "memberToUpdate") return;
     const id = typeof vals.memberToUpdate === "object"
@@ -203,6 +223,40 @@ export default function BeneficiaryMemberProfile() {
     formApiRef.current?.patch?.(flat, { shouldValidate: false, shouldDirty: false });
   }, []);
 
+  // Handler for form submit
+  const handleSubmit = async (vals) => {
+    // These keys should remain as objects/arrays
+    const keepKeys = ["aadhaarPhoto", "disabilityCert", "memberPhoto"];
+
+    // Flatten the formData, keeping the specified keys as objects/arrays
+    const flatFormData = flattenWithExceptions(vals, keepKeys);
+
+    const payload = {
+      module: "USER_DATA_UPDATE",
+      operation: "CREATE",
+      formType: "MEMBER_PROFILE",
+      formData: flatFormData,
+    };
+    const Url = "v1/reap/operations";
+    const method = "post";
+
+    submitMutation.mutate(
+      { method, url: Url, payload },
+      {
+        onSuccess: (response) => {
+          console.log("SUBMIT SUCCESS", response);
+          alert("Beneficiary profile submitted successfully!!!");
+          // Optionally show a success message or redirect
+        },
+        onError: (error) => {
+          alert("Error submitting form.");
+          console.error("SUBMIT ERROR", error);
+          // Optionally show an error message
+        },
+      }
+    );
+  };
+
   return (
     <ConfigStepperMUI
       schema={memberProfileSchema}
@@ -214,7 +268,7 @@ export default function BeneficiaryMemberProfile() {
       }
       onSave={(vals) => console.log("SAVE", vals)}
       onDraft={(vals) => console.log("DRAFT", vals)}
-      onSubmit={(vals) => console.log("SUBMIT", vals)}
+      onSubmit={handleSubmit}
       formProps={{
         entityId: "member-profile",
         autosaveMs: 800,
