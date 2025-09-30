@@ -20,3 +20,8 @@ export {keys} from "./cache-keys/index.js";
 export * from "./cache-keys/cache.js";
 // ---- storage ----
 export { default as VersionedStorage } from "./storage/index.js";
+
+// ---- logout service ----
+export { handleLogoutService } from "./services/logout/logout.js";
+// ---- beneficiary member profile service ----
+export { submitDataService, useSubmitData } from "./services/formSubmitServices/submitFormServices.js";

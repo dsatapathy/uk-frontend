@@ -12,6 +12,9 @@
   },
   "files": ["dist"],
   "sideEffects": ["**/*.css", "**/*.scss"],
+  "dependencies": {
+        "@egov/data": "0.0.0"
+  },
   "peerDependencies": {
     "@gov/core": "0.1.0",
     "react": "17.0.2",
