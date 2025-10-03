@@ -22,7 +22,7 @@
     "build:data": "node -e \"require('child_process').spawn('vite', ['build'], { cwd: 'packages/gov-portal/data', stdio: 'inherit', shell: true })\"",
     "build:modules": "node scripts/build-modules.js",
     "build:app": "node -e \"require('child_process').spawn('vite', ['build'], { cwd: 'apps/uk-portal', stdio: 'inherit', shell: true })\"",
-    "build": "npm run build:core && npm run build:ui-engine && npm run build:data && npm run build:modules && npm run build:app",
+    "build": "yarn run build:core && yarn run build:ui-engine && yarn run build:data && yarn run build:modules && yarn run build:app",
 
     "//---------------- Preview (built app) --------------": "────────",
     "preview": "node -e \"require('child_process').spawn('vite', ['preview','--strictPort'], { cwd: 'apps/uk-portal', stdio: 'inherit', shell: true })\"",
