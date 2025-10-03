@@ -59,7 +59,7 @@ export function start(rawConfig) {
     history,
     config: cfg,
     addRoutes: (r) => externalSetRoutes((prev) => [...r, ...prev]),
-    addNav: (items) => runtime?.registerNav?.(items) || {},
+    addNav: {},
     actions: hooks.provideActions?.() || {},
     reducers: hooks.provideReducers?.() || {},
   };
