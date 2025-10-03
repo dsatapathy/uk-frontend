@@ -10,7 +10,7 @@
     "packages/gov-portal/ui-engine",
     "packages/gov-portal/data"
   ],
-  "engines": { "node": ">=20" },
+  "engines": { "node": "20.x" },
 
   "scripts": {
     "//---------------- Dev (single port) ----------------": "────────",
@@ -76,7 +76,7 @@
     "@vitejs/plugin-react": "^4.3.1",
     "babel-jest": "^29.7.0",
     "concurrently": "^8.2.2",
-    "dotenv": "^17.2.1",
+    "dotenv": "^16.4.5",
     "jest": "^29.7.0",
     "rimraf": "^5.0.0",
     "rollup-plugin-visualizer": "^6.0.3",
