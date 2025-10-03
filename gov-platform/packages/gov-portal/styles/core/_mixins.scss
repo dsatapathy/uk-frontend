@@ -1,9 +1,13 @@
 /* styles/core/_mixins.scss */
+@use "sass:map";
+
+/* Focus ring helper */
 @mixin focus-ring($offset: 2px) {
   outline: 3px solid var(--g-focus-ring);
   outline-offset: $offset;
 }
 
+/* Breakpoints */
 $breakpoints: (
   sm: 640px,
   md: 768px,
@@ -11,27 +15,33 @@ $breakpoints: (
   xl: 1280px
 );
 
-/* existing: min-width (up) */
+/* min-width (up) */
 @mixin media($bp) {
-  $v: map-get($breakpoints, $bp);
-  @if $v == null { @error "Unknown breakpoint `#{$bp}`"; }
-  @media (min-width: $v) { @content; }
+  $v: map.get($breakpoints, $bp);
+  @if $v == null {
+    @error "Unknown breakpoint `#{$bp}`. Valid keys: #{map.keys($breakpoints)}";
+  }
+  @media (min-width: #{$v}) { @content; }
 }
 
-/* NEW: max-width (down) */
+/* max-width (down) */
 @mixin media-down($bp) {
-  $v: map-get($breakpoints, $bp);
-  @if $v == null { @error "Unknown breakpoint `#{$bp}`"; }
+  $v: map.get($breakpoints, $bp);
+  @if $v == null {
+    @error "Unknown breakpoint `#{$bp}`. Valid keys: #{map.keys($breakpoints)}";
+  }
   /* subtract a hair to avoid overlap with the next min-width */
   @media (max-width: calc(#{$v} - 0.02px)) { @content; }
 }
 
-/* NEW: between two breakpoints (inclusive–exclusive) */
+/* between two breakpoints (inclusive–exclusive) */
 @mixin media-between($min, $max) {
-  $vmin: map-get($breakpoints, $min);
-  $vmax: map-get($breakpoints, $max);
-  @if $vmin == null or $vmax == null { @error "Unknown breakpoint(s)"; }
-  @media (min-width: $vmin) and (max-width: calc(#{$vmax} - 0.02px)) { @content; }
+  $vmin: map.get($breakpoints, $min);
+  $vmax: map.get($breakpoints, $max);
+  @if $vmin == null or $vmax == null {
+    @error "Unknown breakpoint(s) `#{$min}`, `#{$max}`. Valid keys: #{map.keys($breakpoints)}";
+  }
+  @media (min-width: #{$vmin}) and (max-width: calc(#{$vmax} - 0.02px)) { @content; }
 }
 
 /* Utility to paint surfaces consistently */
@@ -39,6 +49,7 @@ $breakpoints: (
   @if $level == 1 { background: var(--g-surface-1); }
   @else if $level == 2 { background: var(--g-surface-2); }
   @else if $level == 3 { background: var(--g-surface-3); }
+
   color: var(--g-fg);
   border: 1px solid var(--g-border);
   border-radius: var(--g-radius);
