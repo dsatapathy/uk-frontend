@@ -48,7 +48,7 @@ start({
     logo: "/assets/uk-logo.svg",
     favicon: "/assets/uk-fav.ico",
     version: "1.2.3",
-    tenant: "uttar-pradesh", // or "odisha" etc.
+    tenant: "uttarakhand", // or "odisha" etc.
     locale: "en-IN"
   },
 
@@ -99,5 +99,5 @@ start({
       registry: moduleRegistry
     }
   },
-  redirects: [{ from: "/", to: "/bpa" }]
+  redirects: [{ from: "/", to: "/landing" }]
 });

@@ -18,6 +18,11 @@ const list = (import.meta.env.VITE_ENABLED_MODULES ||
   (import.meta.env.DEV ? Object.keys(all).join(",") : ""))
   .split(",").map(s => s.trim()).filter(Boolean);
 
+// Strict production lock
+if (import.meta.env.PROD && !list.length) {
+  throw new Error("VITE_ENABLED_MODULES must be set in production (.env.production)");
+}
+
 /**
 * Map of enabled modules and their lazy importers.
 *
