@@ -230,6 +230,30 @@ mainContents = replaceOrThrow(
 
 writeFile(mainPath, mainContents);
 
+const loginConfigPath = path.join(targetDir, "src", "config", "auth", "login.config.js");
+if (fs.existsSync(loginConfigPath)) {
+  let loginConfig = fs.readFileSync(loginConfigPath, "utf8");
+  loginConfig = replaceOrThrow(
+    loginConfig,
+    /title: "[^"]+",/,
+    `title: "${title}",`,
+    "login brand title"
+  );
+  writeFile(loginConfigPath, loginConfig);
+}
+
+const registerConfigPath = path.join(targetDir, "src", "config", "auth", "register.config.js");
+if (fs.existsSync(registerConfigPath)) {
+  let registerConfig = fs.readFileSync(registerConfigPath, "utf8");
+  registerConfig = replaceOrThrow(
+    registerConfig,
+    /title: "[^"]+",/,
+    `title: "${title}",`,
+    "register brand title"
+  );
+  writeFile(registerConfigPath, registerConfig);
+}
+
 const indexHtmlPath = path.join(targetDir, "index.html");
 if (fs.existsSync(indexHtmlPath)) {
   let indexHtml = fs.readFileSync(indexHtmlPath, "utf8");

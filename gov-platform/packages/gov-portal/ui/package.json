@@ -4,11 +4,11 @@
   "private": true,
   "type": "module",
   "description": "Gov Portal app configs (e.g., login.config.js).",
-  "files": ["config"],
+  "files": ["config", "assets"],
   "sideEffects": false,
   "exports": {
     ".": "./config/index.js",
-    "./login.config": "./config/login.config.js",
-    "./config/*": "./config/*"
+    "./config/*": "./config/*",
+    "./assets/*": "./assets/*"
   }
 }

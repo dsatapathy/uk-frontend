@@ -1,6 +1,5 @@
-import { color } from "@mui/system";
-import ukLogo from "../../assets/images/Logo.png";
-import bgImg from "../../assets/images/logo-bg-3.png"; // optimized JPG/WEBP
+import ukLogo from "@gov/ui/assets/images/Logo.png";
+import bgImg from "@gov/ui/assets/images/logo-bg-3.png";
 
 const loginConfig = {
   brand: {
@@ -12,7 +11,7 @@ const loginConfig = {
       fontWeight: 600,
       fontSize: "1.5rem",
       letterSpacing: 0.3,
-      mb: 0.5,                  // spacing below the label
+      mb: 0.5,
     },
   },
 
@@ -20,26 +19,24 @@ const loginConfig = {
 
   style: {
     layout: {
-      paddingPx: 24,          // outer — SCSS clamps anyway
+      paddingPx: 24,
       backgroundImage: bgImg,
       blurPx: 6,
     },
     card: {
-      maxWidthPx: 480,        // feeds --login-card-w via your LoginForm.js
-      paddingPx: 20,          // inner padding (SCSS clamps 16..24)
+      maxWidthPx: 480,
+      paddingPx: 20,
       radiusPx: 12,
       border: "1px solid var(--g-border)",
       elevation: 2,
     },
-    grid: { cols: 12, gapPx: 12 },  // SCSS clamps 8..16
+    grid: { cols: 12, gapPx: 12 },
     field: { fullWidth: true, size: "small" },
     button: { align: "center", marginTopPx: 10 },
   },
 
-  // decorations optional; remove if they distract
   visual: {
     decorations: [
-      // hues are handled in CSS; keeping structure is fine
       { type: "blob", size: 320, top: "8%", left: "6%", opacity: 0.22, speed: 22 },
       { type: "blob", size: 260, bottom: "10%", right: "12%", opacity: 0.18, speed: 28 },
       { type: "ring", size: 220, top: "65%", left: "20%", opacity: 0.16, speed: 30 },
@@ -58,8 +55,9 @@ const loginConfig = {
         fontWeight: 600,
         fontSize: "0.9rem",
         letterSpacing: 0.3,
-        mb: 0.5,                  // spacing below the label
-      }, minLength: 3,
+        mb: 0.5,
+      },
+      minLength: 3,
       icon: "person",
       grid: { span: { xs: 12, md: 12 } },
       placeholder: "Enter your user ID",
@@ -74,8 +72,9 @@ const loginConfig = {
         fontWeight: 600,
         fontSize: "0.9rem",
         letterSpacing: 0.3,
-        mb: 0.5,                  // spacing below the label
-      }, placeholder: "Enter your password",
+        mb: 0.5,
+      },
+      placeholder: "Enter your password",
       required: true,
       minLength: 6,
       icon: "lock",
@@ -85,25 +84,30 @@ const loginConfig = {
   ],
 
   captcha: {
-    provider: "dev", name: "captcha", length: 6, labelSx: {
+    provider: "dev",
+    name: "captcha",
+    length: 6,
+    labelSx: {
       color: "#fff",
       fontWeight: 600,
       fontSize: "0.9rem",
       letterSpacing: 0.3,
-      mb: 0.5,                  // spacing below the label
+      mb: 0.5,
     },
   },
 
   submit: {
-    label: "Log In", endpoint: "v1/auth/login", method: "POST", labelSx: {
+    label: "Log In",
+    endpoint: "v1/auth/login",
+    method: "POST",
+    labelSx: {
       color: "#fff",
       fontWeight: 600,
       fontSize: "0.9rem",
       letterSpacing: 0.3,
-      mb: 0.5,                  // spacing below the label
+      mb: 0.5,
     },
   },
-  // register: { label: "Register", redirect: "/register" },
   onSuccessRoute: "/landing",
 };
 

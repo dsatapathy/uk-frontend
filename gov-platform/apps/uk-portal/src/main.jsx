@@ -1,4 +1,5 @@
 import { start, buildModuleDefaults } from "@gov/ui-engine";
+import { registerConfigLoader } from "@gov/ui";
 import { moduleMap, enabledKeys } from "./moduleRegistry";
 import landingLogo from "../public/assets/images/landing_logo.png";
 // build the route list to match enabled modules
@@ -6,6 +7,11 @@ const basePaths = { auth: "/login", landing: "/landing", bpa: "/bpa", member: "/
 const defaultModules = buildModuleDefaults(enabledKeys, basePaths);
 const moduleRegistry = Object.fromEntries(defaultModules.map((m) => [m.key, moduleMap[m.key]]));
 // Only defaults/registry are used; source/endpoints are ignored here.
+
+registerConfigLoader("auth/login", () => import("./config/auth/login.config.js"));
+registerConfigLoader("auth/register", () => import("./config/auth/register.config.js"));
+registerConfigLoader("landing/landing", () => import("./config/landing/landing.config.js"));
+
 start({
   target: "#root",
   base: "/",
