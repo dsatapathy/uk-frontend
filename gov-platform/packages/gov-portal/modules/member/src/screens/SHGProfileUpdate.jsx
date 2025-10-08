@@ -1,7 +1,8 @@
 import React from "react";
 import { getComponent } from "@gov/core";
-import { shgRegistrationSchema } from "../form/shg-registration.schema";
 import { useSubmitForm } from "@gov/data";
+import { useConfig } from "@gov/library";
+import { loadShgRegistrationSchema } from "../form/loaders";
 
 
 const ui = {
@@ -38,16 +39,23 @@ const ui = {
 
 export default function SHGProfileUpdate() {
   const DynamicForm = getComponent("DynamicForm");
-  const submit = useSubmitForm(shgRegistrationSchema.id, "shg-registration");
+  const { config: schema, loading } = useConfig(
+    loadShgRegistrationSchema,
+    "shg-registration-schema"
+  );
+  if (loading || !schema) {
+    return null;
+  }
+  const submit = useSubmitForm(schema.id, "shg-registration");
   return (
     <DynamicForm
-      schema={shgRegistrationSchema}
+      schema={schema}
       onSubmit={(values) => submit.mutate(values)}
       entityId="shg-registration"
       autosaveMs={800}
       ui={ui}
-      validationSchema={shgRegistrationSchema}
-      defaultsSchema={shgRegistrationSchema}
+      validationSchema={schema}
+      defaultsSchema={schema}
       output="schema"
     />
   );

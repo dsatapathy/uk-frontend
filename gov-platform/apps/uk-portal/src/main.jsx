@@ -10,6 +10,12 @@ const moduleRegistry = Object.fromEntries(defaultModules.map((m) => [m.key, modu
 
 registerConfigLoader("auth/login", () => import("./config/auth/login.config.js"));
 registerConfigLoader("auth/register", () => import("./config/auth/register.config.js"));
+registerConfigLoader("member/forms/member-profile.schema", () => import("./config/member/forms/member-profile.schema.js"));
+registerConfigLoader("member/forms/member-profile.steps", () => import("./config/member/forms/member-profile.steps.js"));
+registerConfigLoader("member/forms/shg-registration.schema", () => import("./config/member/forms/shg-registration.schema.js"));
+registerConfigLoader("member/forms/update-profile.schema", () => import("./config/member/forms/update-profile.schema.js"));
+registerConfigLoader("member/forms/update-profile.steps", () => import("./config/member/forms/update-profile.steps.js"));
+registerConfigLoader("member/forms/vo-registration.schema", () => import("./config/member/forms/vo-registration.schema.js"));
 registerConfigLoader("landing/landing", () => import("./config/landing/landing.config.js"));
 
 start({

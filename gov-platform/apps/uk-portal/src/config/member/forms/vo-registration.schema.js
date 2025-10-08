@@ -1,4 +1,4 @@
-export const voRegistrationFormSchema = {
+const voRegistrationFormSchema = {
     "$schema": "fe.v1",
     "id": "vo-registration",
     "version": "1.0.0",
@@ -175,4 +175,6 @@ export const voRegistrationFormSchema = {
             ]
         }
     ]
-}
+};
+
+export default voRegistrationFormSchema;

@@ -1,4 +1,4 @@
-export const shgRegistrationSchema = {
+const shgRegistrationSchema = {
   "$schema": "fe.v1",
   "id": "shg-registration",
   "version": "1.0.0",
@@ -397,4 +397,6 @@ export const shgRegistrationSchema = {
       ]
     }
   ]
-}
+};
+
+export default shgRegistrationSchema;

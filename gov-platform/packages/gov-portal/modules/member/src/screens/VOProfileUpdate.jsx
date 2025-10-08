@@ -1,7 +1,8 @@
 import React from "react";
 import { getComponent } from "@gov/core";
 import { useSubmitForm } from "@gov/data";
-import { voRegistrationFormSchema } from "../form/vo-registration.schema";
+import { useConfig } from "@gov/library";
+import { loadVoRegistrationSchema } from "../form/loaders";
 
 
 const ui = {
@@ -38,16 +39,23 @@ const ui = {
 
 export default function VOProfileUpdate() {
   const DynamicForm = getComponent("DynamicForm");
-  const submit = useSubmitForm(voRegistrationFormSchema.id, "vo-registration");
+  const { config: schema, loading } = useConfig(
+    loadVoRegistrationSchema,
+    "vo-registration-schema"
+  );
+  if (loading || !schema) {
+    return null;
+  }
+  const submit = useSubmitForm(schema.id, "vo-registration");
   return (
     <DynamicForm
-      schema={voRegistrationFormSchema}
+      schema={schema}
       onSubmit={(values) => submit.mutate(values)}
       entityId="vo-registration"
       autosaveMs={800}
       ui={ui}
-      validationSchema={voRegistrationFormSchema}
-      defaultsSchema={voRegistrationFormSchema}
+      validationSchema={schema}
+      defaultsSchema={schema}
       output="schema"
     />
   );

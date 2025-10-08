@@ -1,5 +1,5 @@
 // member-profile.schema.js (aligned to your components)
-export const memberProfileSchema = {
+const memberProfileSchema = {
   $schema: "fe.v1",
   id: "member-profile",
   version: "1.0.0",
@@ -859,3 +859,5 @@ export const memberProfileSchema = {
     }
   ]
 };
+
+export default memberProfileSchema;

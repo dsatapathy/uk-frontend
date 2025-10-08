@@ -1,8 +1,8 @@
 import React from "react";
-import { memberProfileSchema } from "../form/member-profile.schema";
-import { memberProfileSteps } from "../form/member-profile.steps";
 import { getComponent } from "@gov/core";
 import { useSubmitData } from "@gov/data";
+import { useConfig } from "@gov/library";
+import { loadMemberProfileSchema, loadMemberProfileSteps } from "../form/loaders";
 
 // ✅ fix nesting
 const ui = {
@@ -200,6 +200,31 @@ export default function BeneficiaryMemberProfile() {
   const DynamicForm = getComponent("DynamicForm");
   const ConfigStepperMUI = getComponent("ConfigStepperMUI");
   const formApiRef = React.useRef(null);
+  const { config: schema, loading: schemaLoading } = useConfig(
+    loadMemberProfileSchema,
+    "member-profile-schema"
+  );
+  const { config: steps, loading: stepsLoading } = useConfig(
+    loadMemberProfileSteps,
+    "member-profile-steps"
+  );
+  React.useEffect(() => {
+    if (!schemaLoading && (!schema || !steps)) {
+      console.error(
+        "[BeneficiaryMemberProfile] Missing form config.",
+        "schemaLoaded:", Boolean(schema),
+        "stepsLoaded:", Boolean(steps)
+      );
+    }
+  }, [schemaLoading, schema, steps]);
+  if (schemaLoading || stepsLoading) return null;
+  if (!schema || !steps) {
+    return (
+      <div style={{ padding: 16, color: "crimson" }}>
+        Member profile configuration failed to load. Please contact support.
+      </div>
+    );
+  }
 
   const submitMutation = useSubmitData();
   const handleValuesChange = React.useCallback((vals, meta) => {
@@ -259,10 +284,10 @@ export default function BeneficiaryMemberProfile() {
 
   return (
     <ConfigStepperMUI
-      schema={memberProfileSchema}
+      schema={schema}
       DynamicForm={DynamicForm}
       formApiRef={formApiRef}
-      steps={memberProfileSteps}
+      steps={steps}
       getStepActions={(step, ctx) =>
         ctx.index === ctx.total - 1 ? ["prev", "save", "draft", "submit"] : ["prev", "save", "next", "draft"]
       }
@@ -274,6 +299,9 @@ export default function BeneficiaryMemberProfile() {
         autosaveMs: 800,
         ui,
         onValuesChange: handleValuesChange,
+        validationSchema: schema,
+        defaultsSchema: schema,
+        output: "schema",
       }}
     />
   );

@@ -1,5 +1,5 @@
 // member-profile.steps.js — stepper flow
-export const memberProfileSteps = [
+const memberProfileSteps = [
   { id: "registration", label: "Registration & Location", sections: ["registration"] },
   { id: "association",  label: "Association",             sections: ["association"] },
   { id: "personalA",    label: "Personal (A)",            sections: ["personalA"] },
@@ -9,3 +9,5 @@ export const memberProfileSteps = [
   { id: "income",       label: "Income & Finance",        sections: ["income"] },
   { id: "documents",    label: "Documents & Mapping",     sections: ["documents"] },
 ];
+
+export default memberProfileSteps;
