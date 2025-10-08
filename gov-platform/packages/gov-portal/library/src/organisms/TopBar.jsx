@@ -135,7 +135,7 @@ export default function TopBar(props) {
           )}
 
           {/* Notifications */}
-          <IconButton
+          {/* <IconButton
             aria-label="Notifications"
             aria-haspopup="menu"
             aria-controls={notif.open ? "notif-menu" : undefined}
@@ -146,7 +146,7 @@ export default function TopBar(props) {
             <Badge badgeContent={notificationCount ?? unread} color="error" max={99}>
               {getIcon("notifications")}
             </Badge>
-          </IconButton>
+          </IconButton> */}
 
           {/* Profile */}
           <IconButton

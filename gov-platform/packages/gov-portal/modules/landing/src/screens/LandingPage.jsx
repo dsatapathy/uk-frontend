@@ -69,7 +69,7 @@ export default function LandingPage() {
         return (
           <DSBox key="modulesGrid" mt={2}>
             <ModuleGrid
-              modules={modules?.data}
+              modules={modules}
               loading={modulesLoading}
               onNavigate={onNavigate}
               config={{ layout: landingConfig.layout, modules: landingConfig.modules }}

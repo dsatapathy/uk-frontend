@@ -7,6 +7,7 @@ import TypographyX from "./TypographyX";
 import { getIcon } from "../utils/icons";
 import { get } from "lodash";
 import { http } from "../../../data/services/bootstrap";
+import { useSnackbar } from "./Snackbar";
 // ---------- utils ----------
 const isDefined = (v) => v !== undefined && v !== null;
 const isAcceptableItem = (x) =>
@@ -63,6 +64,7 @@ export default function UploadInput({
   // Internal mirror so UI updates immediately even if parent is slow
   const [filesUI, setFilesUI] = React.useState(() => toArray(value, multiple));
 
+  const { enqueue } = useSnackbar();
   // Keep internal state in sync with parent whenever it changes
   React.useEffect(() => {
     setFilesUI(toArray(value, multiple));
@@ -83,7 +85,7 @@ export default function UploadInput({
     formData.append("file", file);
 
     // You should get the token from your auth context, localStorage, or however your app stores it
-    const token = http().getAccessToken(); 
+    const token = http().getAccessToken();
 
     const resp = await fetch("http://reap-mis-myapp-ukgv.casacam.net:9090/reap-mis/api/files/upload", {
       method: "POST",
@@ -94,37 +96,39 @@ export default function UploadInput({
       }
     });
     if (!resp.ok) throw new Error("File upload failed");
-    alert("File uploaded successfully.");
     const data = await resp.json();
     return data.fileId;
   };
 
   const pick = async (e) => {
-  const picked = Array.from(e.target.files || []);
-  if (!picked.length) return;
+    const picked = Array.from(e.target.files || []);
+    if (!picked.length) return;
 
-  const addable = maxSizeMB
-    ? picked.filter((f) => f.size <= maxSizeMB * 1024 * 1024)
-    : picked;
+    const addable = maxSizeMB
+      ? picked.filter((f) => f.size <= maxSizeMB * 1024 * 1024)
+      : picked;
 
-  try {
-    const fileDescriptors = [];
-    for (const file of addable) {
-      const fileId = await uploadFileToServer(file);
-      fileDescriptors.push({
-        id: fileId,
-        name: file.name,
-        size: file.size,
-        // url: ... // if your API returns a download URL, add it here
-      });
+    try {
+      const fileDescriptors = [];
+      for (const file of addable) {
+        const fileId = await uploadFileToServer(file);
+        fileDescriptors.push({
+          id: fileId,
+          name: file.name,
+          size: file.size,
+          // url: ... // if your API returns a download URL, add it here
+        });
+      }
+      emitChange(multiple ? fileDescriptors : [fileDescriptors[0]]);
+      // Show success snackbar
+      enqueue({ message: "File(s) uploaded successfully.", severity: "success", duration: 4000 });
+    } catch (err) {
+      enqueue({ message: "File upload failed. Please try again.", severity: "error", duration: 6000 });
+      console.error(err);
     }
-    emitChange(multiple ? fileDescriptors : [fileDescriptors[0]]);
-  } catch (err) {
-    alert("File upload failed. Please try again.");
-  }
 
-  e.target.value = "";
-};
+    e.target.value = "";
+  };
 
   const removeAt = (idx) => {
     if (!multiple) {
@@ -198,13 +202,15 @@ export default function UploadInput({
             const name = isFile ? item.name : (get(item, fileKeys.label) ?? "file");
             const size = isFile ? item.size : get(item, fileKeys.size);
             const hasDownload = isFile || !!get(item, fileKeys.url) || !!getDownloadUrl;
-
+            const storedId = isFile ? null : (get(item, fileKeys.id) ?? null);
             return (
+
               <DSBox
                 key={`${name}-${i}`}
                 sx={{
+                  position: "relative", // allow absolute-positioned remove button
                   display: "flex",
-                  alignItems: "center",
+                  alignItems: "flex-start",
                   gap: 1,
                   px: 1.25,
                   py: 1,
@@ -212,9 +218,29 @@ export default function UploadInput({
                   borderRadius: 1.5,
                   minWidth: 260,
                   maxWidth: "100%",
-                  backgroundColor: (t) => t.palette.background.paper,
+                  // backgroundColor: (t) => t.palette.background.paper,
+                  backgroundColor: "#e4efe3",
                 }}
               >
+                {/* Remove button: small cross at top-right */}
+                <IconButton
+                  aria-label={`Remove ${name}`}
+                  onClick={() => removeAt(i)}
+                  size="small"
+                  sx={{
+                    position: "absolute",
+                    top: 6,
+                    right: 6,
+                    width: 24,
+                    height: 24,
+                    bgcolor: (t) => t.palette.background.paper,
+                    boxShadow: 2,
+                    "&:hover": { bgcolor: (t) => t.palette.action.hover },
+                    zIndex: 2,
+                  }}
+                >
+                  {getIcon("remove")}
+                </IconButton>
                 <DSBox aria-hidden sx={{ display: "flex", alignItems: "center" }}>
                   {getIcon("fileIcon")}
                 </DSBox>
@@ -224,13 +250,23 @@ export default function UploadInput({
                     variant="body2"
                     noWrap
                     title={name}
-                    sx={{ fontWeight: 600 }}
+                    sx={{
+                      fontWeight: 600,
+                      whiteSpace: "normal",
+                      overflowWrap: "anywhere",
+                      wordBreak: "break-word",
+                    }}
                   >
                     {name}
                   </TypographyX>
                   <TypographyX variant="caption" color="text.secondary">
                     {formatSize(size)}
                   </TypographyX>
+                  {storedId && (
+                    <TypographyX variant="caption" color="text.secondary" sx={{ display: "block", mt: 0.25 }}>
+                      ID: {storedId}
+                    </TypographyX>
+                  )}
                 </DSBox>
 
                 {hasDownload && (
@@ -248,7 +284,7 @@ export default function UploadInput({
                   </Tooltip>
                 )}
 
-                <Tooltip title="Remove">
+                {/* <Tooltip title="Remove">
                   <span>
                     <IconButton
                       size="small"
@@ -259,7 +295,7 @@ export default function UploadInput({
                       {getIcon("deleteIcon")}
                     </IconButton>
                   </span>
-                </Tooltip>
+                </Tooltip> */}
               </DSBox>
             );
           })}

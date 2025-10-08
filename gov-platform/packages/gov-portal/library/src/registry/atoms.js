@@ -17,6 +17,8 @@ export const TypographyX = makeLoader("../atoms/TypographyX.jsx", "TypographyX")
 export const CardItem = makeLoader("../atoms/CardItem.jsx", "CardItem");
 export const CardItemSkeleton = makeLoader("../atoms/CardItemSkeleton.jsx", "CardItemSkeleton");
 export const DSBox = makeLoader("../atoms/DSBox.jsx", "DSBox");
+export const DSDialog = makeLoader("../atoms/DSDialog.jsx", "DSDialog");
+
 const defs = [
   ["AppButton", loadButton],
   ["InputText", InputText],
@@ -34,6 +36,7 @@ const defs = [
   ["CardItem", CardItem],
   ["CardItemSkeleton", CardItemSkeleton],
   ["DSBox", DSBox],
+  ["DSDialog", DSDialog],
 ];
 
 export function registerAtoms() {
