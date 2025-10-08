@@ -26,10 +26,10 @@ const DSDialog = React.memo(function DSDialog({
             fullWidth={fullWidth}
             maxWidth={maxWidth}
             PaperProps={{
-                sx: {
-                    borderRadius: rad,
-                    ...surfaceSx(theme, { intent, variant }),
-                },
+                // sx: {
+                //     borderRadius: rad,
+                //     ...surfaceSx(theme, { intent, variant }),
+                // },
                 ...PaperProps,
             }}
         >

@@ -188,10 +188,10 @@ export const memberProfileSchema = {
           label: "Select Member to Update",
           options: {
             endpointKey: "v1/master/data",
-            query: { type: "member_profiles" }, 
-            labelKey: "name", 
+            query: { type: "member_profiles" },
+            labelKey: "name",
             valueKey: "id",
-            dependsOn: ["values.shg"], 
+            dependsOn: ["values.shg"],
             dependsOnHint: "Select SHG first",
             queryBuilder: (deps) => ({
               type: "member_profiles",
@@ -199,7 +199,7 @@ export const memberProfileSchema = {
             }),
           },
           validations: [{ type: "required" }],
-          
+
           rules: [{ when: "values.action !== 'update'", action: "hide" }],
           grid: { span: { xs: 12, sm: 6, md: 4 } },
         },
@@ -312,20 +312,29 @@ export const memberProfileSchema = {
         },
         {
           id: "age",
-          type: "number",
+          // type: "number",
+          // label: "Age",
+          // validations: [{ type: "required" }],
+          // props: { min: 0, step: 1 },
+          // config: { inputMode: "numeric" },
+          // rules: [
+          //   {
+          //     when: "values.dob",
+          //     action: "derive",
+          //     value:
+          //       "Math.max(0, Math.floor((Date.now() - new Date(values.dob)) / 31557600000))"
+          //   },
+          //   { when: "values.dob", action: "disable" }
+          // ],
+          // grid: { span: { xs: 12, sm: 6, md: 4 } }
+          type: "text",
           label: "Age",
-          validations: [{ type: "required" }],
+          validations: [
+            { type: "required" },
+            { type: "pattern", value: "^\\d+$", message: "Invalid Input, Expecting Number" }
+          ],
           props: { min: 0, step: 1 },
           config: { inputMode: "numeric" },
-          rules: [
-            {
-              when: "values.dob",
-              action: "derive",
-              value:
-                "Math.max(0, Math.floor((Date.now() - new Date(values.dob)) / 31557600000))"
-            },
-            { when: "values.dob", action: "disable" }
-          ],
           grid: { span: { xs: 12, sm: 6, md: 4 } }
         },
         {
@@ -570,7 +579,7 @@ export const memberProfileSchema = {
           type: "text",
           label: "Irrigated land Area (Nali)",
           validations: [
-            { type: "pattern", value: "^\\d+$", message: "Invalid Input, Expecting Number" }
+            { type: "pattern", value: "^(|\\d+)$", message: "Invalid Input, Expecting Number" }
           ],
           // props: { min: 0, step: 1 }, 
           // config: { inputMode: "numeric" }, 
@@ -582,7 +591,7 @@ export const memberProfileSchema = {
           type: "text",
           label: "Rainfed land Area (Nali)",
           validations: [
-            { type: "pattern", value: "^\\d+$", message: "Invalid Input, Expecting Number" }
+            { type: "pattern", value: "^(|\\d+)$", message: "Invalid Input, Expecting Number" }
           ],
           // props: { min: 0, step: 1 }, 
           // config: { inputMode: "numeric" }, 
@@ -594,7 +603,7 @@ export const memberProfileSchema = {
           type: "text",
           label: "Uncultivated land (Nali)",
           validations: [
-            { type: "pattern", value: "^\\d+$", message: "Invalid Input, Expecting Number" }
+            { type: "pattern", value: "^(|\\d+)$", message: "Invalid Input, Expecting Number" }
           ],
           // props: { min: 0, step: 1 }, 
           // config: { inputMode: "numeric" }, 
@@ -626,7 +635,7 @@ export const memberProfileSchema = {
           type: "text",
           label: "Bull/Ox",
           validations: [
-            { type: "pattern", value: "^\\d+$", message: "Invalid Input, Expecting Number" }
+            { type: "pattern", value: "^(|\\d+)$", message: "Invalid Input, Expecting Number" }
           ],
           // props: { min: 0, step: 1 }, 
           // config: { inputMode: "numeric" }, 

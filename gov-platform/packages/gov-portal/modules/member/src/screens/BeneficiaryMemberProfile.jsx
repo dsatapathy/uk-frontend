@@ -1,8 +1,10 @@
-import React from "react";
+import React, { useState } from "react";
+import { useHistory } from "react-router-dom";
 import { memberProfileSchema } from "../form/member-profile.schema";
 import { memberProfileSteps } from "../form/member-profile.steps";
 import { getComponent } from "@gov/core";
 import { useSubmitData } from "@gov/data";
+import { useSnackbar } from "../../../../library/src/atoms/Snackbar";
 
 // ✅ fix nesting
 const ui = {
@@ -199,7 +201,12 @@ function flattenWithExceptions(obj, keepKeys = []) {
 export default function BeneficiaryMemberProfile() {
   const DynamicForm = getComponent("DynamicForm");
   const ConfigStepperMUI = getComponent("ConfigStepperMUI");
+  // const DSDialog = getComponent("DSDialog");
+  const AppButton = getComponent("AppButton");
   const formApiRef = React.useRef(null);
+  const [error, setError] = useState(null);
+   const { enqueue } = useSnackbar();
+  const history = useHistory();
 
   const submitMutation = useSubmitData();
   const handleValuesChange = React.useCallback((vals, meta) => {
@@ -245,12 +252,33 @@ export default function BeneficiaryMemberProfile() {
       {
         onSuccess: (response) => {
           console.log("SUBMIT SUCCESS", response);
-          alert("Beneficiary profile submitted successfully!!!");
-          // Optionally show a success message or redirect
+          // Build your params
+          const params = new URLSearchParams({
+            status: "success",
+            heading: "Submission Successful For Member Profile",
+            form: "Beneficiary Member Profile",
+            body: "Your profile has been successfully created.",
+            name: response?.data?.data?.memberName || "Unknown",
+            memberId: response?.data?.data?.memberId || "00XX00",
+            mobileNumber: response?.data?.data?.mobile || "9999999999",
+          }).toString();
+
+          // history.push(`/common/acknowledgement_page?${params}`);
+
+          // const segments = window.location.pathname.split("/").filter(Boolean);
+          // const context = segments.length ? `/${segments[0]}` : "";
+          // history.push(`${context}/common/acknowledgement_page?${params}`);
+          const target = `${window.location.origin}/common/acknowledgement_page?${params}`;
+          window.location.href = target;
         },
         onError: (error) => {
-          alert("Error submitting form.");
-          console.error("SUBMIT ERROR", error);
+             const errMsg = 
+            error?.response?.data?.error?.message ||
+           error?.message ||
+            "Error submitting form.";
+          console.log("SUBMIT ERROR", error);
+          enqueue({ message: errMsg, severity: "error", duration: 6000 });   
+          console.log("SUBMIT ERROR", error);
           // Optionally show an error message
         },
       }
@@ -258,23 +286,26 @@ export default function BeneficiaryMemberProfile() {
   };
 
   return (
-    <ConfigStepperMUI
-      schema={memberProfileSchema}
-      DynamicForm={DynamicForm}
-      formApiRef={formApiRef}
-      steps={memberProfileSteps}
-      getStepActions={(step, ctx) =>
-        ctx.index === ctx.total - 1 ? ["prev", "save", "draft", "submit"] : ["prev", "save", "next", "draft"]
-      }
-      onSave={(vals) => console.log("SAVE", vals)}
-      onDraft={(vals) => console.log("DRAFT", vals)}
-      onSubmit={handleSubmit}
-      formProps={{
-        entityId: "member-profile",
-        autosaveMs: 800,
-        ui,
-        onValuesChange: handleValuesChange,
-      }}
-    />
+    <>
+      <ConfigStepperMUI
+        schema={memberProfileSchema}
+        DynamicForm={DynamicForm}
+        formApiRef={formApiRef}
+        steps={memberProfileSteps}
+        getStepActions={(step, ctx) =>
+          ctx.index === ctx.total - 1 ? ["prev", "save", "draft", "submit"] : ["prev", "save", "next", "draft"]
+        }
+        onSave={(vals) => console.log("SAVE", vals)}
+        onDraft={(vals) => console.log("DRAFT", vals)}
+        onSubmit={handleSubmit}
+        formProps={{
+          entityId: "member-profile",
+          autosaveMs: 800,
+          ui,
+          onValuesChange: handleValuesChange,
+        }}
+      />
+
+    </>
   );
 }

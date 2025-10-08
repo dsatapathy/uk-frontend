@@ -63,7 +63,23 @@ export default function createHttp(cfg = {}, storage) {
     async (error) => {
       const status = error?.response?.status;
       const original = error?.config || {};
-
+      // Handle 403 "Token has been revoked" (or similar) early:
+      try {
+        const respData = error?.response?.data;
+        const msg = (respData && respData.message) ? String(respData.message).toLowerCase() : "";
+        if (status === 403 && msg.includes("revoked")) {
+          // clear tokens from storage
+          setTokens(undefined);
+          // emit a global event so the app can handle logout/redirect
+          if (typeof window !== "undefined" && typeof window.dispatchEvent === "function") {
+            window.dispatchEvent(new CustomEvent("auth:forbidden", { detail: { message: respData?.message, status } }));
+         }
+          // reject with the original error so callers can handle if needed
+          return Promise.reject(error);
+        }
+      } catch (e) {
+        // swallow any handling errors and continue below
+      }
       // Build full request URL and check same-origin
       const reqURL = new URL(
         original.url || "",

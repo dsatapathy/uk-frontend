@@ -6,6 +6,7 @@ import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DatePicker as MuiDatePicker } from "@mui/x-date-pickers/DatePicker";
 import s from "@gov/styles/library/form/DatePicker.module.scss";
+import { useForkRef } from "@mui/material/utils";
 
 const DEFAULT_CFG = {
   variant: "outlined",
@@ -82,26 +83,35 @@ export default function DatePicker({
   const actionBar = cfg.allowClear ? { actions: ["clear"] } : undefined;
 
   // Common TextField renderer (for v5’s renderInput)
-  const renderInput = (params) => (
-    <TextField
-      {...params}
-      id={id}
-      name={controlled.name}
-      inputRef={controlled.inputRef}
-      variant={cfg.variant}
-      size={muiSize}
-      error={!!error}
-      fullWidth={cfg.fullWidth}
-      disabled={disabled}
-      InputProps={{ ...params.InputProps, readOnly }}
-      inputProps={{
-        ...params.inputProps,
-        "aria-describedby": ariaDescribedBy,
-        ...(textFieldProps?.inputProps || {}),
-      }}
-      {...textFieldProps}
-    />
-  );
+ const renderInput = (params) => {
+   // merge MUI's inputRef with RHF/inputRef you pass in
+   const mergedInputRef = useForkRef(params.inputRef, controlled.inputRef || null);
+   return (
+     <TextField
+       // IMPORTANT: keep MUI's refs so popper can anchor
+       ref={params.ref}
+       inputRef={mergedInputRef}
+
+       id={id}
+       name={controlled.name}
+       variant={cfg.variant}
+       size={muiSize}
+       error={!!error}
+       fullWidth={cfg.fullWidth}
+       disabled={disabled}
+
+       // keep params’ props and extend safely
+       InputProps={{ ...params.InputProps, readOnly }}
+       inputProps={{
+         ...params.inputProps,
+         "aria-describedby": ariaDescribedBy,
+         ...(textFieldProps?.inputProps || {}),
+       }}
+       // spread last is OK, but avoid overriding refs we just set
+       {...textFieldProps}
+     />
+   );
+ };
 
   const pickerEl = (
     <MuiDatePicker
@@ -131,6 +141,7 @@ export default function DatePicker({
       reduceAnimations={cfg.reduceAnimations}
       // v5 expects this:
       renderInput={renderInput}
+      PopperProps={{ container: typeof document !== "undefined" ? document.body : undefined }}
       // v6 expects this:
       slotProps={{
         ...slotProps,

@@ -14,6 +14,7 @@ import DatePicker from "../atoms/DatePicker.jsx";
 import Repeater from "../organisms/Repeater.jsx";
 import UploadInput from "../atoms/UploadInput.jsx";
 import CaptchaBox from "../components/CaptchaBox.jsx";
+import Dropdown from "../atoms/Dropdown.jsx";
 
 /** -----------------------------------------------------------------------
  * Small, safe helpers
@@ -254,8 +255,8 @@ export default function FieldController({
           : field.type === "checkbox"
             ? false
             : (field.type === "file" || field.type === "upload")
-            ? (field.props?.multiple ? [] : null)
-            : ""
+              ? (field.props?.multiple ? [] : null)
+              : ""
       }
       control={control}
       render={({ field: rhf, fieldState }) => {
@@ -508,7 +509,21 @@ function renderFieldByType(field, { rhf, error, disabled, required, hidden, ctxD
           {...inputCommon}
         />
       );
-
+    case "dropdown":
+      return (
+        <Dropdown
+          id={field.id}
+          name={rhf.name}
+          value={rhf.value ?? ""}
+          onChange={rhf.onChange}
+          onBlur={rhf.onBlur}
+          inputRef={rhf.ref}
+          options={field?.options.items || []}
+          placeholder={field.props?.placeholder}
+          config={field.config}
+          {...inputCommon}
+        />
+      );
     case "email":
     case "password":
     case "tel":

@@ -8,6 +8,7 @@ const all = {
   auth: () => import("@gov/mod-auth"),
   bpa: () => import("@gov/mod-bpa"),
   member: () => import("@gov/mod-member"),
+  common: () => import("@gov/mod-common"),
 };
 
 console.log("[env] VITE_ENABLED_MODULES =", import.meta.env.VITE_ENABLED_MODULES);
