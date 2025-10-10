@@ -6,38 +6,9 @@ import NavTree from "../molecules/NavTree";
 import { DRAWER_WIDTH } from "../utils/menu-utils";
 import SearchField from "../atoms/SearchField";
 import TypographyX from "../atoms/TypographyX";
+import { useAppConfig } from "@gov/ui-engine";
 
-export default function Sidebar(props) {
-  const {
-    isDesktop, open, onClose, logo, title, items,
-    currentPath, expandedSet, onToggle, onNavigate,
-    searchValue, onSearchChange, onSearchEnter,
-  } = props;
-
-  const t = useTheme();
-  const p = t.palette;
-
-  // Build CSS variable fallbacks from the active theme
-  const fg = p.mode === "light" ? p.text.primary : p.text.primary;
-  const fgDim = p.text.secondary;
-  const divider = p.divider;
-
-  const paperBase = {
-    position: "sticky",
-    top: 0,
-    alignSelf: "flex-start",
-    height: "100dvh",
-    width: { xs: 280, md: "var(--sidebar-w, " + (DRAWER_WIDTH || 320) + "px)" },
-    boxSizing: "border-box",
-    display: "flex",
-    overflow: "hidden",
-    overflowX: "hidden",
-    borderRadius: 0,
-    color: "var(--sidebar-fg, var(--g-fg-muted))", // Using a muted text color for better contrast on a light bg
-
-    borderRight: "1px solid var(--sidebar-line, var(--g-border, #e0e0e0))",
-
-    backgroundImage: `
+const fallbackBackground = `
     /* Sharp, angled facets for the diamond-cut effect */
     linear-gradient(
       165deg,
@@ -66,20 +37,71 @@ export default function Sidebar(props) {
       var(--sidebar-bg-mid, #9ccc65) 46%,     /* Medium Banana Leaf Green */
       var(--sidebar-bg-bottom, #8bc34a) 100%  /* Richer Banana Leaf Green */
     )
-  `,
+  `;
+export default function Sidebar(props) {
+  const {
+    isDesktop, open, onClose, logo: propLogo, title, items,
+    currentPath, expandedSet, onToggle, onNavigate,
+    searchValue, onSearchChange, onSearchEnter,
+  } = props;
+  const appCfg = useAppConfig();
+  const primaryBg = appCfg?.brand?.primaryBg;
+  const themeLogo = appCfg?.topBar?.logo;
+  const resolvedBg = React.useMemo(() => {
+    if (!primaryBg) return null;
+    const trimmed = String(primaryBg).trim();
+    if (/^(url\(|linear-gradient|radial-gradient|conic-gradient)/i.test(trimmed)) {
+      return trimmed;
+    }
+    return `url(${trimmed})`;
+  }, [primaryBg]);
+  const drawerLogo = React.useMemo(() => {
+    const value = themeLogo;
+    if (!value) return null;
+    if (React.isValidElement(value)) return value;
+    if (typeof value === "string") {
+      return (
+        <Box
+          component="img"
+          src={value}
+          alt={title || "Sidebar logo"}
+          sx={{ width: "100%", height: "auto", display: "block", borderRadius: 1.5 }}
+        />
+      );
+    }
+    return null;
+  }, [themeLogo,title]);
+  const t = useTheme();
+  const p = t.palette;
 
-    // Softer inner shadow for a lighter theme
+  // Build CSS variable fallbacks from the active theme
+  const fg = p.mode === "light" ? p.text.primary : p.text.primary;
+  const fgDim = p.text.secondary;
+  const divider = p.divider;
+
+  const paperBase = {
+    position: "sticky",
+    top: 0,
+    alignSelf: "flex-start",
+    height: "100dvh",
+    width: { xs: 280, md: "var(--sidebar-w, " + (DRAWER_WIDTH || 250) + "px)" },
+    boxSizing: "border-box",
+    display: "flex",
+    overflow: "hidden",
+    overflowX: "hidden",
+    borderRadius: 0,
+    color: "var(--sidebar-fg, var(--g-fg-muted))",
+    borderRight: "1px solid var(--sidebar-line, var(--g-border, #e0e0e0))",
+    backgroundImage: resolvedBg || fallbackBackground,
     boxShadow: `inset -1px 0 0 var(--sidebar-line, var(--g-border, #e0e0e0)),
             4px 0 18px -12px rgba(0,0,0,0.3)`,
   };
-
-
   const content = (
     <Box role="navigation" sx={{ height: "100%", display: "flex", flexDirection: "column", width: "100%" }}>
       {/* Mobile header */}
       {!isDesktop && (
         <DrawerHeader
-          logo={logo}
+          logo={drawerLogo}
           title={title}
           showClose={!isDesktop}
           showTitle={!isDesktop}

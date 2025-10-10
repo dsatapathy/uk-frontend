@@ -15,7 +15,8 @@
     "dependencies": {
         "@gov/styles": "0.0.0",
         "@gov/core": "0.1.0",
-        "@gov/data": "0.0.0"
+        "@gov/data": "0.0.0",
+        "@gov/ui-engine": "0.1.0"
     },
     "peerDependencies": {
         "react": "^17.0.2",

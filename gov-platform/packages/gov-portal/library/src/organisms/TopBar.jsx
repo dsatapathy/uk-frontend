@@ -8,7 +8,9 @@ import {
 import TypographyX from "../atoms/TypographyX";
 import SearchField from "../atoms/SearchField";
 import { getIcon } from "../utils/icons";
-
+import { Brand } from "../components/Brand";
+import { useAppConfig } from "@gov/ui-engine";
+import defaultS from "@gov/styles/modules/auth/Auth.module.scss";
 function useMenu() {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
@@ -26,7 +28,40 @@ export default function TopBar(props) {
     notifications = [], notificationCount, onClickNotification,
     profileMenu = [], onLogout, homeMenu = [], lineDeptMenu = [],
   } = props;
+  const s = defaultS;
+  const appCfg = useAppConfig();
+  const primaryColor = appCfg?.theme?.palette?.primary?.main || "currentColor";
+  const titleBase = React.useMemo(() => ({
+    fontWeight: 700,
+    color: primaryColor,
+  }), [primaryColor]);
 
+  const titleSx = isDesktop
+  ? { ...titleBase, fontSize: { xs: "1.4rem", sm: "1.7rem", md: "2rem" } } // desktop
+  : { ...titleBase, fontSize: "1.1rem" };   
+  const desktopTitleSx = React.useMemo(
+    () => ({
+      fontWeight: 700,
+      color: primaryColor,
+      fontSize: {
+        xs: "1.4rem",
+        sm: "1.7rem",
+        md: "2rem",
+      },
+    }),
+    [primaryColor]
+  );
+  const brandProps = React.useMemo(() => {
+    const topBarCfg = appCfg?.topBar || {};
+    if (isDesktop) {
+      const override = topBarCfg.titleSx || topBarCfg.labelSx || {};
+      return {
+        ...topBarCfg,
+        titleSx: { ...desktopTitleSx, ...override },
+      };
+    }
+    return topBarCfg;
+  }, [appCfg, desktopTitleSx, isDesktop]);
   const [mobileSearchOpen, setMobileSearchOpen] = React.useState(!!mobileSearchInitiallyOpen);
   const searchPanelId = "topbar-mobile-search";
   const toggleMobileSearch = () => {
@@ -66,18 +101,7 @@ export default function TopBar(props) {
         )}
 
         {/* LEFT SIDE: brand (logo + project title) */}
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1, minWidth: 0, flexShrink: 1 }}>
-          {logo}
-          {/* <TypographyX
-            variant="h6"
-            sx={{ fontWeight: 600, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
-                  maxWidth: { xs: 160, sm: 240, md: "none" } }}
-            title={title}
-          >
-            {title}
-          </TypographyX> */}
-        </Box>
-
+        <Brand classes={s} {...brandProps} showLogo={isDesktop} titleSx={titleSx}  />
         {/* optional centered search on desktop; otherwise just fill space */}
         {isDesktop && showSearchOnDesktop ? (
           <Box sx={{ flex: 1, display: "flex", justifyContent: "center", px: 2 }}>

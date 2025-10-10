@@ -10,18 +10,33 @@ export function Brand({
   logoWidth = 160,
   logoHeight = 64,
   classes,
-  titleSx,          // <— preferred prop name
+  titleSx,
   subtitleSx,
-  labelSx,          // <— optional alias to support "labelSx"
+  labelSx,
   titleVariant = "h6",
   subtitleVariant = "body2",
+  sx,
+  logoSx,
+  
+  // NEW: visibility controls
+  showLogo = true,
+  showTitle = true,
+  showSubtitle = true,
+
+  // (optional) legacy/shortcut: hide={['logo','title','subtitle']}
+  hide = [],
 }) {
   const s = classes || {};
-  const _titleSx = titleSx ?? labelSx;  // alias if you pass "labelSx"
+  const _titleSx = titleSx ?? labelSx;
+
+  // normalize visibility (hide[] wins if passed)
+  const _showLogo = showLogo && !hide.includes("logo");
+  const _showTitle = showTitle && !hide.includes("title");
+  const _showSubtitle = showSubtitle && !hide.includes("subtitle");
 
   return (
-    <div className={`${s.brand} ${className}`}>
-      {logo && (
+    <div className={`${s.brand} ${className}`} style={sx}>
+      {_showLogo && logo && (
         <img
           className={s.brandLogo}
           src={logo}
@@ -30,15 +45,22 @@ export function Brand({
           height={logoHeight}
           loading="eager"
           decoding="async"
+          style={logoSx}
         />
       )}
-      {title && (
+
+      {_showTitle && title && (
         <TypographyX variant={titleVariant} sx={_titleSx}>
           {title}
         </TypographyX>
       )}
-      {subtitle && (
-        <TypographyX className={s.brandSubtitle} variant={subtitleVariant} sx={subtitleSx}>
+
+      {_showSubtitle && subtitle && (
+        <TypographyX
+          className={s.brandSubtitle}
+          variant={subtitleVariant}
+          sx={subtitleSx}
+        >
           {subtitle}
         </TypographyX>
       )}

@@ -6,7 +6,7 @@ import IconButton from "@mui/material/IconButton";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import s from "@gov/styles/library/organism/FieldGroup.module.scss";
 import TypographyX from "../atoms/TypographyX";
-
+import { useAppConfig } from "@gov/ui-engine";
 /**
  * FieldGroup — Card/panel grouping fields (config-driven).
  *
@@ -46,6 +46,44 @@ const DEFAULT_CFG = {
   defaultOpen: true,
 };
 
+const fallbackBackground = `
+   /* Sharp, angled facets for the diamond-cut effect */
+   linear-gradient(
+     165deg,
+     transparent 45%,
+     var(--crystal-highlight, rgba(236, 253, 245, 0.2)) 50%,
+     var(--crystal-shadow, rgba(20, 83, 45, 0.15)) 52%,
+     transparent 60%
+   ),
+   linear-gradient(
+     -40deg,
+     transparent 30%,
+     var(--crystal-highlight, rgba(236, 253, 245, 0.15)) 48%,
+     transparent 60%
+   ),
+   linear-gradient(
+     20deg,
+     transparent 40%,
+     var(--crystal-shadow, rgba(20, 83, 45, 0.1)) 55%,
+     transparent 70%
+   ),
+   linear-gradient(
+     180deg,
+     var(--sidebar-bg-top, #aed581) 0%,
+     var(--sidebar-bg-mid, #9ccc65) 46%,
+     var(--sidebar-bg-bottom, #8bc34a) 100%
+   )
+ `;
+
+function resolveBackground(primaryBg) {
+  if (!primaryBg) return null;
+  const trimmed = String(primaryBg).trim();
+  if (/^(url\(|linear-gradient|radial-gradient|conic-gradient)/i.test(trimmed)) {
+    return trimmed;
+  }
+  return `url(${trimmed})`;
+}
+
 function useMergedConfig(config) {
   return React.useMemo(() => {
     const base = { ...DEFAULT_CFG, ...(config || {}) };
@@ -70,7 +108,9 @@ export default function FieldGroup({
   ...rest
 }) {
   const cfg = useMergedConfig(config);
-
+  const appCfg = useAppConfig();
+  const primaryBg = appCfg?.brand?.primaryBg;
+  const resolvedBg = React.useMemo(() => resolveBackground(primaryBg), [primaryBg]);
   // explicit props win over config
   const isCollapsible = typeof collapsible === "boolean" ? collapsible : cfg.collapsible;
   const initialOpen = typeof defaultOpen === "boolean" ? defaultOpen : cfg.defaultOpen;
@@ -120,35 +160,7 @@ export default function FieldGroup({
           cfg.header.dense ? s["dense"] : "",
         ].join(" ")}
         sx={{
-          backgroundImage: `
-      /* Sharp, angled facets for the diamond-cut effect */
-      linear-gradient(
-        165deg,
-        transparent 45%,
-        var(--crystal-highlight, rgba(236, 253, 245, 0.2)) 50%, /* Sharp highlight edge */
-        var(--crystal-shadow, rgba(20, 83, 45, 0.15)) 52%,       /* Subtle shadow edge */
-        transparent 60%
-      ),
-      linear-gradient(
-        -40deg,
-        transparent 30%,
-        var(--crystal-highlight, rgba(236, 253, 245, 0.15)) 48%, /* Second highlight facet */
-        transparent 60%
-      ),
-      linear-gradient(
-        20deg,
-        transparent 40%,
-        var(--crystal-shadow, rgba(20, 83, 45, 0.1)) 55%,        /* A wider, softer shadow facet */
-        transparent 70%
-      ),
-      /* The original 3-stop base gradient for color foundation */
-      linear-gradient(
-        180deg,
-        var(--sidebar-bg-top, #aed581) 0%,    /* Light Banana Leaf Green */
-        var(--sidebar-bg-mid, #9ccc65) 46%,     /* Medium Banana Leaf Green */
-        var(--sidebar-bg-bottom, #8bc34a) 100%  /* Richer Banana Leaf Green */
-      )
-    `,
+          backgroundImage: resolvedBg || fallbackBackground,
           backgroundSize: "cover",
           backgroundRepeat: "no-repeat",
           backgroundPosition: "center",

@@ -61,6 +61,11 @@ export const configSchema = z.object({
   brand: z.object({
     logo: z.string().optional(),
     title: z.string().optional(),
+    primaryBg: z.string().optional(),
+  }).default({}),
+  topBar: z.object({
+    logo: z.string().optional(),
+    title: z.string().optional(),
   }).default({}),
   app: z.object({
     name: z.string().optional(),

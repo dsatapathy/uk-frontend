@@ -36,7 +36,7 @@ export function start(rawConfig) {
     auth = { strategy: "none" },
     hooks = {},
     context = {},
-    brand = { logo: null, title: "" }
+    brand = { logo: null, title: "",primaryBg: "" }
   } = cfg;
 
   const history = createBrowserHistory({ basename: base });

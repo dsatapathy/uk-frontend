@@ -1,6 +1,9 @@
 import { start } from "@gov/ui-engine";
 import { moduleMap } from "./moduleRegistry";
 import landingLogo from "../public/assets/images/landing_logo.png";
+import primaryBg from "../public/assets/images/bg-3.png";
+import topBarLogo from "../public/assets/images/Logo.png"
+
 // build the route list to match enabled modules
 const enabled = Object.keys(moduleMap);
 const basePaths = { auth: "/login", landing: "/landing", bpa: "/bpa", member: "/member" };
@@ -10,7 +13,13 @@ const moduleRegistry = Object.fromEntries(defaultModules.map((m) => [m.key, modu
 start({
   target: "#root",
   base: "/",
-  brand: { logo: landingLogo, title: "UK Portal" },
+  brand: { 
+    logo: landingLogo, 
+    title: "UK Portal", 
+    primaryBg: primaryBg,
+    
+  },
+  topBar: {logo: topBarLogo, title: "UGVS-REAP"},
   layout: {
     component: "AuthBlank", 
     backgroungImg: `

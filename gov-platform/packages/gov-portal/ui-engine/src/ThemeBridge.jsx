@@ -110,7 +110,7 @@ export default function ThemeBridge() {
     "--sidebar-active-bg": "rgba(120,180,255,0.14)",
     "--sidebar-active-bd": "rgba(120,180,255,0.28)",
     "--sidebar-accent": "rgba(120,180,255,1)",
-    "--sidebar-label-active": "#DCE9FF",
+    "--sidebar-label-active": "#fff",
 
     "--sidebar-bg-top": "#0b1a12",
     "--sidebar-bg-mid": "#0a2015",
