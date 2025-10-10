@@ -2,7 +2,7 @@
 .authLayout {
   /* center content */
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: center;
 
   /* allow the page to grow if needed, but try to fill screen */
@@ -32,14 +32,14 @@
   position: absolute;
   inset: 0;
   background: var(--login-overlay, transparent);
-  backdrop-filter: blur(var(--login-blur, 0px));
+  // backdrop-filter: blur(var(--login-blur, 0px));
   z-index: 0;
 }
 
 /* The card (MUI Card/Paper wrapper) */
 .authCard {
   position: relative;
-  background: linear-gradient(180deg, #62B34799 0%, #3B9B5999 50%, #025F4899 100%);
+  background: linear-gradient(to right, rgba(35, 148, 96, 0.9) 0%, rgba(36, 149, 95, 0.9) 1%, rgba(111, 201, 38, 0.8) 100%);
   /* never exceed viewport width */
   width: 100%;
   max-width: var(--login-card-w, 480px);
@@ -66,9 +66,10 @@
 
   .brandLogo {
     /* scale with viewport height, clamp between 36 and 64px */
-    max-height: clamp(36px, 7vh, 64px);
-    width: auto;
+    // max-height: clamp(46px, 10vh, 74px);
+    width: "auto";
     margin-bottom: clamp(6px, 1.6vh, 12px);
+    border-radius: var(--login-card-radius, 5px);
   }
   .brandTitle {
     font-size: clamp(1.05rem, 2.2vh, 1.25rem);
@@ -84,6 +85,12 @@
   .brand {
     flex-direction: column;
     text-align: center;          /* optional, looks nicer */
+  }
+}
+
+@media (max-width: 1024px) {
+  .authLayout {
+    justify-content: center;
   }
 }
 
@@ -117,6 +124,6 @@
 /* Extra compression on short screens (≤ 750px tall) */
 @media (max-height: 750px) {
   .authCard { max-width: 460px; }
-  .brand .brandLogo { max-height: 48px; }
+  .brand .brandLogo { border-radius: var(--login-card-radius, 5px); }
   .submitRow { gap: 10px; }
 }

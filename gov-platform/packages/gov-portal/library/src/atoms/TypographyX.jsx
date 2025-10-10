@@ -105,6 +105,7 @@ export default function TypographyX({
           color: toneToColor(tone),
           fontWeight: typeof weight === "number" ? weight : FW[weight],
           marginBottom: MARGINS[mb] ?? 0,
+          fontFamily: '"Nunito", sans-serif',
         },
         underline ? { textDecoration: "underline" } : null,
         respSx,

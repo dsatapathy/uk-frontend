@@ -55,8 +55,8 @@ const AppButton = React.forwardRef(function AppButton(
       sx={[
         (theme) => marginStyles(theme),
         { borderRadius: "var(--g-radius)", fontWeight: "bold", minWidth: {
-            xs: "120px",   // below sm (mobile)
-            sm: "150px",   // above sm (tablet & desktop)
+            xs: "100%",   // below sm (mobile)
+            sm: "100%",   // above sm (tablet & desktop)
           }, },        
         loading && { pointerEvents: "none" },
         ...(Array.isArray(sx) ? sx : sx ? [sx] : []),

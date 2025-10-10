@@ -55,7 +55,7 @@ start({
   theme: {
     palette: {
       mode: "light",
-      primary: { main: "#16a34a" },
+      primary: { main: "#01604a" },
       secondary: { main: "#15803d", contrastText: "#ffffff" },
       background: { default: "#f9fafb" },
     },
