@@ -1,5 +1,7 @@
 import * as React from "react";
 import Grid from "@mui/material/Grid";
+import Box from "@mui/material/Box";
+import { alpha, useTheme } from "@mui/material/styles";
 import InlineCondition from "../form/InlineCondition";
 
 const isObj = (v) => v && typeof v === "object" && !Array.isArray(v);
@@ -54,11 +56,17 @@ Item.displayName = "FormGridItem";
 
 /* ---- FormGrid ---- */
 export default function FormGrid({
-  columns: columnsProp,    // support both
-  cols,                    // alias
+  columns: columnsProp,
+  cols,
   gap, rowGap, columnGap, spacing,
-  children, className, style, sx, ...rest
+  children, className, style, sx,
+  surface = true,
+  surfacePadding = { xs: 2, sm: 2.5, md: 3 },
+  surfaceRadius = 2,
+  surfaceSx,
+   ...rest
 }) {
+  const theme = useTheme();
   const columns = columnsProp ?? cols ?? { xs: 12, sm: 12, md: 12, lg: 12, xl: 12 };
 
   const primary = { gap: gap ?? spacing, rowGap: rowGap ?? spacing, columnGap: columnGap ?? spacing };
@@ -66,23 +74,39 @@ export default function FormGrid({
   const usePropsGaps = !hasString && !hasNull;
 
   const gridProps = usePropsGaps
-    ? {
-        rowSpacing: isObj(rowNum) ? rowNum : (rowNum ?? 0),
-        columnSpacing: isObj(colNum) ? colNum : (colNum ?? 0),
-        sx,
-      }
-    : {
-        rowSpacing: 0,
-        columnSpacing: 0,
-        sx: { ...sx, rowGap: isObj(primary.rowGap) ? primary.rowGap : (primary.rowGap ?? 0), columnGap: isObj(primary.columnGap) ? primary.columnGap : (primary.columnGap ?? 0) },
-      };
+    ? { rowSpacing: isObj(rowNum) ? rowNum : (rowNum ?? 0), columnSpacing: isObj(colNum) ? colNum : (colNum ?? 0), sx }
+    : { rowSpacing: 0, columnSpacing: 0, sx: { ...sx, rowGap: isObj(primary.rowGap) ? primary.rowGap : (primary.rowGap ?? 0), columnGap: isObj(primary.columnGap) ? primary.columnGap : (primary.columnGap ?? 0) } };
 
-  return (
+  // Light-gray card surface (theme-aware), subtle shadow
+  const surfaceBg =
+    theme.palette.mode === "dark"
+      ? alpha(theme.palette.background.default, 0.65)
+      : theme.palette.grey[50];
+
+  const wrapper = (node) =>
+    surface ? (
+      <Box
+        sx={{
+          p: surfacePadding,
+          borderRadius: surfaceRadius,
+          bgcolor: surfaceBg,
+          boxShadow:
+            theme.palette.mode === "dark"
+              ? "0 6px 22px rgba(0,0,0,.35)"
+              : "0 10px 24px rgba(0,0,0,.10)",
+          border: `1px solid ${theme.palette.divider}`,
+          ...surfaceSx,
+        }}
+      >
+        {node}
+      </Box>
+    ) : node;
+
+  return wrapper(
     <Grid container columns={columns} className={className} style={style} {...gridProps} {...rest}>
       {React.Children.map(children, (child, idx) => {
         if (!React.isValidElement(child)) return child;
 
-        // InlineCondition → let it render <Item> directly (no wrapper) or null
         if (child.type?.displayName === "InlineCondition") {
           const span = child.props?.span ?? 12;
           return (
@@ -96,12 +120,10 @@ export default function FormGrid({
           );
         }
 
-        // Already an Item → keep as-is (ensure key)
         if (child.type === Item || child.type?.displayName === "FormGridItem") {
           return React.cloneElement(child, { key: child.key ?? idx });
         }
 
-        // Any other node → wrap in Item
         const span = child.props?.span ?? 12;
         return <Item key={child.key ?? idx} span={span}>{child}</Item>;
       })}
