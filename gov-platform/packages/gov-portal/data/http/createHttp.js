@@ -9,6 +9,7 @@ export default function createHttp(cfg = {}, storage) {
   let isRefreshing = false;
   let refreshPromise = null;
   const queue = [];
+  let refreshFailed = false;
 
   const apiBase = cfg.http.baseURL || "";
   const refreshPath = (cfg.auth && cfg.auth.endpoints && cfg.auth.endpoints.refresh) || "/auth/refresh";
@@ -63,6 +64,20 @@ export default function createHttp(cfg = {}, storage) {
     async (error) => {
       const status = error?.response?.status;
       const original = error?.config || {};
+      // prevent infinite retry loops
+      if (original._retry) {
+        return Promise.reject(error);
+      }
+
+      // if we've already attempted refresh and it failed, bail out early
+      if (refreshFailed && status === 401) {
+        // clear tokens and notify app to logout
+        setTokens(undefined);
+        if (typeof window !== "undefined" && typeof window.dispatchEvent === "function") {
+          window.dispatchEvent(new CustomEvent("auth:forbidden", { detail: { message: "Refresh failed", status } }));
+        }
+        return Promise.reject(error);
+      }
       // Handle 403 "Token has been revoked" (or similar) early:
       try {
         const respData = error?.response?.data;
@@ -90,6 +105,7 @@ export default function createHttp(cfg = {}, storage) {
       const isRefreshCall = reqURL === refreshURL;
 
       if (status === 401 && sameOrigin && !isRefreshCall) {
+        original._retry = true;
         if (!isRefreshing) {
           isRefreshing = true;
           refreshPromise = (async () => {
@@ -97,9 +113,14 @@ export default function createHttp(cfg = {}, storage) {
               const { data } = await axios.post(refreshURL, {}, { withCredentials: true });
               const token = data?.tokens?.accessToken || data?.token;
               const refreshToken = data?.tokens?.refreshToken || data?.refreshToken;
-              if (token) setTokens({ accessToken: token, refreshToken });
+              if (token) {
+                setTokens({ accessToken: token, refreshToken });
+                refreshFailed = false;
+              }
               return token;
             } catch (e) {
+              refreshFailed = true;
+              // clear tokens from storage
               setTokens(undefined);
               return undefined;
             } finally {
@@ -112,7 +133,14 @@ export default function createHttp(cfg = {}, storage) {
 
         return new Promise((resolve, reject) => {
           enqueue(async (t) => {
-            if (!t) return reject(error);
+            if (!t) {
+              // refresh failed -> emit forbidden and reject
+              setTokens(undefined);
+              if (typeof window !== "undefined" && typeof window.dispatchEvent === "function") {
+                window.dispatchEvent(new CustomEvent("auth:forbidden", { detail: { message: "Refresh failed", status } }));
+              }
+              return reject(error);
+            }
             try {
               const retryCfg = {
                 ...original,

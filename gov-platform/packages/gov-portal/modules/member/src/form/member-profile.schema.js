@@ -15,10 +15,10 @@ export const memberProfileSchema = {
           id: "action",
           type: "radio-group",
           label: "Action",
-          defaultValue: "add",
+          defaultValue: "create",
           options: {
             items: [
-              { label: "Add New Member", value: "add" },
+              { label: "Add New Member", value: "create" },
               { label: "Update Existing", value: "update" }
             ]
           },
@@ -183,14 +183,14 @@ export const memberProfileSchema = {
         },
         // UPDATE flow field
         {
-          id: "memberToUpdate",
+          id: "memberId",
           type: "autocomplete",
           label: "Select Member to Update",
           options: {
             endpointKey: "v1/master/data",
             query: { type: "member_profiles" },
-            labelKey: "name",
-            valueKey: "id",
+            labelKey: "memberName",
+            valueKey: "memberId",
             dependsOn: ["values.shg"],
             dependsOnHint: "Select SHG first",
             queryBuilder: (deps) => ({
@@ -780,7 +780,22 @@ export const memberProfileSchema = {
           ],
           grid: { span: { xs: 12, sm: 6, md: 4 } }
         },
-        { id: "ifsc", type: "text", label: "IFSC Code", rules: [{ when: "values.hasBankAccount !== 'Yes'", action: "hide" }, { when: "values.hasBankAccount === 'Yes'", action: "require" }], validations: [{ type: "pattern", value: "^[A-Z]{4}0[A-Z0-9]{6}$", message: "Invalid IFSC" }], props: { maxLength: 11 }, grid: { span: { xs: 12, sm: 6, md: 4 } } }
+        { id: "ifsc", 
+          type: "text", 
+          label: "IFSC Code", 
+          rules: [
+            { when: "values.hasBankAccount !== 'Yes'", action: "hide" }, 
+            { when: "values.hasBankAccount === 'Yes'", action: "require" }
+          ], 
+          validations: [
+            { 
+              type: "pattern", 
+              value: "^[A-Z]{4}0[A-Z0-9]{6}$", 
+              message: "Invalid IFSC" 
+            }
+          ], 
+          props: { maxLength: 11 }, 
+          grid: { span: { xs: 12, sm: 6, md: 4 } } }
       ]
     },
 

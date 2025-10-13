@@ -25,3 +25,5 @@ export { default as VersionedStorage } from "./storage/index.js";
 export { handleLogoutService } from "./services/logout/logout.js";
 // ---- beneficiary member profile service ----
 export { submitDataService, useSubmitData } from "./services/formSubmitServices/submitFormServices.js";
+// ---- generic data service ----
+export {apiService,useGetDataService} from "./services/getDataService/getDataService.js";

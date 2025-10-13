@@ -10,9 +10,23 @@ export const clfLcRegistrationSchema = {
       title: "CLF/LC Details",
       fields: [
         {
-          id: "isClfOrLcUpdate",
+          id: "action",
+          type: "radio-group",
+          label: "Action",
+          defaultValue: "create",
+          options: {
+            items: [
+              { label: "Create New CLF/LC", value: "create" },
+              { label: "Update Existing", value: "update" }
+            ]
+          },
+          validations: [{ type: "required" }],
+          grid: { span: { xs: 12, sm: 6, md: 4 } }
+        },
+        {
+          id: "isClfOrLcCreateUpdate",
           type: "dropdown",
-          label: "Is it CLF or LC Data update?",
+          label: "Is it CLF or LC Data ?",
           options: {
             items: [
               { label: "CLF", value: "clf" },
@@ -54,14 +68,37 @@ export const clfLcRegistrationSchema = {
         {
           id: "clfLcName",
           type: "text",
-          label: "CLF/LCs Name",
+          label: "CLF / LCs Name",
           validations: [{ type: "required" }],
-          grid: { span: { xs: 12, sm: 6, md: 4 } }
+          grid: { span: { xs: 12, sm: 6, md: 4 } },
+          rules: [{ when: "values.action === 'update'", action: "hide" }],
+        },
+        {
+          id: "clfLcToUpdate",
+          type: "autocomplete",
+          label: "Choose CLF / LC to Update",
+          options: {
+            endpointKey: "v1/master/data",
+            labelKey: "name",
+            valueKey: "id",
+            query: { type: "clf_profiles" },
+            dependsOn: ["values.block", "values.isClfOrLcCreateUpdate"],
+            dependsOnHint: "Select Block first",
+            queryBuilder: (deps) => ({
+              type: "clf_profiles",
+              id: deps.block,
+              isClfOrLc: deps.isClfOrLcCreateUpdate
+            }
+            )
+          },
+          validations: [{ type: "required" }],
+          grid: { span: { xs: 12, sm: 6, md: 4 } },
+          rules: [{ when: "values.action !== 'update'", action: "hide" }],
         },
         {
           id: "agreementEffectiveDate",
           type: "date",
-          label: "CLF Adoption Agreement (Effective) Date",
+          label: "CLF / LC Adoption Agreement (Effective) Date",
           validations: [{ type: "required" }],
           props: { format: "DD/MM/YYYY" },
           config: { valueKind: "iso", outputFormat: "YYYY-MM-DD", disableFuture: true },
@@ -98,181 +135,187 @@ export const clfLcRegistrationSchema = {
         {
           id: "address",
           type: "text",
-          label: "Address of CLF/LCs",
+          label: "Address of CLF / LCs",
           grid: { span: { xs: 12, sm: 6, md: 4 } }
         },
         {
           id: "registrationNo",
           type: "text",
-          label: "CLF/LC Registration No.",
+          label: "CLF / LC Registration No.",
           validations: [{ type: "required" }],
           grid: { span: { xs: 12, sm: 6, md: 4 } }
         },
         {
           id: "registrationDate",
           type: "date",
-          label: "CLF/LCs Date of Registration",
+          label: "CLF / LCs Date of Registration",
           props: { format: "DD/MM/YYYY" },
           config: { valueKind: "iso", outputFormat: "YYYY-MM-DD", disableFuture: true },
           grid: { span: { xs: 12, sm: 6, md: 4 } }
         },
         {
-          
-            id: "presidentName",
+
+          id: "presidentName",
           type: "text",
-          label: "CLF BOD's Name: President",
+          label: "CLF / LC BOD's Name: President",
           validations: [{ type: "required" }],
           grid: { span: { xs: 12, sm: 6, md: 4 } }
         },
         {
           id: "secretaryName",
           type: "text",
-          label: "CLF BOD's Name: Secretary",
+          label: "CLF / LC BOD's Name: Secretary",
           validations: [{ type: "required" }],
           grid: { span: { xs: 12, sm: 6, md: 4 } }
         },
         {
           id: "treasurerName",
           type: "text",
-          label: "CLF BOD's Name: Treasurer",
+          label: "CLF / LC BOD's Name: Treasurer",
           validations: [{ type: "required" }],
           grid: { span: { xs: 12, sm: 6, md: 4 } }
         },
         {
           id: "bodNames",
           type: "textarea",
-          label: "CLF BOD Names (Others)",
+          label: "CLF / LC BOD Names (Others)",
           description: "Enter multiple names (up to 10)",
           grid: { span: { xs: 12, sm: 6, md: 4 } }
         },
-        { 
-            id: "panOrTan", 
-            type: "text", 
-            label: "PAN / TAN No",
-            grid: { span: { xs: 12, sm: 6, md: 4 } } 
+        {
+          id: "panOrTan",
+          type: "text",
+          label: "PAN / TAN No",
+          grid: { span: { xs: 12, sm: 6, md: 4 } }
         },
-        { 
-            id: "fssaiNo", 
-            type: "text", 
-            label: "FSSAI No.",
-            grid: { span: { xs: 12, sm: 6, md: 4 } }
+        {
+          id: "fssaiNo",
+          type: "text",
+          label: "FSSAI No.",
+          grid: { span: { xs: 12, sm: 6, md: 4 } }
         },
 
         /* Staff Sub-section */
         {
-            id: "staffHeader",
-            type: "subheader",
-            label: "Names of Staff in CLF/LC",
-            grid: { span: { xs: 12, sm: 6, md: 4 } }
+          id: "staffHeader",
+          type: "subheader",
+          label: "Names of Staff in CLF / LC",
+          grid: { span: { xs: 12, sm: 6, md: 4 } }
         },
         {
-            id: "businessPromoter",
-            type: "text",
-            label: "Name of Business Promoter",
-            grid: { span: { xs: 12, sm: 6, md: 4 } }
+          id: "businessPromoter",
+          type: "text",
+          label: "Name of Business Promoter",
+          grid: { span: { xs: 12, sm: 6, md: 4 } }
         },
         {
-            id: "accountantName",
-            type: "text",
-            label: "Name of Accountant/Data Entry Operator",
-            grid: { span: { xs: 12, sm: 6, md: 4 } }
+          id: "accountantName",
+          type: "text",
+          label: "Name of Accountant/Data Entry Operator",
+          grid: { span: { xs: 12, sm: 6, md: 4 } }
         },
         {
-            id: "gm1",
-            type: "text",
-            label: "Name of Group Mobiliser -1",
-            grid: { span: { xs: 12, sm: 6, md: 4 } }
+          id: "gm1",
+          type: "text",
+          label: "Name of Group Mobiliser -1",
+          grid: { span: { xs: 12, sm: 6, md: 4 } }
         },
         {
-            id: "gm2",
-            type: "text",
-            label: "Name of Group Mobiliser -2",
-            grid: { span: { xs: 12, sm: 6, md: 4 } }    
+          id: "gm2",
+          type: "text",
+          label: "Name of Group Mobiliser -2",
+          grid: { span: { xs: 12, sm: 6, md: 4 } }
         },
 
         {
-            id: "shareholders",
-            type: "text",
-            label: "Shareholders (No’s)",
-            validations: [{ type: "required" }, { type: "pattern", value: "^\\d+$" }],
-            grid: { span: { xs: 12, sm: 6, md: 4 } }
+          id: "shareholders",
+          type: "text",
+          label: "Shareholders (No’s)",
+          validations: [{ type: "required" }, { type: "pattern", value: "^\\d+$" }],
+          grid: { span: { xs: 12, sm: 6, md: 4 } }
         },
         {
-            id: "sharecapital",
-            type: "text",
-            label: "Sharecapital Amount (INR)",
-            validations: [{ type: "required" }, { type: "pattern", value: "^\\d+$" }],
-            grid: { span: { xs: 12, sm: 6, md: 4 } }
+          id: "sharecapital",
+          type: "text",
+          label: "Sharecapital Amount (INR)",
+          validations: [{ type: "required" }, { type: "pattern", value: "^\\d+$" }],
+          grid: { span: { xs: 12, sm: 6, md: 4 } }
         },
         {
-            id: "associatedFpo",
-            type: "text",
-            label: "Name of Associated FPO",
-            grid: { span: { xs: 12, sm: 6, md: 4 } }
+          id: "associatedFpo",
+          type: "text",
+          label: "Name of Associated FPO",
+          grid: { span: { xs: 12, sm: 6, md: 4 } }
         },
 
         /* Banking */
-        { 
-            id: "bankAccount",
-            type: "text",
-            label: "CLF-LCs Bank A/C No.",
-            validations: [{ type: "required" }, { type: "pattern", value: "^\\d+$" }],
-            grid: { span: { xs: 12, sm: 6, md: 4 } }
+        {
+          id: "bankAccount",
+          type: "text",
+          label: "CLF / LCs Bank A/C No.",
+          validations: [{ type: "required" }, { type: "pattern", value: "^\\d+$" }],
+          grid: { span: { xs: 12, sm: 6, md: 4 } }
         },
         {
-            id: "ifscCode",
-            type: "text",
-            label: "IFSC Code",
-            validations: [{ type: "required" }],
-            grid: { span: { xs: 12, sm: 6, md: 4 } }
+          id: "ifscCode",
+          type: "text",
+          label: "IFSC Code",
+          validations: [{ type: "required" },{ 
+              type: "pattern", 
+              value: "^[A-Z]{4}0[A-Z0-9]{6}$", 
+              message: "Invalid IFSC" 
+            }],
+            props: { maxLength: 11 },
+          grid: { span: { xs: 12, sm: 6, md: 4 },
+         }
         },
         {
-            id: "bankName",
-            type: "text",
-            label: "Name of Bank",
-            validations: [{ type: "required" }],
-            grid: { span: { xs: 12, sm: 6, md: 4 } }
+          id: "bankName",
+          type: "text",
+          label: "Name of Bank",
+          validations: [{ type: "required" }],
+          grid: { span: { xs: 12, sm: 6, md: 4 } }
         },
         {
-            id: "bankBranch",
-            type: "text",
-            label: "Name of Bank Branch",
-            validations: [{ type: "required" }],
-            grid: { span: { xs: 12, sm: 6, md: 4 } }
+          id: "bankBranch",
+          type: "text",
+          label: "Name of Bank Branch",
+          validations: [{ type: "required" }],
+          grid: { span: { xs: 12, sm: 6, md: 4 } }
         },
 
         {
-            id: "totalLand",
-            type: "text",
-            label: "Total Land of CLF-LCs Members",
-            validations: [{ type: "pattern", value: "^(|\\d+)$" }],
-            grid: { span: { xs: 12, sm: 6, md: 4 } }
+          id: "totalLand",
+          type: "text",
+          label: "Total Land of CLF / LCs Members",
+          validations: [{ type: "pattern", value: "^(|\\d+)$" }],
+          grid: { span: { xs: 12, sm: 6, md: 4 } }
         },
         {
-            id: "grade",
-            type: "text",
-            label: "Grade of CLF / LC",
-            grid: { span: { xs: 12, sm: 6, md: 4 } }
+          id: "grade",
+          type: "text",
+          label: "Grade of CLF / LC",
+          grid: { span: { xs: 12, sm: 6, md: 4 } }
         },
 
         /* Value Chains */
-        { 
-            id: "valueChain1",
-            type: "text",
-            label: "CLF/LC Key Value Chain: 1",
-            grid: { span: { xs: 12, sm: 6, md: 4 } }
+        {
+          id: "valueChain1",
+          type: "text",
+          label: "CLF/LC Key Value Chain: 1",
+          grid: { span: { xs: 12, sm: 6, md: 4 } }
         },
         {
-            id: "valueChain2",
-            type: "text",
-            label: "CLF/LC Key Value Chain: 2",
-            grid: { span: { xs: 12, sm: 6, md: 4 } }
+          id: "valueChain2",
+          type: "text",
+          label: "CLF/LC Key Value Chain: 2",
+          grid: { span: { xs: 12, sm: 6, md: 4 } }
         },
         {
-            id: "valueChain3",
-            type: "text",
-            label: "CLF/LC Key Value Chain: 3",
-            grid: { span: { xs: 12, sm: 6, md: 4 } }    
+          id: "valueChain3",
+          type: "text",
+          label: "CLF/LC Key Value Chain: 3",
+          grid: { span: { xs: 12, sm: 6, md: 4 } }
         },
 
         /* Audits and Meetings */
