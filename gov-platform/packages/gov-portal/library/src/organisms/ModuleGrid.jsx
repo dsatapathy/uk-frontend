@@ -3,6 +3,8 @@ import React from "react";
 import { Grid, Skeleton, Box, Typography, Button } from "@mui/material";
 import ModuleCard from "../molecules/ModuleCard";
 import DSBox from "../atoms/DSBox";
+import { useTheme } from "@mui/material/styles";
+import useMediaQuery from "@mui/material/useMediaQuery";
 
 export const ModuleGrid = React.memo(function ModuleGrid({
   modules = [],
@@ -11,12 +13,28 @@ export const ModuleGrid = React.memo(function ModuleGrid({
   onQuickAction,
   config,
 }) {
-  const cardHeight = config?.layout?.cardHeight ?? 240;
-  const skeletonCount = config?.skeletonCount ?? 9;
+  const theme = useTheme();
+  const isXs = useMediaQuery(theme.breakpoints.down("sm"));   // <600
+  const isSm = useMediaQuery(theme.breakpoints.between("sm","md")); // 600–899
+  const isMdUp = useMediaQuery(theme.breakpoints.up("md"));   // >=900
+  const isLgUp = useMediaQuery(theme.breakpoints.up("lg"));   // >=1200
 
-  // No span calculation — plain Grid breakpoints
-  // Default: 1 per row on phones, 2 on small screens, 3 on md+, 3 on lg
+  // Default grid: xs=1 col, sm=2, md=4, lg=4 (you set md:3/ lg:3 -> 4 cards/row)
   const itemProps = config?.layout?.itemProps || { xs: 12, sm: 6, md: 3, lg: 3 };
+
+  // Responsive card height (can be overridden via config.layout.cardHeights)
+  const defaultHeights = { xs: 184, sm: 210, md: 240, lg: 260 };
+  const cfgHeights = config?.layout?.cardHeights || defaultHeights;
+
+  const cardHeight = React.useMemo(() => {
+    if (isXs) return cfgHeights.xs;
+    if (isSm) return cfgHeights.sm;
+    if (isLgUp) return cfgHeights.lg;
+    if (isMdUp) return cfgHeights.md;
+    return defaultHeights.md;
+  }, [isXs, isSm, isMdUp, isLgUp, cfgHeights]);
+
+  const skeletonCount = config?.skeletonCount ?? 9;
 
   const list = React.useMemo(() => {
     const arr = Array.isArray(modules) ? [...modules] : [];
@@ -46,7 +64,8 @@ export const ModuleGrid = React.memo(function ModuleGrid({
               onNavigate={onNavigate}
               onQuickAction={onQuickAction}
               navIcon={config?.modules?.navIcon}
-              cardSx={{ width: "100%", height: "100%" }}
+              // ↙︎ make height responsive
+              cardSx={{ width: "100%", minHeight: cardHeight }}
               showCounts
               showLastUpdated
               showQuickActions
