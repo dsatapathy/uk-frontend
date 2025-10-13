@@ -8,8 +8,31 @@ export const DEFAULT_THEME = {
   },
 
   shape: { borderRadius: 12 },
-
+  typography: {
+    fontFamily: '"Nunito", sans-serif',
+  },
   components: {
+    MuiCssBaseline: {
+      styleOverrides: {
+        ":root": {
+          "--g-font": '"Nunito", sans-serif',
+        },
+        "html, body, #root": {
+          height: "100%",
+        },
+        body: {
+          fontFamily: '"Nunito", sans-serif',
+          WebkitFontSmoothing: "antialiased",
+          MozOsxFontSmoothing: "grayscale",
+        },
+        "*": {
+          fontFamily: '"Nunito", sans-serif',
+        },
+        ".MuiTypography-root": {
+          fontFamily: '"Nunito", sans-serif',
+        },
+      },
+    },
     MuiAutocomplete: {
       styleOverrides: {
         root: {
