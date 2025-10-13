@@ -1,19 +1,6 @@
 import * as React from "react";
 import MuiTypography from "@mui/material/Typography";
 
-/**
- * TypographyX — ergonomic wrapper around MUI Typography
- *
- * Props (in addition to all MUI Typography props):
- * - tone: "default"|"muted"|"primary"|"secondary"|"success"|"warning"|"danger"|"info"
- * - clamp: number | true     // true => 1 line; adds multi-line clamp
- * - ellipsis: boolean        // single-line truncate with ...
- * - weight: number|"regular"|"medium"|"semibold"|"bold"
- * - mb: "none"|"xs"|"sm"|"md"|"lg"   // bottom margin scale
- * - responsive: { xs?, sm?, md?, lg?, xl? } // per-breakpoint variant names
- *
- * Everything else is passed through to MUI <Typography />.
- */
 const FW = { regular: 400, medium: 500, semibold: 600, bold: 700 };
 const MARGINS = {
   none: 0,
@@ -23,7 +10,6 @@ const MARGINS = {
   lg: "var(--g-s4, 12px)",
 };
 
-// map tone -> CSS variable color
 function toneToColor(tone) {
   switch (tone) {
     case "muted":
@@ -40,12 +26,15 @@ function toneToColor(tone) {
       return "var(--error-600)";
     case "info":
       return "var(--info-600)";
+    case "inherit":
+      return "inherit";          // allow explicit inherit
+    case "custom":
+      return undefined;          // let sx.color override fully
     default:
-      return "var(--g-fg)"; // default text color
+      return "var(--g-fg)";
   }
 }
 
-// per-breakpoint typography variant mapping
 function makeResponsiveTypography(responsive) {
   if (!responsive) return undefined;
   const order = ["xs", "sm", "md", "lg", "xl"];
@@ -68,9 +57,9 @@ export default function TypographyX({
   tone = "default",
   clamp,
   ellipsis,
-  weight = "regular",   // default weight
+  weight = "regular",
   mb = "none",
-  align,                 // passthrough to MUI
+  align,
   underline = false,
   sx,
   children,
@@ -78,7 +67,6 @@ export default function TypographyX({
 }) {
   const respSx = makeResponsiveTypography(responsive);
 
-  // clamp → multi-line truncation
   const clampCount = clamp === true ? 1 : clamp;
   const clampSx =
     typeof clampCount === "number"
@@ -90,7 +78,6 @@ export default function TypographyX({
         }
       : undefined;
 
-  // single-line ellipsis if no clamp
   const ellipsisSx =
     !clampSx && ellipsis
       ? { whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }
@@ -102,7 +89,7 @@ export default function TypographyX({
       align={align}
       sx={[
         {
-          color: toneToColor(tone),
+          color: toneToColor(tone),   // defaults to CSS var
           fontWeight: typeof weight === "number" ? weight : FW[weight],
           marginBottom: MARGINS[mb] ?? 0,
           fontFamily: '"Nunito", sans-serif',
@@ -111,7 +98,7 @@ export default function TypographyX({
         respSx,
         clampSx,
         ellipsisSx,
-        sx,
+        sx, // ⬅️ user sx LAST so it overrides tone/color/weight cleanly
       ]}
       {...rest}
     >
@@ -120,5 +107,4 @@ export default function TypographyX({
   );
 }
 
-// Optional alias
 export { TypographyX as Text };

@@ -16,7 +16,7 @@ export const ModuleGrid = React.memo(function ModuleGrid({
 
   // No span calculation — plain Grid breakpoints
   // Default: 1 per row on phones, 2 on small screens, 3 on md+, 3 on lg
-  const itemProps = config?.layout?.itemProps || { xs: 12, sm: 6, md: 4, lg: 4 };
+  const itemProps = config?.layout?.itemProps || { xs: 12, sm: 6, md: 3, lg: 3 };
 
   const list = React.useMemo(() => {
     const arr = Array.isArray(modules) ? [...modules] : [];
@@ -46,7 +46,7 @@ export const ModuleGrid = React.memo(function ModuleGrid({
               onNavigate={onNavigate}
               onQuickAction={onQuickAction}
               navIcon={config?.modules?.navIcon}
-              cardSx={{ height: cardHeight }}
+              cardSx={{ width: "100%", height: "100%" }}
               showCounts
               showLastUpdated
               showQuickActions

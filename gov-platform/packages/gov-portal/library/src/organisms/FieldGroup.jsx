@@ -46,33 +46,7 @@ const DEFAULT_CFG = {
   defaultOpen: true,
 };
 
-const fallbackBackground = `
-   /* Sharp, angled facets for the diamond-cut effect */
-   linear-gradient(
-     165deg,
-     transparent 45%,
-     var(--crystal-highlight, rgba(236, 253, 245, 0.2)) 50%,
-     var(--crystal-shadow, rgba(20, 83, 45, 0.15)) 52%,
-     transparent 60%
-   ),
-   linear-gradient(
-     -40deg,
-     transparent 30%,
-     var(--crystal-highlight, rgba(236, 253, 245, 0.15)) 48%,
-     transparent 60%
-   ),
-   linear-gradient(
-     20deg,
-     transparent 40%,
-     var(--crystal-shadow, rgba(20, 83, 45, 0.1)) 55%,
-     transparent 70%
-   ),
-   linear-gradient(
-     180deg,
-     var(--sidebar-bg-top, #aed581) 0%,
-     var(--sidebar-bg-mid, #9ccc65) 46%,
-     var(--sidebar-bg-bottom, #8bc34a) 100%
-   )
+const fallbackBackground = `background: linear-gradient(to right, #239460 0%, #6fc926 100%)
  `;
 
 function resolveBackground(primaryBg) {
@@ -160,10 +134,11 @@ export default function FieldGroup({
           cfg.header.dense ? s["dense"] : "",
         ].join(" ")}
         sx={{
-          backgroundImage: resolvedBg || fallbackBackground,
-          backgroundSize: "cover",
-          backgroundRepeat: "no-repeat",
-          backgroundPosition: "center",
+          // backgroundImage: resolvedBg || fallbackBackground,
+          // backgroundSize: "cover",
+          // backgroundRepeat: "no-repeat",
+          // backgroundPosition: "center",
+          background: `linear-gradient(to right, #239460 0%, #6fc926 100%)`,
         }}
         role={isCollapsible ? "button" : undefined}
         tabIndex={isCollapsible ? 0 : -1}
