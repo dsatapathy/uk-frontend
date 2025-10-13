@@ -7,7 +7,11 @@ import StepLabel from "@mui/material/StepLabel";
 import Stack from "@mui/material/Stack";
 import Divider from "@mui/material/Divider";
 import useMediaQuery from "@mui/material/useMediaQuery";
-import { useTheme } from "@mui/material/styles";
+import { useTheme, styled } from "@mui/material/styles";
+import LinearProgress from "@mui/material/LinearProgress";
+import StepConnector, { stepConnectorClasses } from "@mui/material/StepConnector";
+import CheckRoundedIcon from "@mui/icons-material/CheckRounded";
+import LensBlurRoundedIcon from "@mui/icons-material/LensBlurRounded";
 import DSBox from "../atoms/DSBox";
 import TypographyX from "../atoms/TypographyX";
 import AppButton from "../atoms/AppButton";
@@ -29,7 +33,6 @@ function pickFieldsFromOneSection(section, fieldIds = []) {
 }
 
 function buildSchemaForStep(fullSchema, step) {
-  // step can specify either sections:[ids] or a single section  fieldIds
   if (step.sections && step.sections.length) return pickSections(fullSchema, step.sections);
   if (step.section && step.fieldIds) {
     const section = (fullSchema.sections || []).find((s) => s.id === step.section);
@@ -37,7 +40,6 @@ function buildSchemaForStep(fullSchema, step) {
     const one = pickFieldsFromOneSection(section, step.fieldIds);
     return { ...fullSchema, sections: [one] };
   }
-  // default: show nothing
   return { ...fullSchema, sections: [] };
 }
 
@@ -47,12 +49,81 @@ function fieldsForStep(fullSchema, step) {
   return sections.flatMap((s) => (s.fields || []).map((f) => f.id));
 }
 
-// Evaluate show/disable conditions (boolean or function)
 function evalCond(cond, ctx) {
   if (cond == null) return true;
   if (typeof cond === "boolean") return cond;
   if (typeof cond === "function") return !!cond(ctx);
   return true;
+}
+
+// ----------------------------- Styled Components ---------------------------
+
+// Gradient connector
+const GradientConnector = styled(StepConnector)(({ theme }) => ({
+  // Horizontal (labels under icons)
+  [`&.${stepConnectorClasses.alternativeLabel}`]: {
+    top: 14,
+  },
+
+  // Base line (horizontal)
+  [`& .${stepConnectorClasses.line}`]: {
+    height: 3,
+    border: 0,
+    borderRadius: 2,
+    background: `linear-gradient(90deg, ${theme.palette.success.main}, ${theme.palette.success.light})`,
+    opacity: 0.6,
+  },
+
+  // Vertical mode: style the ROOT, then its line
+  [`&.${stepConnectorClasses.vertical}`]: {
+    top: 0,
+    marginLeft: 14,
+    padding: 0,
+  },
+  [`&.${stepConnectorClasses.vertical} .${stepConnectorClasses.line}`]: {
+    width: 3,
+    height: "100%",
+    background: `linear-gradient(180deg, ${theme.palette.success.main}, ${theme.palette.success.light})`,
+    borderRadius: 2,
+    border: 0,
+    opacity: 0.6,
+  },
+}));
+
+// Step icon root
+const StepIconRoot = styled("div")(({ theme, ownerState }) => {
+  const active = ownerState.active;
+  const completed = ownerState.completed;
+
+  return {
+    background:
+      completed
+        ? theme.palette.success.main
+        : active
+          ? `linear-gradient(135deg, ${theme.palette.success.main}, ${theme.palette.success.light})`
+          : theme.palette.grey[300],
+    color: completed || active ? theme.palette.common.white : theme.palette.text.secondary,
+    width: 28,
+    height: 28,
+    display: "grid",
+    placeItems: "center",
+    borderRadius: "50%",
+    boxShadow: active
+      ? "0 6px 18px rgba(16,185,129,.35)"
+      : completed
+        ? "0 4px 12px rgba(16,185,129,.25)"
+        : "inset 0 0 0 1px rgba(0,0,0,.06)",
+    transition: "all .2s ease",
+  };
+});
+
+function PrettyStepIcon(props) {
+  const { active, completed, className } = props;
+  return (
+    <StepIconRoot ownerState={{ active, completed }} className={className}>
+      {completed ? <CheckRoundedIcon sx={{ fontSize: 18 }} /> : <LensBlurRoundedIcon sx={{ fontSize: 16 }} />}
+    </StepIconRoot>
+  );
 }
 
 // ----------------------------- main component ------------------------------
@@ -74,16 +145,11 @@ export default function ConfigStepperMUI({
   const step = steps[index];
   const total = steps.length;
 
-  // Build a filtered schema for current step
   const stepSchema = React.useMemo(() => buildSchemaForStep(schema, step), [schema, step]);
-
-  // Compute field IDs in current step (for step validation)
   const stepFieldIds = React.useMemo(() => fieldsForStep(schema, step), [schema, step]);
   const allFieldIds = React.useMemo(() => uniq(steps.flatMap((s) => fieldsForStep(schema, s))), [schema, steps]);
-
   const ctx = React.useMemo(() => ({ index, total, step }), [index, total, step]);
 
-  // move between steps
   const go = React.useCallback((to) => {
     const next = Math.max(0, Math.min(total - 1, to));
     if (next !== index) {
@@ -92,7 +158,6 @@ export default function ConfigStepperMUI({
     }
   }, [index, total, onStepChange, ctx]);
 
-  // ---------- handlers wired to RHF through DynamicForm formApiRef ----------
   const triggerStep = React.useCallback(async () => {
     const api = formApiRef?.current;
     if (!api?.trigger) return true;
@@ -111,7 +176,6 @@ export default function ConfigStepperMUI({
     return ok;
   }, [formApiRef, allFieldIds, steps, schema]);
 
-  // default actions wiring (you can override with getStepActions)
   const baseActions = React.useMemo(() => ({
     prev: { id: "prev", label: "Previous", variant: "outlined", color: "inherit", onClick: () => go(index - 1) },
     next: { id: "next", label: "Next", variant: "contained", color: "primary", requiresValid: true, onClick: async () => (await triggerStep()) && go(index + 1) },
@@ -158,37 +222,55 @@ export default function ConfigStepperMUI({
           ? { ...(baseActions[x.id] || {}), ...(actions[x.id] || {}), ...x }
           : x
     );
-
     return merged
       .filter((a) => evalCond(a?.showWhen ?? true, env))
-      .map((a) => ({
-        ...a,
-        disabled: !!evalCond(a?.disableWhen ?? false, env),
-      }));
+      .map((a) => ({ ...a, disabled: !!evalCond(a?.disableWhen ?? false, env) }));
   }
 
   const resolvedActions = React.useMemo(() => resolveActions(), [actions, getStepActions, ctx, baseActions]);
 
   return (
-    // Make the whole area a column so the footer can sit at the bottom *inside the body*
     <DSBox sx={{ display: "flex", flexDirection: "column", minHeight: "100vh", gap: 2 }}>
-      {/* top stepper */}
-      <Paper elevation={0} sx={{ p: { xs: 1, sm: 2 }, border: "none" }}>
-        <Stepper activeStep={index} alternativeLabel={!isMobile} orientation={isMobile ? "vertical" : "horizontal"}>
-          {steps.map((s) => (
-            <Step key={s.id}>
-              <StepLabel sx={{
-                "& .MuiStepLabel-label": {
-                  fontWeight: 600,   // or 'bold'
-                  color: "var(--g-fg)", // optional: use your theme token
-                },
-              }}>{s.label || s.title || s.id}</StepLabel>
-            </Step>
-          ))}
+      {/* --- Modern Stepper Header --- */}
+      <Paper elevation={0} sx={{ p: { xs: 1.25, sm: 2 }, border: "none" }}>
+        <Stepper
+          activeStep={index}
+          alternativeLabel={!isMobile}
+          orientation={isMobile ? "vertical" : "horizontal"}
+          connector={<GradientConnector />}
+          sx={{
+            px: { xs: 0.5, sm: 1 },
+          }}
+        >
+          {steps.map((s, i) => {
+            const isCompleted = i < index;
+            const isActive = i === index;
+
+            return (
+              <Step key={s.id} completed={isCompleted} onClick={() => setIndex(i)}>
+                <StepLabel
+                  StepIconComponent={PrettyStepIcon}
+                  sx={{
+                    "& .MuiStepLabel-label": {
+                      // completed → bold, others → normal
+                      fontWeight: isCompleted ? 700 : 400,
+                      // (optional) keep your size/colors consistent
+                      fontSize: { xs: ".85rem", sm: ".95rem" },
+                      color: "text.primary",
+                      // small emphasis for current step if you want:
+                      ...(isActive && !isCompleted ? { fontWeight: 500 } : null),
+                    },
+                  }}
+                >
+                  {s.label || s.title || s.id}
+                </StepLabel>
+              </Step>
+            );
+          })}
         </Stepper>
       </Paper>
 
-      {/* form surface — grows and scrolls; keep room for sticky footer */}
+      {/* form surface */}
       <Paper
         elevation={0}
         sx={{
@@ -197,17 +279,17 @@ export default function ConfigStepperMUI({
           border: "none",
           flex: 1,
           overflow: "auto",
-          pb: { xs: 10, sm: 9 }, // avoid overlap with sticky footer height
+          pb: { xs: 10, sm: 9 },
         }}
       >
         {step?.description && (
           <DSBox sx={{ mb: 2 }}>
-            <TypographyX variant="subtitle1" weight="bold" color="text.secondary">{step.description}</TypographyX>
+            <TypographyX variant="subtitle1" weight="bold" color="text.secondary">
+              {step.description}
+            </TypographyX>
             <Divider sx={{ mt: 1 }} />
           </DSBox>
         )}
-
-        {/* IMPORTANT: keep one DynamicForm mounted; pass a filtered schema */}
         <DynamicForm
           {...formProps}
           schema={stepSchema}
@@ -219,7 +301,7 @@ export default function ConfigStepperMUI({
         />
       </Paper>
 
-      {/* footer actions — INSIDE body, width-matched, mobile 100% */}
+      {/* footer actions */}
       <DSBox
         radius={0}
         sx={{
@@ -230,8 +312,8 @@ export default function ConfigStepperMUI({
           px: { xs: 2, md: 3 },
           py: 2,
           width: "100%",
-          maxWidth: 1200,          // ← match your content container width
-          mx: "auto",              // ← center on desktop
+          maxWidth: 1200,
+          mx: "auto",
           zIndex: 1,
           display: "flex",
           justifyContent: "space-between",
@@ -243,34 +325,18 @@ export default function ConfigStepperMUI({
           sx={{ justifyContent: "space-between", alignItems: "center", width: "100%" }}
         >
           <DSBox sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
-            {resolvedActions
-              .filter((a) => ["prev", "save"].includes(a.id))
-              .map((a) => (
-                <AppButton
-                  key={a.id}
-                  variant={a.variant}
-                  color={a.color}
-                  disabled={a.disabled}
-                  onClick={a.onClick}
-                >
-                  {a.label}
-                </AppButton>
-              ))}
+            {resolvedActions.filter((a) => ["prev", "save"].includes(a.id)).map((a) => (
+              <AppButton key={a.id} variant={a.variant} color={a.color} disabled={a.disabled} onClick={a.onClick}>
+                {a.label}
+              </AppButton>
+            ))}
           </DSBox>
           <DSBox sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
-            {resolvedActions
-              .filter((a) => !["prev", "save"].includes(a.id))
-              .map((a) => (
-                <AppButton
-                  key={a.id}
-                  variant={a.variant}
-                  color={a.color}
-                  disabled={a.disabled}
-                  onClick={a.onClick}
-                >
-                  {a.label}
-                </AppButton>
-              ))}
+            {resolvedActions.filter((a) => !["prev", "save"].includes(a.id)).map((a) => (
+              <AppButton key={a.id} variant={a.variant} color={a.color} disabled={a.disabled} onClick={a.onClick}>
+                {a.label}
+              </AppButton>
+            ))}
           </DSBox>
         </Stack>
       </DSBox>
