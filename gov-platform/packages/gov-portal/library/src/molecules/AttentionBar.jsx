@@ -33,13 +33,19 @@ export const AttentionBar = React.memo(function AttentionBar({
       intent={intent}
       variant={dsVariant}
       elevation={{ xs: elevation, md: elevation }}              // no shadow on phones
-      radius={{ xs: 8, md: 16 }}                         // ← smaller radius on phones
+      radius={{ xs: 2, md: 2 }}                         // ← smaller radius on phones
       p={{ xs: 3, sm: 2, md: 3 }}                      // tighter padding on phones
       grid
       gridCols={{ xs: "1fr", md: "1fr max-content" }}    // stack on phones
       gridGap={{ xs: 1, md: 16 }}                        // ← smaller gap on phones
       align="center"
-      sx={{ position: "relative", overflow: "hidden", minWidth: 0 }}
+      sx={{ 
+        position: "relative", 
+        overflow: "hidden", 
+        minWidth: 0, 
+        background: `linear-gradient(to right, #239460 0%, #6fc926 100%)`,
+        color: "#fff"
+       }}
     >
       {/* Left: Icon + title/subtitle */}
       <Stack
@@ -48,12 +54,13 @@ export const AttentionBar = React.memo(function AttentionBar({
         alignItems="flex-start"
         sx={{ minWidth: 0 }}
       >
-        {getIcon("campaign", { fontSize: "medium", color: "primary" })}
+        {getIcon("campaign", { fontSize: "medium", color: "#fff" })}
         <div style={{ minWidth: 0 }}>
           <TypographyX
             variant="h6"
             weight={700}
             sx={{
+              color: "#fff",
               lineHeight: 1.2,
               wordBreak: "break-word",
               fontSize: { xs: 15, sm: 17, md: 20 },
@@ -66,7 +73,7 @@ export const AttentionBar = React.memo(function AttentionBar({
             <TypographyX
               variant="body2"
               color="text.secondary"
-              sx={{ wordBreak: "break-word" }}
+              sx={{ wordBreak: "break-word",color: "#fff", }}
             >
               {left.subtitle}
             </TypographyX>

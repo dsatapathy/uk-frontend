@@ -3,25 +3,25 @@ import React from "react";
 
 /** 1) Explicit, tree-shakable loaders */
 const LOADERS = {
-  home:        () => import("@mui/icons-material/Home"),
-  layers:      () => import("@mui/icons-material/Layers"),
-  assessment:  () => import("@mui/icons-material/Assessment"),
-  settings:    () => import("@mui/icons-material/Settings"),
-  openinnew:   () => import("@mui/icons-material/OpenInNew"),
-  logout:      () => import("@mui/icons-material/Logout"),
+  home: () => import("@mui/icons-material/Home"),
+  layers: () => import("@mui/icons-material/Layers"),
+  assessment: () => import("@mui/icons-material/Assessment"),
+  settings: () => import("@mui/icons-material/Settings"),
+  openinnew: () => import("@mui/icons-material/OpenInNew"),
+  logout: () => import("@mui/icons-material/Logout"),
   notifications: () => import("@mui/icons-material/Notifications"),
-  inbox:       () => import("@mui/icons-material/Inbox"),
-  menu:        () => import("@mui/icons-material/Menu"),
-  search:      () => import("@mui/icons-material/Search"),
-  close:       () => import("@mui/icons-material/Close"),
-  person:      () => import("@mui/icons-material/Person"),
-  campaign:    () => import("@mui/icons-material/Campaign"),
-  edit:        () => import("@mui/icons-material/Edit"),
+  inbox: () => import("@mui/icons-material/Inbox"),
+  menu: () => import("@mui/icons-material/Menu"),
+  search: () => import("@mui/icons-material/Search"),
+  close: () => import("@mui/icons-material/Close"),
+  person: () => import("@mui/icons-material/Person"),
+  campaign: () => import("@mui/icons-material/Campaign"),
+  edit: () => import("@mui/icons-material/Edit"),
   uploadFileIcon: () => import("@mui/icons-material/UploadFile"),
-  deleteIcon:  () => import("@mui/icons-material/Delete"),
-  refresh:     () => import("@mui/icons-material/Refresh"),
-  add:         () => import("@mui/icons-material/Add"),
-  remove:      () => import("@mui/icons-material/Remove"),
+  deleteIcon: () => import("@mui/icons-material/Delete"),
+  refresh: () => import("@mui/icons-material/Refresh"),
+  add: () => import("@mui/icons-material/Add"),
+  remove: () => import("@mui/icons-material/Remove"),
 };
 /** 2) Aliases */
 const ALIASES = {
@@ -72,14 +72,14 @@ export function prefetchIcons(...names) {
 }
 
 /** 4) Icon component using the cache */
-export function Icon({ name, fontSize = "small", ...props }) {
+export function Icon({ name, fontSize = "small", color = "#fff", ...props }) {
   const key = resolveKey(name);
   const LazyIcon = getLazyIconForKey(key);
   if (!LazyIcon) return null;
 
   return (
     <React.Suspense fallback={null}>
-      <LazyIcon fontSize={fontSize} {...props} />
+      <LazyIcon fontSize={fontSize} color={color} {...props} />
     </React.Suspense>
   );
 }
