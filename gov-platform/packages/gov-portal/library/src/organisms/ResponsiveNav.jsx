@@ -7,6 +7,8 @@ import { findAncestorsByPath, filterTreeByQuery, DRAWER_WIDTH } from "../utils/m
 import TopBar from "./TopBar";
 import Sidebar from "./Sidebar";
 import { handleLogoutService } from "@gov/data";
+import { useLoader } from "../atoms/Loader";
+import { useSnackbar } from "../atoms/Snackbar";
 
 export default function ResponsiveNav({
   menu,
@@ -22,7 +24,8 @@ export default function ResponsiveNav({
   const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
   const [openMobile, setOpenMobile] = React.useState(false);
   const [query, setQuery] = React.useState("");
-
+  const { show, hide } = useLoader();
+  const { enqueue } = useSnackbar();
   const defaultExpanded = React.useMemo(
     () => findAncestorsByPath(menu, currentPath),
     [menu, currentPath]
@@ -38,6 +41,39 @@ export default function ResponsiveNav({
     () => filterTreeByQuery(menu, query),
     [menu, query]
   );
+  const logoutService = async () => {
+
+    try {
+      show("Logging out...");
+      // call actual logout service
+      const isLoggedOut = await handleLogoutService();
+      if (isLoggedOut) {
+        hide();
+        enqueue({
+          message: "Logged out successfully",
+          severity: "success",
+          duration: 3000,
+        });
+        localStorage.clear();
+        sessionStorage.clear();
+        window.location.reload();
+      } else {
+        hide();
+        enqueue({
+          message: "Failed to log out",
+          severity: "error",
+          duration: 5000,
+        });
+      }
+    } catch (error) {
+      hide();
+      enqueue({
+        message: "Failed to log out",
+        severity: "error",
+        duration: 5000,
+      });
+    }
+  };
 
   const onToggle = React.useCallback((id) => {
     setExpanded((prev) => {
@@ -84,7 +120,7 @@ export default function ResponsiveNav({
           { id: "profile", label: "My Profile", icon: "user", onClick: () => onNavigate?.("/me") },
           { id: "settings", label: "Settings", icon: "settings", onClick: () => onNavigate?.("/settings") },
         ]}
-        onLogout={handleLogoutService}
+        onLogout={logoutService}
       />
 
       <Box

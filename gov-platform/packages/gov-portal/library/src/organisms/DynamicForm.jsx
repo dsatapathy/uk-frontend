@@ -450,15 +450,33 @@ export default function DynamicForm({
   }, [watch, autosaveMs, dispatch, formKey, onValuesChange, depGraph, defaultMap, schemaForValidation, setValue, clearErrors]);
 
   const submit = handleSubmit(async (vals) => {
+    // dispatch(setSubmitting(true));
+    // try {
+    //   // still useful when the form is used without the stepper
+    //   const payload =
+    //     output === "schema"
+    //       ? mapUsingSchemaOutput(schemaForValidation, vals)
+    //       : output === "bySection"
+    //         ? mapUsingSchemaOutput({ sections: (schemaForValidation?.sections || []).map(s => ({ ...s, output: { key: s.id, type: "object" } })) }, vals)
+    //         : vals;
+    //   await onSubmit?.(payload);
+    //   // dispatch(clearDraft(formKey));
+    // } finally {
+    //   dispatch(setSubmitting(false));
+    // }
     dispatch(setSubmitting(true));
     try {
-      // still useful when the form is used without the stepper
+      // Sometimes the vals argument can be an empty object while RHF internally
+      // holds the real values. Use getValues() as a fallback so callers always
+      // receive the live form values.
+      const live = vals && Object.keys(vals).length ? vals : getValues();
+
       const payload =
         output === "schema"
-          ? mapUsingSchemaOutput(schemaForValidation, vals)
+          ? mapUsingSchemaOutput(schemaForValidation, live)
           : output === "bySection"
-            ? mapUsingSchemaOutput({ sections: (schemaForValidation?.sections || []).map(s => ({ ...s, output: { key: s.id, type: "object" } })) }, vals)
-            : vals;
+            ? mapUsingSchemaOutput({ sections: (schemaForValidation?.sections || []).map(s => ({ ...s, output: { key: s.id, type: "object" } })) }, live)
+            : live;
       await onSubmit?.(payload);
       // dispatch(clearDraft(formKey));
     } finally {

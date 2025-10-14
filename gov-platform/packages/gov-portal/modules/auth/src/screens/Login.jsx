@@ -6,7 +6,8 @@ import { getComponent } from "@gov/core";
 import { useAppSelector } from "@gov/store";
 import { useLoginFlow } from "../hooks/useLoginFlow";
 import { useConfig } from "@gov/library";
-
+import { useSnackbar } from "../../../../library/src/atoms/Snackbar";
+import { useLoader } from "../../../../library/src/atoms/Loader";
 // --- Base helpers ---
 const escapeRe = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 function useBase(locationPathname) {
@@ -83,7 +84,28 @@ function LoginInner({ loginConfig }) {
   }, [isAuthed, location.pathname, target, deferReplace]);
 
   const { submit, isLoading, error } = useLoginFlow(loginConfig);
+  const { enqueue } = useSnackbar();
+  const { show, hide } = useLoader();
 
+  React.useEffect(() => {
+    if (!error) return;
+    const msg = error?.response?.data?.message || error?.message || "Login failed";
+    enqueue({ message: msg, severity: "error", duration: 6000 });
+  }, [error, enqueue]);
+
+  // show global loader while login is in progress
+  React.useEffect(() => {
+    if (isLoading) {
+      show("Signing in...");
+    } else {
+      hide();
+    }
+    // ensure hide on unmount
+    return () => {
+      hide();
+    };
+  }, [isLoading, show, hide]);
+  
   const handleSubmit = async (payload) => {
     const { username, password, remember } = payload || {};
     await submit(username, password, { remember });

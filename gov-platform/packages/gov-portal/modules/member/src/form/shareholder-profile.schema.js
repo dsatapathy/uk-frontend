@@ -12,10 +12,10 @@ export const shareholderProfileSchema = {
           id: "action",
           type: "radio-group",
           label: "Action",
-          defaultValue: "add",
+          defaultValue: "create",
           options: {
             items: [
-              { label: "Create New", value: "add" },
+              { label: "Create New", value: "create" },
               { label: "Update Existing", value: "update" }
             ]
           },
@@ -92,7 +92,7 @@ export const shareholderProfileSchema = {
           validations: [{ type: "required" }],
           grid: { span: { xs: 12, sm: 6, md: 4 } }
         },
-                {
+        {
           id: "clf",
           type: "autocomplete",
           label: "CLF",
@@ -155,9 +155,9 @@ export const shareholderProfileSchema = {
           label: "Finance Year",
           options: {
             endpointKey: "v1/master/data",
-            labelKey: "year",
-            valueKey: "year",
-            query: { type: "financial_years" }
+            labelKey: "label",
+            valueKey: "value",
+            query: { type: "financial_year"}
           },
           validations: [{ type: "required" }],
           grid: { span: { xs: 12, sm: 6, md: 4 } }
@@ -166,6 +166,27 @@ export const shareholderProfileSchema = {
           id: "shareholderName",
           type: "text",
           label: "Name of Shareholder",
+          validations: [{ type: "required" }],
+          rules: [{ when: "values.action === 'update'", action: "hide" }],
+          grid: { span: { xs: 12, sm: 6, md: 4 } }
+        },
+        {
+          id: "shareholderId",
+          type: "autocomplete",
+          label: "Choose Shareholder to Update",
+          options: {
+            endpointKey: "v1/master/data",
+            labelKey: "name",
+            valueKey: "id",
+            query: { type: "shareholder_profiles" },
+            dependsOn: ["values.shg"],
+            dependsOnHint: "Select SHG first",
+            queryBuilder: (deps) => ({
+              type: "shareholder_profiles",
+              id: deps.shg
+            })
+          },
+          rules: [{ when: "values.action !== 'update'", action: "hide" }],
           validations: [{ type: "required" }],
           grid: { span: { xs: 12, sm: 6, md: 4 } }
         },

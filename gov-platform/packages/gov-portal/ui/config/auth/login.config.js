@@ -95,7 +95,7 @@ const loginConfig = {
   },
 
   submit: {
-    label: "Log In", endpoint: "v1/auth/login", method: "POST", labelSx: {
+    label: "Sign In", endpoint: "v1/auth/login", method: "POST", labelSx: {
       color: "#fff",
       fontWeight: 600,
       fontSize: "0.9rem",

@@ -4,8 +4,9 @@ import { memberProfileSchema } from "../form/member-profile.schema";
 import { memberProfileSteps } from "../form/member-profile.steps";
 import { getComponent } from "@gov/core";
 import { useSubmitData } from "@gov/data";
+import {apiService} from "@gov/data";
 import { useSnackbar } from "../../../../library/src/atoms/Snackbar";
-
+import { useLoader } from "../../../../library/src/atoms/Loader";
 // ✅ fix nesting
 const ui = {
   padding: 2,
@@ -42,7 +43,7 @@ const MOCK_PROFILE = {
     vo: "vo-rai-1a",
     shg: "shg-rai-1a-1",
     shgCode: 1,
-    memberToUpdate: "mem-001",
+    memberId: "mem-001",
     shgJoinDate: "2025-09-15",
     uid: "12",
   },
@@ -99,84 +100,105 @@ const MOCK_PROFILE = {
 };
 
 // map from sectioned MOCK_PROFILE -> flat RHF values
-function flatFromMock(p) {
+function flatFromMock(memberData,update=false) {
   return {
     // registration
-    action: p.registration?.action,
-    district: p.registration?.district,
-    block: p.registration?.block,
-    gp: p.registration?.gp,
-    village: p.registration?.village,
+    action: update ? "update" : "create",
+    // district/block/gp/village as codes number
+    district: memberData?.district ? Number(memberData?.district) : "",
+    block: memberData?.block ? Number(memberData?.block) : "",
+    gp: memberData?.gp ? Number(memberData?.gp) : "",
+    village: memberData?.village ? Number(memberData?.village) : "",
 
     // association
-    clf: p.association?.clf,
-    vo: p.association?.vo,
-    shg: p.association?.shg,
-    shgCode: p.association?.shgCode,
-    memberToUpdate: p.association?.memberToUpdate,
-    shgJoinDate: p.association?.shgJoinDate,
-    uid: p.association?.uid,
+    // clf/vo/shg as codes number
+    clf: memberData?.clf ? Number(memberData?.clf) : "",
+    vo: memberData?.vo ? Number(memberData?.vo) : "",
+    shg: memberData?.shg ? Number(memberData?.shg) : "",
+    // shgCode as number string
+    shgCode: memberData?.shgCode ? String(memberData?.shgCode) : "",
+    memberId: memberData?.memberId,
+    shgJoinDate: memberData?.shgJoinDate,
+    // uid as string
+    uid: memberData?.uid ? String(memberData?.uid) : "",
 
     // personalA
-    guardianName: p.personalA?.guardianName,
-    mobile: p.personalA?.mobile,
-    aadhaar: p.personalA?.aadhaar,
-    voterId: p.personalA?.voterId,
-    rationType: p.personalA?.rationType,
-    education: p.personalA?.education,
-
+    guardianName: memberData?.guardianName,
+    // mobile as string
+    mobile: memberData?.mobile ? String(memberData?.mobile) : "",
+    // aadhaar as string
+    aadhaar: memberData?.aadhaar ? String(memberData?.aadhaar) : "",
+    // voterId as string
+    voterId: memberData?.voterId ? String(memberData?.voterId) : "",
+    // rationType as string
+    rationType: memberData?.rationType ? String(memberData?.rationType) : "",
+    // education as string
+    education: memberData?.education ? String(memberData?.education) : "",
     // personalB
-    dob: p.personalB?.dob,
-    age: p.personalB?.age,
-    socialCategory: p.personalB?.socialCategory,
-    pwd: p.personalB?.pwd,
-    religion: p.personalB?.religion,
-    maritalStatus: p.personalB?.maritalStatus,
-    seccCategory: p.personalB?.seccCategory,
-    diffAbledSelf: p.personalB?.diffAbledSelf,
-    tribal: p.personalB?.tribal,
+    dob: memberData?.dob ? String(memberData?.dob) : "",
+    // age as number string
+    age: memberData?.age ? String(memberData?.age) : "",
+    // socialCategory as string
+    socialCategory: memberData?.socialCategory ? String(memberData?.socialCategory) : "",
+    // pwd as string
+    pwd: memberData?.pwd ? String(memberData?.pwd) : "",
+    // religion as string
+    religion: memberData?.religion ? String(memberData?.religion) : "",
+    maritalStatus: memberData?.maritalStatus ? String(memberData?.maritalStatus) : "",
+    seccCategory: memberData?.seccCategory ? String(memberData?.seccCategory) : "",
+    diffAbledSelf: memberData?.diffAbledSelf ? String(memberData?.diffAbledSelf) : "",
+    tribal: memberData?.tribal ? String(memberData?.tribal) : "",
 
     // household
-    hhSize: p.household?.hhSize,
-    children05: p.household?.children05,
-    schoolChildren: p.household?.schoolChildren,
-    headOfHousehold: p.household?.headOfHousehold,
-    houseType: p.household?.houseType,
-    electricity: p.household?.electricity,
-    drinkingWater: p.household?.drinkingWater,
-    sanitation: p.household?.sanitation,
-    lpg: p.household?.lpg,
+    // hhSize as number string
+    hhSize: memberData?.hhSize ? String(memberData?.hhSize) : "",
+    // children05 as number string
+    children05: memberData?.children05 ? String(memberData?.children05) : "",
+    // schoolChildren as number string
+    schoolChildren: memberData?.schoolChildren ? String(memberData?.schoolChildren) : "",
+    headOfHousehold: memberData?.headOfHousehold ? String(memberData?.headOfHousehold) : "",
+    houseType: memberData?.houseType ? String(memberData?.houseType) : "",
+    electricity: memberData?.electricity ? String(memberData?.electricity) : "",
+    drinkingWater: memberData?.drinkingWater ? String(memberData?.drinkingWater) : "",
+    sanitation: memberData?.sanitation ? String(memberData?.sanitation) : "",
+    lpg: memberData?.lpg ? (memberData?.lpg === "No" ? "No" : "Yes") : "",
 
     // livelihood
-    landOwnership: p.livelihood?.landOwnership,
-    totalLand: p.livelihood?.totalLand,
-    irrigatedLand: p.livelihood?.irrigatedLand,
-    rainfedLand: p.livelihood?.rainfedLand,
-    uncultivatedLand: p.livelihood?.uncultivatedLand,
-    ownsLivestock: p.livelihood?.ownsLivestock,
-    cowCount: p.livelihood?.cowCount,
-    bullCount: p.livelihood?.bullCount,
-    buffaloCount: p.livelihood?.buffaloCount,
-    nonFarmActivity: p.livelihood?.nonFarmActivity,
-    wageLabour: p.livelihood?.wageLabour,
-    migration: p.livelihood?.migration,
-    migrationPurpose: p.livelihood?.migrationPurpose,
+    // landOwnership as "f" or "t"
+    landOwnership: memberData?.landOwnership ? (memberData?.landOwnership === "No" ? "No" : "Yes") : "",
+    // totalLand as number string
+    totalLand: memberData?.totalLand ? String(memberData?.totalLand) : "",
+    irrigatedLand: memberData?.irrigatedLand ? String(memberData?.irrigatedLand) : "",
+    rainfedLand: memberData?.rainfedLand ? String(memberData?.rainfedLand) : "",
+    uncultivatedLand: memberData?.uncultivatedLand ? String(memberData?.uncultivatedLand) : "",
+    // ownsLivestock as "f" or "t"
+    ownsLivestock: memberData?.ownsLivestock ? (memberData?.ownsLivestock === "No" ? "No" : "Yes") : "",
+    cowCount: memberData?.cowCount ? String(memberData?.cowCount) : "",
+    bullCount: memberData?.bullCount ? String(memberData?.bullCount) : "",
+    buffaloCount: memberData?.buffaloCount ? String(memberData?.buffaloCount) : "",
+    nonFarmActivity: memberData?.nonFarmActivity ? String(memberData?.nonFarmActivity) : "",
+    wageLabour: memberData?.wageLabour ? String(memberData?.wageLabour) : "",
+    // migration as "f" or "t"
+    migration: memberData?.migration ? (memberData?.migration === "No" ? "No" : "Yes") : "",
+    migrationPurpose: memberData?.migrationPurpose,
 
     // income
-    annualIncome: p.income?.annualIncome,
-    majorIncomeSource: p.income?.majorIncomeSource,
-    savingsPerMonth: p.income?.savingsPerMonth,
-    hasBankAccount: p.income?.hasBankAccount,
-    bankName: p.income?.bankName,
-    accountNo: p.income?.accountNo,
-    branchName: p.income?.branchName,
-    accountType: p.income?.accountType,
-    ifsc: p.income?.ifsc,
+    // annualIncome as number string
+    annualIncome: memberData?.annualIncome ? String(memberData?.annualIncome) : "",
+    majorIncomeSource: memberData?.majorIncomeSource,
+    // savingsPerMonth as number string
+    savingsPerMonth: memberData?.savingsPerMonth ? String(memberData?.savingsPerMonth) : "",
+    hasBankAccount: memberData?.hasBankAccount,
+    bankName: memberData?.bankName ? String(memberData?.bankName) : "",
+    accountNo: memberData?.accountNo ? String(memberData?.accountNo) : "",
+    branchName: memberData?.branchName ? String(memberData?.branchName) : "",
+    accountType: memberData?.accountType ? String(memberData?.accountType) : "",
+    ifsc: memberData?.ifsc ? String(memberData?.ifsc) : "",
 
     // documents (skip file fields)
-    valueChainMapping: p.documents?.valueChainMapping,
-    pgMapping: p.documents?.pgMapping,
-    undertaking: p.documents?.undertaking,
+    valueChainMapping: memberData?.valueChainMapping || "",
+    pgMapping: memberData?.pgMapping || "",
+    undertaking: memberData?.undertaking || false,
   };
 }
 
@@ -198,36 +220,69 @@ function flattenWithExceptions(obj, keepKeys = []) {
   return result;
 }
 
+async function fetchMemberData(memberId) {
+  const url = "v1/master/data";
+  const method = "get";
+  const params = { type: "member", id: memberId };
+  const payload = null;
+  const members = await apiService({ method, url, params, payload });
+  if (!members) throw new Error("Member not found");
+  return members;
+}
+
 export default function BeneficiaryMemberProfile() {
   const DynamicForm = getComponent("DynamicForm");
   const ConfigStepperMUI = getComponent("ConfigStepperMUI");
-  // const DSDialog = getComponent("DSDialog");
-  const AppButton = getComponent("AppButton");
   const formApiRef = React.useRef(null);
-  const [error, setError] = useState(null);
-   const { enqueue } = useSnackbar();
+  const { enqueue } = useSnackbar();
+  const { show, hide } = useLoader();
   const history = useHistory();
 
   const submitMutation = useSubmitData();
-  const handleValuesChange = React.useCallback((vals, meta) => {
-    if (meta?.name !== "memberToUpdate") return;
-    const id = typeof vals.memberToUpdate === "object"
-      ? (vals.memberToUpdate?.id ?? vals.memberToUpdate?.value ?? vals.memberToUpdate?.code ?? null)
-      : vals.memberToUpdate;
+  const handleValuesChange = React.useCallback(async (vals, meta) => {
+    const name = meta?.name;
+    if (!name) return;
 
-    if (!id) return;
 
-    // force update mode
-    formApiRef.current?.setValue?.("action", "update", { shouldDirty: false });
+    // helper: reset form to create defaults
+    const resetToCreate = (actionVal) => {
+      const defaults = flatFromMock({},false);
+      defaults.action = actionVal;
+      formApiRef.current?.patch?.(defaults, { shouldValidate: false, shouldDirty: false });
+    };
+    // if action changed, reset to blank/create or clear form
+    if (name === "action") {
+      const actionVal = String(vals.action ?? "").toLowerCase();
+      if (actionVal === "create" || actionVal === "update") {
+        // reset entire form for a fresh "/create" or "/update" flow
+        resetToCreate(actionVal);
+        return;
+      }
+    }
+    if (name !== "memberId") return;
+    const id = typeof vals.memberId === "object"
+      ? (vals.memberId?.id ?? vals.memberId?.value ?? vals.memberId?.code ?? null)
+      : vals.memberId;
+    const memberId = id;
+    if (!memberId) return;
+    // Optionally show loading indicator here
 
-    // use hardcoded data
-    const flat = flatFromMock(MOCK_PROFILE);
+    try {
+      // Fetch member data from API
+      const memberData = await fetchMemberData(memberId);
 
-    // IMPORTANT: ensure the selected member id remains what the user picked
-    flat.memberToUpdate = id;
+      // Flatten or transform memberData as needed for your form
+      // If your API returns flat data, use it directly
+      const flat = flatFromMock(memberData,true);
 
-    // merge into the form without marking dirty / revalidating
-    formApiRef.current?.patch?.(flat, { shouldValidate: false, shouldDirty: false });
+      // IMPORTANT: ensure the selected member id remains what the user picked
+      flat.memberId = memberId;
+      // Patch the form with the fetched data
+      formApiRef.current?.patch?.(flat, { shouldValidate: false, shouldDirty: false });
+    } catch (err) {
+      enqueue({ message: "Failed to load member data", severity: "error" });
+    }
+
   }, []);
 
   // Handler for form submit
@@ -238,48 +293,46 @@ export default function BeneficiaryMemberProfile() {
     // Flatten the formData, keeping the specified keys as objects/arrays
     const flatFormData = flattenWithExceptions(vals, keepKeys);
 
+    const isUpdate = String(flatFormData.action || "").toLowerCase() === "update";
+    show(isUpdate ? "Updating member profile — please wait..." : "Submitting member profile — please wait...");
     const payload = {
       module: "USER_DATA_UPDATE",
-      operation: "CREATE",
+      operation: isUpdate ? "UPDATE" : "CREATE",
       formType: "MEMBER_PROFILE",
       formData: flatFormData,
     };
     const Url = "v1/reap/operations";
     const method = "post";
-
     submitMutation.mutate(
       { method, url: Url, payload },
       {
         onSuccess: (response) => {
+          hide();
+          enqueue({
+            message: isUpdate ? "Member profile updated successfully" : "Form submitted successfully",
+            severity: "success",
+            duration: 6000,
+          });
           console.log("SUBMIT SUCCESS", response);
-          // Build your params
           const params = new URLSearchParams({
             status: "success",
-            heading: "Submission Successful For Member Profile",
+            heading: isUpdate ? "Update Successful For Member Profile" : "Submission Successful For Member Profile",
             form: "Beneficiary Member Profile",
-            body: "Your profile has been successfully created.",
+            body: isUpdate ? "Your profile has been successfully updated." : "Your profile has been successfully created.",
             name: response?.data?.data?.memberName || "Unknown",
-            memberId: response?.data?.data?.memberId || "00XX00",
-            mobileNumber: response?.data?.data?.mobile || "9999999999",
+            memberId: response?.data?.data?.memberId || "00XX00"
           }).toString();
-
-          // history.push(`/common/acknowledgement_page?${params}`);
-
-          // const segments = window.location.pathname.split("/").filter(Boolean);
-          // const context = segments.length ? `/${segments[0]}` : "";
-          // history.push(`${context}/common/acknowledgement_page?${params}`);
           const target = `${window.location.origin}/common/acknowledgement_page?${params}`;
           window.location.href = target;
         },
         onError: (error) => {
-             const errMsg = 
+          hide();
+          const errMsg =
             error?.response?.data?.error?.message ||
-           error?.message ||
+            error?.message ||
             "Error submitting form.";
           console.log("SUBMIT ERROR", error);
-          enqueue({ message: errMsg, severity: "error", duration: 6000 });   
-          console.log("SUBMIT ERROR", error);
-          // Optionally show an error message
+          enqueue({ message: errMsg, severity: "error", duration: 6000 });
         },
       }
     );
@@ -293,10 +346,13 @@ export default function BeneficiaryMemberProfile() {
         formApiRef={formApiRef}
         steps={memberProfileSteps}
         getStepActions={(step, ctx) =>
-          ctx.index === ctx.total - 1 ? ["prev", "save", "draft", "submit"] : ["prev", "save", "next", "draft"]
+          ctx.index === ctx.total - 1 ? ["prev", "submit"] : ["prev", "next"]
         }
-        onSave={(vals) => console.log("SAVE", vals)}
-        onDraft={(vals) => console.log("DRAFT", vals)}
+        // getStepActions={(step, ctx) =>
+        //   ctx.index === ctx.total - 1 ? ["prev", "save", "draft", "submit"] : ["prev", "save", "next", "draft"]
+        // }
+        // onSave={(vals) => console.log("SAVE", vals)}
+        // onDraft={(vals) => console.log("DRAFT", vals)}
         onSubmit={handleSubmit}
         formProps={{
           entityId: "member-profile",

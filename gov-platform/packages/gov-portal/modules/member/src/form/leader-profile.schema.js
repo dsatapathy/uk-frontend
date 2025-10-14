@@ -12,10 +12,10 @@ export const leaderProfileSchema = {
                     id: "action",
                     type: "radio-group",
                     label: "Action",
-                    defaultValue: "add",
+                    defaultValue: "create",
                     options: {
                         items: [
-                            { label: "Create New", value: "add" },
+                            { label: "Create New", value: "create" },
                             { label: "Update Existing", value: "update" }
                         ]
                     },
@@ -70,6 +70,34 @@ export const leaderProfileSchema = {
                     grid: { span: { xs: 12, sm: 6, md: 4 } }
                 },
                 {
+                    id: "presidentName",
+                    type: "text",
+                    label: "President Name",
+                    validations: [{ type: "required" }],
+                    rules: [{ when: "values.action === 'update'", action: "hide" }],
+                    grid: { span: { xs: 12, sm: 6, md: 4 } }
+                },
+                {
+                    id: "presidentNameId",
+                    type: "text",
+                    label: "Select President Name",
+                    options: {
+                        endpointKey: "v1/master/data",
+                        labelKey: "name",
+                        valueKey: "id",
+                        query: { type: "leader_profiles" },
+                        dependsOn: ["values.clfLc"],
+                        dependsOnHint: "Select CLF/LC first",
+                        queryBuilder: (deps) => ({
+                            type: "leader_profiles",
+                            id: deps.clfLc
+                        })
+                    },
+                    validations: [{ type: "required" }],
+                    rules: [{ when: "values.action !== 'update'", action: "hide" }],
+                    grid: { span: { xs: 12, sm: 6, md: 4 } }
+                },
+                {
                     id: "yearOfRegistration",
                     type: "date",
                     label: "Year of Registration",
@@ -91,17 +119,10 @@ export const leaderProfileSchema = {
                     label: "Year Taken in REAP",
                     options: {
                         endpointKey: "v1/master/data",
-                        labelKey: "year",
-                        valueKey: "year",
-                        query: { type: "years" }
+                        labelKey: "label",
+                        valueKey: "value",
+                        query: { type: "reap_year" }
                     },
-                    validations: [{ type: "required" }],
-                    grid: { span: { xs: 12, sm: 6, md: 4 } }
-                },
-                {
-                    id: "presidentName",
-                    type: "text",
-                    label: "President Name",
                     validations: [{ type: "required" }],
                     grid: { span: { xs: 12, sm: 6, md: 4 } }
                 },
@@ -120,6 +141,7 @@ export const leaderProfileSchema = {
                         { type: "required" },
                         { type: "pattern", value: "^[6-9]\\d{9}$", message: "Invalid mobile number" }
                     ],
+                    props: { maxLength: 10, placeholder: "10-digit number" },
                     grid: { span: { xs: 12, sm: 6, md: 4 } }
                 },
                 {
@@ -128,8 +150,8 @@ export const leaderProfileSchema = {
                     label: "Designation",
                     options: {
                         endpointKey: "v1/master/data",
-                        labelKey: "name",
-                        valueKey: "id",
+                        labelKey: "label",
+                        valueKey: "value",
                         query: { type: "designations" }
                     },
                     validations: [{ type: "required" }],
@@ -176,7 +198,7 @@ export const leaderProfileSchema = {
                         endpointKey: "v1/master/data",
                         labelKey: "label",
                         valueKey: "value",
-                        query: { type: "gender" }
+                        query: { type: "gender"}
                     },
                     grid: { span: { xs: 12, sm: 6, md: 4 } }
                 },

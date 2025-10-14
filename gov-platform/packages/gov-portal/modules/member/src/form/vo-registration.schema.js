@@ -1,5 +1,4 @@
-import { grid } from "@mui/system";
-
+// VO Registration Form Schema
 export const voRegistrationFormSchema = {
     $schema: "fe.v1",
     id: "vo-registration",
@@ -14,10 +13,10 @@ export const voRegistrationFormSchema = {
                     id: "action",
                     type: "radio-group",
                     label: "Action",
-                    defaultValue: "add",
+                    defaultValue: "create",
                     options: {
                         items: [
-                            { label: "Add New Member", value: "add" },
+                            { label: "Create New VO", value: "create" },
                             { label: "Update Existing", value: "update" }
                         ]
                     },
@@ -76,12 +75,63 @@ export const voRegistrationFormSchema = {
                     grid: { span: { xs: 12, sm: 6, md: 4 }, }
                 },
                 {
+                    id: "clf",
+                    type: "autocomplete",
+                    label: "Parent CLF",
+                    options: {
+                        endpointKey: "v1/master/data",
+                        labelKey: "name",
+                        valueKey: "id",
+                        query: { type: "clf_profiles" },
+                        dependsOn: ["values.block"],
+                        dependsOnHint: "Select Block first",
+                        queryBuilder: (deps) => ({
+                            type: "clf_profiles",
+                            id: deps.block
+                        })
+                    },
+                    validations: [{ type: "required" }],
+                    grid: { span: { xs: 12, sm: 6, md: 4 } }
+                },
+                {
                     id: "vo",
                     type: "text",
-                    label: "VO",
+                    label: "Enter VO Name",
                     validations: [{ type: "required" }],
                     description: "Enter the VO under the CLF",
+                    rules: [{ when: "values.action === 'update'", action: "hide" }],
                     grid: { span: { xs: 12, sm: 6, md: 4 }, }
+                },
+                {
+                    id: "voId",
+                    type: "autocomplete",
+                    label: "Choose VO to Update",
+                    options: {
+                        endpointKey: "v1/master/data",
+                        labelKey: "name",
+                        valueKey: "id",
+                        query: { type: "vo_profiles" },
+                        dependsOn: ["values.clf"],
+                        dependsOnHint: "Select CLF first",
+                        queryBuilder: (deps) => ({
+                            type: "vo_profiles",
+                            id: deps.clf
+                        })
+                    },
+                    validations: [{ type: "required" }],
+                    rules: [{ when: "values.action !== 'update'", action: "hide" }],
+                    grid: { span: { xs: 12, sm: 6, md: 4 } }
+                },
+                {
+                    id: "vo_registration_code",
+                    type: "text",
+                    label: "VO Registration Code",
+                    validations: [
+                        { type: "required" },
+                        { type: "pattern", value: "^[0-9]*$", message: "Only numbers are allowed" }
+                    ],
+                    grid: { span: { xs: 12, sm: 6, md: 4 }, },
+                    description: "Select VO code in the CLF from the dropdown"
                 },
                 {
                     id: "date_of_registration",
@@ -93,15 +143,6 @@ export const voRegistrationFormSchema = {
                     config: { valueKind: "iso", outputFormat: "YYYY-MM-DD", disableFuture: true },
                 },
                 {
-                    id: "vo_registration_code",
-                    type: "dropdown",
-                    label: "VO Registration Code",
-                    options: { endpointKey: "vo_codes", deps: ["vo"] },
-                    validations: [{ type: "required" }],
-                    grid: { span: { xs: 12, sm: 6, md: 4 }, },
-                    description: "Select VO code in the CLF from the dropdown"
-                },
-                {
                     id: "address",
                     type: "text",
                     label: "Address",
@@ -110,18 +151,9 @@ export const voRegistrationFormSchema = {
                     grid: { span: { xs: 12, sm: 6, md: 4 }, },
                 },
                 {
-                    id: "parent_clf",
-                    type: "dropdown",
-                    label: "Parent CLF",
-                    options: { endpointKey: "clfs", deps: ["block"] },
-                    validations: [{ type: "required" }],
-                    description: "Select CLF in the block",
-                    grid: { span: { xs: 12, sm: 6, md: 4 }, },
-                },
-                {
                     id: "shg_mapped",
                     type: "text",
-                    label: "SHG Mapped",
+                    label: "No. of SHGs Mapped",
                     validations: [
                         { type: "required" },
                         { type: "pattern", value: "^\\d+$", message: "Invalid Input, Expecting Number" }
@@ -144,7 +176,7 @@ export const voRegistrationFormSchema = {
                     id: "monitoring_committee_formed",
                     type: "radio-group",
                     label: "Monitoring Committee Formed",
-                    options: { items: [{ label: "Yes", value: "yes" }, { label: "No", value: "no" }] },
+                    options: { items: [{ label: "Yes", value: "Yes" }, { label: "No", value: "No" }] },
                     validations: [{ type: "required" }],
                     description: "Select if monitoring committee is formed",
                     grid: { span: { xs: 12, sm: 6, md: 4 }, }
@@ -153,7 +185,7 @@ export const voRegistrationFormSchema = {
                     id: "livelihood_committee_formation",
                     type: "radio-group",
                     label: "Livelihood Committee Formation",
-                    options: { items: [{ label: "Yes", value: "yes" }, { label: "No", value: "no" }] },
+                    options: { items: [{ label: "Yes", value: "Yes" }, { label: "No", value: "No" }] },
                     validations: [{ type: "required" }],
                     description: "Select if livelihood committee is formed",
                     grid: { span: { xs: 12, sm: 6, md: 4 }, }
@@ -162,7 +194,7 @@ export const voRegistrationFormSchema = {
                     id: "seed_revolving_fund_received",
                     type: "radio-group",
                     label: "Seed Revolving Fund Received",
-                    options: { items: [{ label: "Yes", value: "yes" }, { label: "No", value: "no" }] },
+                    options: { items: [{ label: "Yes", value: "Yes" }, { label: "No", value: "No" }] },
                     validations: [{ type: "required" }],
                     description: "Select if seed revolving fund received",
                     grid: { span: { xs: 12, sm: 6, md: 4 }, }
@@ -179,7 +211,7 @@ export const voRegistrationFormSchema = {
                     id: "seed_revolving_fund_utilised",
                     type: "radio-group",
                     label: "Seed Revolving Fund Utilised",
-                    options: { items: [{ label: "Yes", value: "yes" }, { label: "No", value: "no" }] },
+                    options: { items: [{ label: "Yes", value: "Yes" }, { label: "No", value: "No" }] },
                     validations: [{ type: "required" }],
                     description: "Select if seed revolving fund utilised",
                     grid: { span: { xs: 12, sm: 6, md: 4 }, }
@@ -188,7 +220,7 @@ export const voRegistrationFormSchema = {
                     id: "storage_for_drudgery_reduction_tools",
                     type: "radio-group",
                     label: "Storage For Drudgery Reduction Tools",
-                    options: { items: [{ label: "Yes", value: "yes" }, { label: "No", value: "no" }] },
+                    options: { items: [{ label: "Yes", value: "Yes" }, { label: "No", value: "No" }] },
                     validations: [{ type: "required" }],
                     description: "Select if storage for drudgery reduction tools available",
                     grid: { span: { xs: 12, sm: 6, md: 4 }, }
@@ -206,7 +238,7 @@ export const voRegistrationFormSchema = {
                     type: "text",
                     label: "VO A/C No.",
                     validations: [{ type: "required" },
-                        { type: "pattern", pattern: "^[0-9]*$", message: "Only numbers are allowed" }
+                    { type: "pattern", pattern: "^[0-9]*$", message: "Only numbers are allowed" }
                     ],
                     description: "Enter VO account number",
                     grid: { span: { xs: 12, sm: 6, md: 4 } }

@@ -5,7 +5,8 @@ import { useHistory } from "react-router-dom";
 import { runtime } from "@gov/core";
 import { useMenu } from "@gov/data";
 import { Box } from "@mui/material";
-import { SnackbarProvider} from "../../../library/src/atoms/Snackbar.jsx";
+import { SnackbarProvider } from "../../../library/src/atoms/Snackbar.jsx";
+import { LoaderProvider } from "../../../library/src/atoms/Loader.jsx";
 // ---------- helpers ----------
 function renderLogoFromBrand(brand) {
   if (!brand) return null;
@@ -33,7 +34,13 @@ function renderLogoFromBrand(brand) {
 
 // ---------- shells ----------
 export function AuthBlank({ children }) {
-  return <main>{children}</main>;
+  return (
+    <LoaderProvider>
+      <SnackbarProvider anchorOrigin={{ vertical: "bottom", horizontal: "center" }} autoHideDuration={4000}>
+        <main>{children}</main>
+      </SnackbarProvider>
+    </LoaderProvider>
+  );
 }
 
 export function DefaultShell({ children, brand }) {
@@ -111,40 +118,42 @@ export function DefaultShell({ children, brand }) {
     return <div style={{ padding: 16 }}>{children}</div>;
   }
 
-React.useEffect(() => {
+  React.useEffect(() => {
     const onForbidden = (e) => {
       // optional: read message/status: e.detail?.message, e.detail?.status
       // clear app state here if you have a store: e.g., store.dispatch(logout())
       try {
         // remove auth tokens from local storage if used
         if (typeof window !== "undefined") {
-          try { window.localStorage.clear(); } catch (_) {}
-          try { window.sessionStorage.clear(); } catch (_) {}
+          try { window.localStorage.clear(); } catch (_) { }
+          try { window.sessionStorage.clear(); } catch (_) { }
         }
-      } catch (err) {}
+      } catch (err) { }
       // redirect to login
       if (typeof window !== "undefined") {
         window.location.href = "/login";
       }
     };
     window.addEventListener("auth:forbidden", onForbidden);
-   return () => window.removeEventListener("auth:forbidden", onForbidden);
+    return () => window.removeEventListener("auth:forbidden", onForbidden);
   }, []);
 
   return (
-     <SnackbarProvider anchorOrigin={{ vertical: "bottom", horizontal: "center" }} autoHideDuration={4000}>
-    <NavLayout
-      brand={brand}          // ⬅️ pass through
-      menu={menu}
-      user={user}
-      logo={logo}
-      title={title}
-      onSearch={handleSearch}
-      onNavigate={handleNavigate}
-    >
-      {children}
-    </NavLayout>
-    </SnackbarProvider>
+    <LoaderProvider>
+      <SnackbarProvider anchorOrigin={{ vertical: "bottom", horizontal: "center" }} autoHideDuration={4000}>
+        <NavLayout
+          brand={brand}          // ⬅️ pass through
+          menu={menu}
+          user={user}
+          logo={logo}
+          title={title}
+          onSearch={handleSearch}
+          onNavigate={handleNavigate}
+        >
+          {children}
+        </NavLayout>
+      </SnackbarProvider>
+    </LoaderProvider>
   );
 }
 

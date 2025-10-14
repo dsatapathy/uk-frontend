@@ -7,19 +7,20 @@ export async function handleLogoutService() {
     const token = http().getAccessToken();
 
     try {
-        await http().request({
+        const response = await http().request({
             url: "v1/auth/logout", // Use full URL if needed
             method: "post",
             headers: {
                 Authorization: `Bearer ${token}`,
             },
         });
-        alert("You have been logged out successfully !!!");
-        localStorage.clear();
-        sessionStorage.clear();
-        window.location.reload();
+        console.log("Logout Data", response);
+        if (response.status === 200) {
+            return true;
+        } else {
+            throw new Error("Logout failed");
+        }
     } catch (err) {
-        alert("Error while logging out.");
         console.error("Logout error:", err);
         
     }

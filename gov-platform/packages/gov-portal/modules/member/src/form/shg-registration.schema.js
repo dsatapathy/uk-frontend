@@ -12,10 +12,10 @@ export const shgRegistrationSchema = {
           id: "action",
           type: "radio-group",
           label: "Action",
-          defaultValue: "add",
+          defaultValue: "create",
           options: {
             items: [
-              { label: "Add New Member", value: "add" },
+              { label: "Create New SHG", value: "create" },
               { label: "Update Existing", value: "update" }
             ]
           },
@@ -131,9 +131,9 @@ export const shgRegistrationSchema = {
           grid: { span: { xs: 12, sm: 6, md: 4 } }
         },
         {
-          id: "shg",
+          id: "shgId",
           type: "autocomplete",
-          label: "SHG",
+          label: "SHG (Name)",
           options: {
             endpointKey: "v1/master/data",
             labelKey: "name",
@@ -147,53 +147,30 @@ export const shgRegistrationSchema = {
             })
           },
           validations: [{ type: "required" }],
+          rules: [{ when: "values.action !== 'update'", action: "hide" }],
           grid: { span: { xs: 12, sm: 6, md: 4 } }
         },
+        // ADD flow field
         {
           id: "shgCode",
-          type: "autocomplete",
-          label: "SHG Code",
-          options: {
-            endpointKey: "v1/master/data",
-            labelKey: "code",
-            valueKey: "code",
-            query: { type: "shg_profiles" },
-            dependsOn: ["values.vo"],
-            dependsOnHint: "Select VO first",
-            queryBuilder: (deps) => ({
-              type: "shg_profiles",
-              id: deps.vo
-            })
-          },
+          type: "text",
+          label: "Enter SHG Code",
           validations: [{ type: "required" }],
           grid: { span: { xs: 12, sm: 6, md: 4 } }
         },
         // ADD flow field
         {
-          id: "memberName",
+          id: "shgName",
           type: "text",
           label: "Name of SHG",
           validations: [{ type: "required" }],
           rules: [{ when: "values.action === 'update'", action: "hide" }],
           grid: { span: { xs: 12, sm: 6, md: 4 } },
         },
-        // UPDATE flow field
-        {
-          id: "memberToUpdate",
-          type: "autocomplete",
-          label: "Select Member to Update",
-          options: {
-            endpointKey: "shgMembers", labelKey: "name", valueKey: "id",
-            dependsOn: ["values.shg"], dependsOnHint: "Select SHG first",
-          },
-          validations: [{ type: "required" }],
-          rules: [{ when: "values.action !== 'update'", action: "hide" }],
-          grid: { span: { xs: 12, sm: 6, md: 4 } },
-        },
         {
           id: "shgJoinDate",
           type: "date",
-          label: "Date of SHG Joining",
+          label: "Date of SHG Registration",
           validations: [{ type: "required" }],
           props: { format: "DD/MM/YYYY" },
           config: { valueKind: "iso", outputFormat: "YYYY-MM-DD", disableFuture: true },
@@ -234,14 +211,13 @@ export const shgRegistrationSchema = {
         },
         {
           id: "meetingFrequency",
-          type: "dropdown",
+          type: "autocomplete",
           label: "SHG Meeting Frequency",
-          options: {
-            items: [
-              { label: "Week", value: "week" },
-              { label: "Bi-Weekly", value: "biweekly" },
-              { label: "Monthly", value: "monthly" }
-            ]
+           options: {
+            endpointKey: "v1/master/data",
+            labelKey: "label",
+            valueKey: "value",
+            query: { type: "meeting_frequency" }  // This will be sent as query params
           },
           grid: { span: { xs: 12, sm: 6, md: 4 } },
           validations: [{ type: "required" }]
@@ -434,10 +410,11 @@ export const shgRegistrationSchema = {
         {
           id: "shgAccountNumber",
           type: "text",
-          label: "SHG A/C No.",
+          label: "SHG Bank A/C No.",
           description: "SHG bank account number.",
           // props: { inputMode: "numeric" },
           grid: { span: { xs: 12, sm: 6, md: 4 } },
+          props: { maxLength: 24 },
           validations: [
             { type: "required" },
             { type: "pattern", value: "^\\d+$", message: "Invalid Input, Expecting Number" }
@@ -446,10 +423,19 @@ export const shgRegistrationSchema = {
         {
           id: "shgIfsc",
           type: "text",
-          label: "SHG IFSC Code",
+          label: "SHG Bank IFSC Code",
           description: "IFSC code of the bank associated with the SHG.",
           grid: { span: { xs: 12, sm: 6, md: 4 } },
-          validations: [{ type: "required" }]
+      
+          validations: [
+            { type: "required" },
+            { 
+              type: "pattern", 
+              value: "^[A-Z]{4}0[A-Z0-9]{6}$", 
+              message: "Invalid IFSC" 
+            }
+          ], 
+          props: { maxLength: 11 },
         },
 
         /* Evidence */
