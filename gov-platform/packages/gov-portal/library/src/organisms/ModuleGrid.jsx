@@ -20,10 +20,10 @@ export const ModuleGrid = React.memo(function ModuleGrid({
   const isLgUp = useMediaQuery(theme.breakpoints.up("lg"));   // >=1200
 
   // Default grid: xs=1 col, sm=2, md=4, lg=4 (you set md:3/ lg:3 -> 4 cards/row)
-  const itemProps = config?.layout?.itemProps || { xs: 12, sm: 6, md: 3, lg: 3 };
+  const itemProps = config?.layout?.itemProps || { xs: 12, sm: 3, md: 3, lg: 3 };
 
   // Responsive card height (can be overridden via config.layout.cardHeights)
-  const defaultHeights = { xs: 184, sm: 210, md: 240, lg: 260 };
+  const defaultHeights = { xs: 184, sm: 210, md: 240, lg: 60 };
   const cfgHeights = config?.layout?.cardHeights || defaultHeights;
 
   const cardHeight = React.useMemo(() => {

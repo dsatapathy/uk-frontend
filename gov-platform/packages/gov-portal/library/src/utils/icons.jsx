@@ -22,6 +22,9 @@ const LOADERS = {
   refresh: () => import("@mui/icons-material/Refresh"),
   add: () => import("@mui/icons-material/Add"),
   remove: () => import("@mui/icons-material/Remove"),
+  person: () => import("@mui/icons-material/Person"),
+  agriculture: () =>  import('@mui/icons-material/Agriculture'),
+  business: () => import('@mui/icons-material/Business')
 };
 /** 2) Aliases */
 const ALIASES = {
