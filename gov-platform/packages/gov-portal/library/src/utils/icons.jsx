@@ -23,7 +23,7 @@ const LOADERS = {
   add: () => import("@mui/icons-material/Add"),
   remove: () => import("@mui/icons-material/Remove"),
   person: () => import("@mui/icons-material/Person"),
-  agriculture: () =>  import('@mui/icons-material/Agriculture'),
+  agriculture: () => import('@mui/icons-material/Agriculture'),
   business: () => import('@mui/icons-material/Business')
 };
 /** 2) Aliases */
@@ -75,14 +75,19 @@ export function prefetchIcons(...names) {
 }
 
 /** 4) Icon component using the cache */
-export function Icon({ name, fontSize = "small", color = "#fff", ...props }) {
+export function Icon({ name, fontSize = "small", color, sx, ...props }) {
   const key = resolveKey(name);
   const LazyIcon = getLazyIconForKey(key);
   if (!LazyIcon) return null;
-
+  console.log("sx", sx)
   return (
     <React.Suspense fallback={null}>
-      <LazyIcon fontSize={fontSize} color={color} {...props} />
+      <LazyIcon
+        fontSize={fontSize}
+        htmlColor={color || undefined}
+        sx={{ color: color ? undefined : "inherit", ...(sx || {}) }}
+        {...props}
+      />
     </React.Suspense>
   );
 }

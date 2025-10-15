@@ -1,9 +1,9 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { ListItemButton, Box } from "@mui/material";
-import IconSlot from "../atoms/IconSlot";
 import NavChevron from "../atoms/NavChevron";
 import TypographyX from "../atoms/TypographyX";
+import { getIcon } from "../utils/icons";
 
 export default function NavItem({ item, level = 0, selected, open, onClick }) {
   const INDENT = 12 + level * 14;
@@ -26,11 +26,8 @@ export default function NavItem({ item, level = 0, selected, open, onClick }) {
         pl: 0,
         borderRadius: "var(--g-radius, 12px)",
         position: "relative",
-
-        color: "var(--sidebar-fg, var(--g-fg))",
-        backgroundColor: selected
-          ? "var(--sidebar-active-bg)"
-          : "transparent",
+        color: "var(--g-primary-contrast)",
+        backgroundColor: selected ? "var(--sidebar-active-bg)" : "transparent",
         border: selected
           ? "1px solid var(--sidebar-active-bd)"
           : "1px solid transparent",
@@ -38,23 +35,29 @@ export default function NavItem({ item, level = 0, selected, open, onClick }) {
         transition:
           "background-color .18s ease, transform .12s ease, border-color .18s ease",
         "&:hover": {
-          backgroundColor: "var(--sidebar-hover-bg)",
+          backgroundColor: "var(--g-primary-contrast)",
           transform: "translateY(-1px)",
+          transition:
+            "background-color .18s ease, transform .08s ease-out, border-color .18s ease",
+
+          "& .nav-label": { color: "#01604a !important" },
+          "& .nav-icon .MuiSvgIcon-root, & .nav-chevron .MuiSvgIcon-root": {
+            color: "#01604a !important",
+          },
         },
 
-        // active accent strip
         "&::before": selected
           ? {
-              content: '""',
-              position: "absolute",
-              left: 6,
-              top: 8,
-              bottom: 8,
-              width: 3,
-              borderRadius: 3,
-              background:
-                "linear-gradient(var(--sidebar-accent), color-mix(in srgb, var(--sidebar-accent) 25%, transparent))",
-            }
+            content: '""',
+            position: "absolute",
+            left: 6,
+            top: 8,
+            bottom: 8,
+            width: 3,
+            borderRadius: 3,
+            background:
+              "linear-gradient(var(--sidebar-accent), color-mix(in srgb, var(--sidebar-accent) 25%, transparent))",
+          }
           : {},
       }}
     >
@@ -63,6 +66,7 @@ export default function NavItem({ item, level = 0, selected, open, onClick }) {
 
       {/* icon */}
       <Box
+        className="nav-icon"
         sx={{
           width: ICON_W,
           height: 22,
@@ -70,17 +74,16 @@ export default function NavItem({ item, level = 0, selected, open, onClick }) {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          color: selected
-            ? "var(--sidebar-accent)"
-            : "var(--sidebar-fg-dim, var(--g-fg-muted))",
+          color: "var(--g-primary-contrast)"
         }}
       >
-        {item.icon ? <IconSlot name={item.icon} /> : null}
+        {item.icon ? getIcon(item.icon, { fontSize: "medium", sx: { color: "inherit" } }) : null}
       </Box>
 
       {/* label */}
       <TypographyX
         variant="body2"
+        className="nav-label"
         sx={{
           flex: "1 1 auto",
           minWidth: 0,
@@ -89,9 +92,7 @@ export default function NavItem({ item, level = 0, selected, open, onClick }) {
           textOverflow: "ellipsis",
           fontWeight: selected ? 700 : 600,
           letterSpacing: 0.1,
-          color: selected
-            ? "var(--sidebar-label-active)"
-            : "var(--sidebar-fg, var(--g-fg))",
+          color: "var(--g-primary-contrast)"
         }}
         onClick={(e) => {
           if (!hasChildren && onClick) onClick(e);
@@ -102,14 +103,8 @@ export default function NavItem({ item, level = 0, selected, open, onClick }) {
 
       {/* chevron or spacer */}
       {hasChildren ? (
-        <Box
-          sx={{
-            color: selected
-              ? "var(--sidebar-accent)"
-              : "var(--sidebar-fg-dim, var(--g-fg-muted))",
-          }}
-        >
-          <NavChevron open={open} />
+        <Box className="nav-chevron" sx={{ color: "var(--g-primary-contrast)" }}>
+          <NavChevron open={open} sx={{ color: "inherit" }} />
         </Box>
       ) : (
         <Box sx={{ width: 12, flex: "0 0 auto" }} />

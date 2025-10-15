@@ -208,7 +208,7 @@ export default function TopBar(props) {
   );
 
   const itemSx = {
-    mx: 1, my: 0.25, borderRadius: 2,
+    mx: 1, my: 0.25, borderRadius: 2, color: "#01604a",
     "&:hover": { backgroundColor: alpha(primaryColor, 0.08) },
   };
 
@@ -485,7 +485,7 @@ export default function TopBar(props) {
               onClick={() => { profile.onClose(); item.onClick?.(item); }}
               sx={itemSx}
             >
-              {item.icon ? <ListItemIcon>{getIcon(item.icon)}</ListItemIcon> : null}
+              {item.icon ? getIcon(item.icon, { fontSize: "medium", sx: { color: "#01604a" } }) : null}
               <ListItemText primary={item.label} />
             </MenuItem>
           ))}
