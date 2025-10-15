@@ -126,7 +126,7 @@ export const DEFAULT_THEME = {
 
     MuiSvgIcon: {
       styleOverrides: {
-        root: { color: "var(--field-icon, #fff)" },
+        root: { color: "var(--field-icon, #94a3b8)" },
       },
     },
 
@@ -144,7 +144,7 @@ export const DEFAULT_THEME = {
     MuiCheckbox: {
       styleOverrides: {
         root: {
-          color: "var(--field-icon, #fff)",
+          color: "var(--field-icon, #94a3b8)",
           "&.Mui-checked, &.MuiCheckbox-indeterminate": {
             color: "var(--g-primary)",
           },
@@ -154,7 +154,7 @@ export const DEFAULT_THEME = {
     MuiRadio: {
       styleOverrides: {
         root: {
-          color: "var(--field-icon, #fff)",
+          color: "var(--field-icon, #94a3b8)",
           "&.Mui-checked": { color: "var(--g-primary)" },
         },
       },
