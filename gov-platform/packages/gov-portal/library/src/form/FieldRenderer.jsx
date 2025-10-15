@@ -55,9 +55,17 @@ export function FieldRenderer({ control, field, errors, classes, globalStyle }) 
 
   const errObj = errors?.[name];
   const errMsg = errObj?.message || "";
+  const tfp = textFieldProps || {};
+  const helperSx = { minHeight: 20, m: 0 }; // reserve one line to prevent layout shift
+
   const labelColorSx = labelColor
-  ? { color: labelColor, "&.Mui-focused": { color: labelColor }, "&.Mui-error": { color: labelColor } }
-  : {};
+    ? {
+        color: labelColor,
+        "&.Mui-focused": { color: labelColor },
+        "&.Mui-error": { color: labelColor },
+      }
+    : {};
+
   // ---------- Checkbox (kept as-is with inline label) ----------
   if (type === "checkbox") {
     return (
@@ -66,10 +74,24 @@ export function FieldRenderer({ control, field, errors, classes, globalStyle }) 
           name={name}
           control={control}
           render={({ field: rhf }) => (
-            <FormControlLabel control={<Checkbox {...rhf} checked={!!rhf.value} />} label={label} />
+            <>
+              <FormControlLabel control={<Checkbox {...rhf} checked={!!rhf.value} />} label={label} />
+              
+              <div
+                className="field-helper"
+                style={{
+                  minHeight: 20,
+                  margin: 0,
+                  fontSize: 12,
+                  marginTop: 4,
+                  color: errMsg ? "#d32f2f" : "rgba(0,0,0,0.6)",
+                }}
+              >
+                {errMsg || " "}
+              </div>
+            </>
           )}
         />
-        {errMsg ? <div className="field-error">{errMsg}</div> : null}
       </div>
     );
   }
@@ -89,24 +111,27 @@ export function FieldRenderer({ control, field, errors, classes, globalStyle }) 
               error={!!errObj}
               disabled={!!disabled}
             >
-              {label ? <FormLabel htmlFor={name} sx={{ ...labelColorSx, ...(labelSx || {}) }} >{label}</FormLabel> : null}
+              {label ? (
+                <FormLabel htmlFor={name} sx={{ ...labelColorSx, ...(labelSx || {}) }}>
+                  {label}
+                </FormLabel>
+              ) : null}
 
               <TextField
                 id={name}
                 select
                 fullWidth
-                margin="none"                  // avoid double vertical spacing (FormControl handles it)
+                margin="none" // FormControl manages vertical spacing
                 placeholder={placeholder}
                 {...rhf}
                 error={!!errObj}
-                // helper text is rendered by FormHelperText below
                 InputProps={{
                   startAdornment: adornment ? (
                     <InputAdornment position="start">{adornment}</InputAdornment>
                   ) : null,
                   readOnly: readOnly || false,
                 }}
-                {...(textFieldProps || {})}
+                {...tfp}
                 // IMPORTANT: do not pass `label` here, we show label above
                 label={undefined}
                 helperText={undefined}
@@ -118,7 +143,10 @@ export function FieldRenderer({ control, field, errors, classes, globalStyle }) 
                 ))}
               </TextField>
 
-              <FormHelperText>{errMsg || textFieldProps?.helperText}</FormHelperText>
+              
+              <FormHelperText sx={helperSx}>
+                {errMsg || tfp.helperText || " "}
+              </FormHelperText>
             </FormControl>
           )}
         />
@@ -174,7 +202,11 @@ export function FieldRenderer({ control, field, errors, classes, globalStyle }) 
               error={!!errObj}
               disabled={!!disabled}
             >
-              {label ? <FormLabel htmlFor={name} sx={{ ...labelColorSx, ...(labelSx || {}) }}>{label}</FormLabel> : null}
+              {label ? (
+                <FormLabel htmlFor={name} sx={{ ...labelColorSx, ...(labelSx || {}) }}>
+                  {label}
+                </FormLabel>
+              ) : null}
 
               <InputText
                 id={name}
@@ -195,14 +227,16 @@ export function FieldRenderer({ control, field, errors, classes, globalStyle }) 
                 config={mergedCfg}
                 // Do NOT pass `label` here; we show label via <FormLabel> above.
                 textFieldProps={{
-                  margin: "none",              // FormControl handles vertical spacing
-                  helperText: undefined,       // use FormHelperText below
-                  ...(textFieldProps || {}),
+                  margin: "none", // FormControl handles vertical spacing
+                  helperText: undefined, // we render helper below with reserved space
+                  ...tfp,
                   label: undefined,
                 }}
               />
 
-              <FormHelperText>{errMsg || textFieldProps?.helperText}</FormHelperText>
+              <FormHelperText sx={helperSx}>
+                {errMsg || tfp.helperText || " "}
+              </FormHelperText>
             </FormControl>
           );
         }}

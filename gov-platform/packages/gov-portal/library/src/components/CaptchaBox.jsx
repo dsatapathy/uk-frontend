@@ -18,6 +18,7 @@ export default function CaptchaBox({ control, cfg = {}, errors, classes, field }
   const name = cfg.name || "captcha";
   const length = cfg.length || 6;
   const inputRef = React.useRef(null);
+  const helperSx = { minHeight: 20, m: 0 };
 
   const make = React.useCallback((n) => {
     const cs = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
@@ -95,12 +96,9 @@ export default function CaptchaBox({ control, cfg = {}, errors, classes, field }
             textFieldProps={{
               margin: "none",
               helperText: undefined,
-              // 👇 remove InputProps here to avoid overriding the adornment
             }}
-            inputProps={{ readOnly: true, "aria-readonly": true }}  // or keep `readOnly` prop above
+            inputProps={{ readOnly: true, "aria-readonly": true }}
           />
-
-          {/* no helper text for display */}
         </FormControl>
 
         {/* User input — label on top + validation */}
@@ -156,8 +154,8 @@ export default function CaptchaBox({ control, cfg = {}, errors, classes, field }
                 }}
               />
 
-              <FormHelperText id={`${name}-help`}>
-                {errMsg}
+              <FormHelperText id={`${name}-help`} sx={helperSx}>
+                {errMsg || " "}
               </FormHelperText>
             </FormControl>
           )}
