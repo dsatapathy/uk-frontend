@@ -13,9 +13,6 @@
 
   /* ---- Brand & semantic remaps (LIGHT) ---- */
   /* Make “primary” the agri green */
-  --g-primary: var(--agri-600);
-  --g-primary-contrast: #ffffff;
-  --g-secondary: var(--agri-700);
   --g-link: var(--agri-600);
   --g-focus-ring: color-mix(in srgb, var(--agri-600) 35%, transparent);
 

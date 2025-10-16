@@ -99,6 +99,9 @@ export default function CaptchaBox({ control, cfg = {}, errors, classes, field }
             }}
             inputProps={{ readOnly: true, "aria-readonly": true }}
           />
+          <FormHelperText id={`${name}-help`} sx={helperSx}>
+            {""}
+          </FormHelperText>
         </FormControl>
 
         {/* User input — label on top + validation */}

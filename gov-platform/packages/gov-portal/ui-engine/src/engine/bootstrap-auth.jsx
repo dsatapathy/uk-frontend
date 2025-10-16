@@ -17,7 +17,7 @@ export function AppProviders({ cfg, http, storage, children }) {
 
   // MUI theme
   const theme = useMemo(
-    () => createTheme({ ...DEFAULT_THEME, ...(cfg?.theme || {}) }),
+    () => createTheme(DEFAULT_THEME, cfg?.theme || {}),
     [cfg?.theme]
   );
 

@@ -21,7 +21,7 @@
   /* fluid outer padding: 12px..24px depending on viewport */
   padding: clamp(12px, 4vh, var(--login-pad, 24px));
 
-  background: var(--login-bg, transparent);
+  background: var(--attention-gradient, transparent);
   background-image: var(--login-bg-img);
   background-size: var(--login-bg-fit, cover);
   background-position: var(--login-bg-pos, center);
@@ -39,7 +39,7 @@
 /* The card (MUI Card/Paper wrapper) */
 .authCard {
   position: relative;
-  background: linear-gradient(to right, rgba(35, 148, 96, 0.9) 0%, rgba(36, 149, 95, 0.9) 1%, rgba(111, 201, 38, 0.8) 100%);
+  background: var(--attention-gradient, transparent);;
   /* never exceed viewport width */
   width: 100%;
   max-width: var(--login-card-w, 480px);

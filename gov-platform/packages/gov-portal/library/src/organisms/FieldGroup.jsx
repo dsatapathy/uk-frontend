@@ -141,7 +141,7 @@ export default function FieldGroup({
         ].join(" ")}
         sx={{
           // ⛔️ Do not alter color → your gradient stays:
-          background: `linear-gradient(to right, #239460 0%, #6fc926 100%)`,
+          background: "var(--attention-gradient, linear-gradient(to right, #239460 0%, #6fc926 100%))",
           position: cfg.header.sticky ? "sticky" : "relative",
           top: cfg.header.sticky ? `var(--fg-sticky-top)` : "auto",
           zIndex: 1,

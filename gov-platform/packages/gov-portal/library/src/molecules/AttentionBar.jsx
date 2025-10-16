@@ -32,18 +32,18 @@ export const AttentionBar = React.memo(function AttentionBar({
     <DSBox
       intent={intent}
       variant={dsVariant}
-      elevation={{ xs: elevation, md: elevation }}              // no shadow on phones
-      radius={{ xs: 2, md: 2 }}                         // ← smaller radius on phones
-      p={{ xs: 3, sm: 2, md: 3 }}                      // tighter padding on phones
+      elevation={{ xs: elevation, md: elevation }}              
+      radius={{ xs: 2, md: 2 }}                         
+      p={{ xs: 3, sm: 2, md: 3 }}                     
       grid
-      gridCols={{ xs: "1fr", md: "1fr max-content" }}    // stack on phones
-      gridGap={{ xs: 1, md: 16 }}                        // ← smaller gap on phones
+      gridCols={{ xs: "1fr", md: "1fr max-content" }}
+      gridGap={{ xs: 1, md: 16 }}                        
       align="center"
       sx={{ 
         position: "relative", 
         overflow: "hidden", 
         minWidth: 0, 
-        background: `linear-gradient(to right, #239460 0%, #6fc926 100%)`,
+        background: "var(--attention-gradient, linear-gradient(to right, #239460 0%, #6fc926 100%))",
         color: "#fff"
        }}
     >

@@ -68,7 +68,10 @@ start({
       secondary: { main: "#15803d", contrastText: "#ffffff" },
       background: { default: "#f9fafb" },
     },
-    shape: { borderRadius: 8 }
+    shape: { borderRadius: 8 },
+    gradients: {
+      attention: "linear-gradient(to right, #239460 0%, #6fc926 100%)",
+    },
   },
   // --- Authentication ---
   http: { baseURL: "http://reap-mis-myapp-ukgv.casacam.net:9090/reap-mis/api/" },
