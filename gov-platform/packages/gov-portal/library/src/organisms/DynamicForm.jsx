@@ -635,7 +635,7 @@ export default function DynamicForm({
 
         {/* legacy non-sticky fallback if you really want it */}
         {!hideDefaultActions && (ui?.stickyActions === false) && (
-          <DSBox sx={{ display: "flex", gap: 2, mt: 2, flexWrap: "wrap" }}>
+          <DSBox sx={{ display: "flex", justifyContent: "center", gap: 2, mt: 2 }}>
             <AppButton type="submit" variant="contained">
               {ui?.submitLabel || "Submit"}
             </AppButton>

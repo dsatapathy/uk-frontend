@@ -54,10 +54,8 @@ const AppButton = React.forwardRef(function AppButton(
       aria-busy={loading || undefined}
       sx={[
         (theme) => marginStyles(theme),
-        { borderRadius: "var(--g-radius)", fontWeight: "bold", minWidth: {
-            xs: "100%",   // below sm (mobile)
-            sm: "100%",   // above sm (tablet & desktop)
-          }, },        
+        { borderRadius: "var(--g-radius)", fontWeight: "bold" },
+        fullWidth && { width: "100%" },
         loading && { pointerEvents: "none" },
         ...(Array.isArray(sx) ? sx : sx ? [sx] : []),
       ]}
