@@ -126,7 +126,7 @@ export default function AsyncAutocomplete({
               fontFamily: dropdownFontFamily,
               fontSize: dropdownFontSize,
               "&:hover, &.Mui-focused, &.Mui-focusVisible, &[aria-selected='true']": {
-                backgroundColor: "var(--g-primary)",
+                backgroundColor: "var(--g-primary) !important",
                 color: "#fff",
               },
             },
