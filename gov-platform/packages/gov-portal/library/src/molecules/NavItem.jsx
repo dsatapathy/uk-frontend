@@ -40,9 +40,9 @@ export default function NavItem({ item, level = 0, selected, open, onClick }) {
           transition:
             "background-color .18s ease, transform .08s ease-out, border-color .18s ease",
 
-          "& .nav-label": { color: "#01604a !important" },
+          "& .nav-label": { color: "var(--g-primary) !important" },
           "& .nav-icon .MuiSvgIcon-root, & .nav-chevron .MuiSvgIcon-root": {
-            color: "#01604a !important",
+            color: "var(--g-primary) !important",
           },
         },
 

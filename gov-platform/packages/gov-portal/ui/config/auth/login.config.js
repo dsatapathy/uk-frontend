@@ -8,7 +8,7 @@ const loginConfig = {
     title: "UGVS-REAP : MIS",
     subtitle: "",
     labelSx: {
-      color: "#fff",
+      color: "var(--g-primary)",
       fontWeight: 600,
       fontSize: "1.5rem",
       letterSpacing: 0.3,
@@ -54,7 +54,7 @@ const loginConfig = {
       name: "username",
       label: "User ID",
       labelSx: {
-        color: "#fff",
+        color: "var(--g-primary)",
         fontWeight: 600,
         fontSize: "0.9rem",
         letterSpacing: 0.3,
@@ -70,7 +70,7 @@ const loginConfig = {
       name: "password",
       label: "Password",
       labelSx: {
-        color: "#fff",
+        color: "var(--g-primary)",
         fontWeight: 600,
         fontSize: "0.9rem",
         letterSpacing: 0.3,
@@ -86,7 +86,7 @@ const loginConfig = {
 
   captcha: {
     provider: "dev", name: "captcha", length: 6, labelSx: {
-      color: "#fff",
+      color: "var(--g-primary)",
       fontWeight: 600,
       fontSize: "0.9rem",
       letterSpacing: 0.3,

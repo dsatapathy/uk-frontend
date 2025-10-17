@@ -2,7 +2,7 @@
 .authLayout {
   /* center content */
   display: flex;
-  justify-content: flex-start;
+  justify-content: center;
   align-items: center;
 
   /* allow the page to grow if needed, but try to fill screen */
@@ -31,28 +31,57 @@
 .bgLayer {
   position: absolute;
   inset: 0;
-  background: var(--login-overlay, transparent);
-  // backdrop-filter: blur(var(--login-blur, 0px));
+  background: rgba(40, 70, 107, 0.55);
   z-index: 0;
 }
 
 /* The card (MUI Card/Paper wrapper) */
 .authCard {
   position: relative;
-  background: var(--attention-gradient, transparent);;
-  /* never exceed viewport width */
+  background: #e3edef;
   width: 100%;
   max-width: var(--login-card-w, 480px);
-
-  /* padding stays inside measured width */
   box-sizing: border-box;
 
-  /* fluid inner padding for short screens */
-  // padding: clamp(16px, 3.5vh, var(--login-card-p, 24px));
-
   border-radius: var(--login-card-radius, 12px);
-  border: var(--login-card-border, 1px solid #e5e7eb);
+  border: var(--login-card-border, 1px solid rgba(255,255,255,.35));
   z-index: 1;
+
+  /* allow glow outside */
+  overflow: visible;
+  isolation: isolate;
+
+  /* Glow now uses same color as card background */
+  box-shadow:
+  0 8px 0px rgba(2, 6, 23, 0.15),
+  0 0 18px 6px rgba(227, 237, 239, 0.4),
+  0 0 28px 10px rgba(227, 237, 239, 0.2);
+}
+
+.authCard::after {
+  content: "";
+  position: absolute;
+  inset: -18px;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: -1;
+
+  /* Corner radiance using the same card bg (#e3edef) */
+  background:
+    radial-gradient(160px 70px at top left,     rgba(227,237,239,.6), transparent 70%),
+    radial-gradient(160px 70px at top right,    rgba(227,237,239,.6), transparent 70%),
+    radial-gradient(140px 60px at bottom left,  rgba(227,237,239,.5), transparent 70%),
+    radial-gradient(140px 60px at bottom right, rgba(227,237,239,.5), transparent 70%);
+  filter: blur(22px);
+  opacity: .9;
+}
+
+.glass {
+  background: rgba(255,255,255,0.86);
+  backdrop-filter: blur(8px) saturate(120%);
+  box-shadow:
+    0 10px 30px rgba(0,0,0,.18),
+    0 0 0 1px rgba(255,255,255,.25) inset;
 }
 
 /* Brand: scale down gracefully on short viewports */
@@ -74,6 +103,7 @@
   .brandTitle {
     font-size: clamp(1.05rem, 2.2vh, 1.25rem);
     font-weight: 600;
+    color: var(--g-primary)
   }
   .brandSubtitle {
     font-size: clamp(0.8rem, 1.8vh, 0.95rem);
