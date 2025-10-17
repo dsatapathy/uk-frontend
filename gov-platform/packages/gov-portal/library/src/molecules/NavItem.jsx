@@ -27,7 +27,7 @@ export default function NavItem({ item, level = 0, selected, open, onClick }) {
         borderRadius: "var(--g-radius, 12px)",
         position: "relative",
         color: "var(--g-primary-contrast)",
-        backgroundColor: selected ? "var(--sidebar-active-bg)" : "transparent",
+        backgroundColor: selected ? "var(--g-primary) !important" : "transparent",
         border: selected
           ? "1px solid var(--sidebar-active-bd)"
           : "1px solid transparent",
@@ -35,7 +35,7 @@ export default function NavItem({ item, level = 0, selected, open, onClick }) {
         transition:
           "background-color .18s ease, transform .12s ease, border-color .18s ease",
         "&:hover": {
-          backgroundColor: "var(--g-primary-contrast)",
+          backgroundColor: "var(--g-primary-contrast) !important",
           transform: "translateY(-1px)",
           transition:
             "background-color .18s ease, transform .08s ease-out, border-color .18s ease",
@@ -56,7 +56,7 @@ export default function NavItem({ item, level = 0, selected, open, onClick }) {
             width: 3,
             borderRadius: 3,
             background:
-              "linear-gradient(var(--sidebar-accent), color-mix(in srgb, var(--sidebar-accent) 25%, transparent))",
+              "var(--attention-gradient)",
           }
           : {},
       }}
