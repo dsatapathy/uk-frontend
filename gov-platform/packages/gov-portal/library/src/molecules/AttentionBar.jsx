@@ -1,10 +1,10 @@
-// molecules/AttentionBar.jsx (responsive, fixed gaps & radius)
 import React from "react";
 import { Stack, IconButton, useMediaQuery, useTheme } from "@mui/material";
 import TypographyX from "../atoms/TypographyX";
 import { getIcon } from "../utils/icons";
 import AppButton from "../atoms/AppButton";
 import DSBox from "../atoms/DSBox";
+import { alpha } from "@mui/material/styles";
 
 /** Map legacy -> DS surface */
 function mapSurface(legacyVariant) {
@@ -28,6 +28,14 @@ export const AttentionBar = React.memo(function AttentionBar({
   const theme = useTheme();
   const isXs = useMediaQuery(theme.breakpoints.down("sm")); // <600px
 
+  const primary = theme.palette.primary?.main || "#1b5e20";
+  const glowShadow = `
+    0 8px 22px -16px ${alpha(theme.palette.common.black, 0.35)},
+    0 0 16px -10px ${primary}`;
+  const hoverGlow = `
+    0 12px 32px -14px ${alpha(theme.palette.common.black, 0.28)},
+    0 0 22px -6px ${primary}`;
+
   return (
     <DSBox
       intent={intent}
@@ -44,8 +52,13 @@ export const AttentionBar = React.memo(function AttentionBar({
         overflow: "hidden", 
         minWidth: 0, 
         background: "var(--attention-gradient, linear-gradient(to right, #239460 0%, #6fc926 100%))",
-        color: "#fff"
-       }}
+        color: "#fff",
+        boxShadow: glowShadow,
+        transition: "box-shadow 220ms cubic-bezier(0.4, 0, 0.2, 1), transform 220ms cubic-bezier(0.4, 0, 0.2, 1)",
+        "&:hover": {
+          boxShadow: hoverGlow,
+        },
+      }}
     >
       {/* Left: Icon + title/subtitle */}
       <Stack
@@ -73,7 +86,7 @@ export const AttentionBar = React.memo(function AttentionBar({
             <TypographyX
               variant="body2"
               color="text.secondary"
-              sx={{ wordBreak: "break-word",color: "#fff", }}
+              sx={{ wordBreak: "break-word", color: "#fff" }}
             >
               {left.subtitle}
             </TypographyX>
@@ -95,10 +108,11 @@ export const AttentionBar = React.memo(function AttentionBar({
             onClick={onOpenEditor}
             size="small"
             sx={{
-              position: { xs: "absolute", md: "static" }, // no layout gap on phones
+              position: { xs: "absolute", md: "static" },
               top: { xs: 6, md: "auto" },
               right: { xs: 6, md: "auto" },
               alignSelf: { md: "auto" },
+              color: "#fff",
             }}
           >
             {getIcon("edit")}
@@ -109,7 +123,7 @@ export const AttentionBar = React.memo(function AttentionBar({
           variant="solid"
           endIcon={getIcon("notifications")}
           onClick={onOpenNotifications}
-          fullWidth={isXs}                               // button spans width on phones
+          fullWidth={isXs}
           size={isXs ? "small" : "medium"}
         >
           {right?.ctaLabel || "Notifications"}

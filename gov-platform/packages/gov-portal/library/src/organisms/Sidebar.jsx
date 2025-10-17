@@ -38,11 +38,24 @@ const fallbackBackground = `
       var(--sidebar-bg-bottom, #8bc34a) 100%  /* Richer Banana Leaf Green */
     )
   `;
+
+const COLLAPSED_WIDTH = 72;
+
 export default function Sidebar(props) {
   const {
-    isDesktop, open, onClose, logo: propLogo, title, items,
-    currentPath, expandedSet, onToggle, onNavigate,
-    searchValue, onSearchChange, onSearchEnter,
+    isDesktop,
+    open,
+    onClose,
+    logo: propLogo,
+    title,
+    items,
+    currentPath,
+    expandedSet,
+    onToggle,
+    onNavigate,
+    searchValue,
+    onSearchChange,
+    onSearchEnter,
   } = props;
   const appCfg = useAppConfig();
   const primaryBg = appCfg?.brand?.primaryBg;
@@ -56,7 +69,7 @@ export default function Sidebar(props) {
     return `url(${trimmed})`;
   }, [primaryBg]);
   const drawerLogo = React.useMemo(() => {
-    const value = themeLogo;
+    const value = themeLogo || propLogo;
     if (!value) return null;
     if (React.isValidElement(value)) return value;
     if (typeof value === "string") {
@@ -70,9 +83,74 @@ export default function Sidebar(props) {
       );
     }
     return null;
-  }, [themeLogo,title]);
+  }, [themeLogo, propLogo, title]);
   const t = useTheme();
   const p = t.palette;
+  const [isHovering, setIsHovering] = React.useState(() => (isDesktop ? false : true));
+  const [mounted, setMounted] = React.useState(false);
+  const collapseTimeoutRef = React.useRef(null);
+  const paperRef = React.useRef(null);
+
+  const clearCollapseTimeout = React.useCallback(() => {
+    if (collapseTimeoutRef.current) {
+      clearTimeout(collapseTimeoutRef.current);
+      collapseTimeoutRef.current = null;
+    }
+  }, []);
+
+  React.useEffect(() => {
+    setMounted(true);
+    return () => clearCollapseTimeout();
+  }, [clearCollapseTimeout]);
+
+  React.useEffect(() => {
+    setIsHovering(isDesktop ? false : true);
+  }, [isDesktop]);
+
+  const scheduleCollapse = React.useCallback(() => {
+    if (!isDesktop) return;
+    clearCollapseTimeout();
+    collapseTimeoutRef.current = setTimeout(() => {
+      collapseTimeoutRef.current = null;
+      if (paperRef.current && typeof document !== "undefined") {
+        const active = document.activeElement;
+        if (active && paperRef.current.contains(active)) {
+          setIsHovering(true);
+          return;
+        }
+      }
+      setIsHovering(false);
+    }, 160);
+  }, [clearCollapseTimeout, isDesktop]);
+
+  const handlePointerEnter = React.useCallback(() => {
+    if (!isDesktop) return;
+    clearCollapseTimeout();
+    setIsHovering(true);
+  }, [clearCollapseTimeout, isDesktop]);
+
+  const handlePointerLeave = React.useCallback(() => {
+    scheduleCollapse();
+  }, [scheduleCollapse]);
+
+  const handleFocusCapture = React.useCallback(() => {
+    if (!isDesktop) return;
+    clearCollapseTimeout();
+    setIsHovering(true);
+  }, [clearCollapseTimeout, isDesktop]);
+
+  const handleBlurCapture = React.useCallback((event) => {
+    if (!isDesktop) return;
+    if (event && event.relatedTarget && event.currentTarget.contains(event.relatedTarget)) {
+      return;
+    }
+    scheduleCollapse();
+  }, [isDesktop, scheduleCollapse]);
+
+  const isCollapsed = isDesktop && !isHovering;
+  const expandedWidth = `var(--sidebar-w, ${(DRAWER_WIDTH || 250)}px)`;
+  const collapsedWidth = `var(--sidebar-collapsed-w, ${COLLAPSED_WIDTH}px)`;
+  const drawerWidthValue = isDesktop ? (isCollapsed ? collapsedWidth : expandedWidth) : 280;
 
   // Build CSS variable fallbacks from the active theme
   const fg = p.mode === "light" ? p.text.primary : p.text.primary;
@@ -84,7 +162,7 @@ export default function Sidebar(props) {
     top: 0,
     alignSelf: "flex-start",
     height: "100dvh",
-    width: { xs: 280, md: "var(--sidebar-w, " + (DRAWER_WIDTH || 250) + "px)" },
+    width: drawerWidthValue,
     boxSizing: "border-box",
     display: "flex",
     overflow: "hidden",
@@ -95,9 +173,31 @@ export default function Sidebar(props) {
     backgroundImage: resolvedBg || fallbackBackground,
     boxShadow: `inset -1px 0 0 var(--sidebar-line, var(--g-border, #e0e0e0)),
             4px 0 18px -12px rgba(0,0,0,0.3)`,
+    transition: mounted ? "width 0.24s cubic-bezier(0.4, 0, 0.2, 1)" : "none",
   };
+
+  const paperProps = {
+    sx: paperBase,
+    ref: paperRef,
+    onMouseEnter: handlePointerEnter,
+    onMouseLeave: handlePointerLeave,
+    onFocusCapture: handleFocusCapture,
+    onBlurCapture: handleBlurCapture,
+    "data-collapsed": isCollapsed ? "true" : "false",
+  };
+
   const content = (
-    <Box role="navigation" sx={{ height: "100%", display: "flex", flexDirection: "column", width: "100%" }}>
+    <Box
+      role="navigation"
+      sx={{
+        height: "100%",
+        display: "flex",
+        flexDirection: "column",
+        width: "100%",
+        "--sidebar-collapsed-flag": isCollapsed ? 1 : 0,
+      }}
+      data-collapsed={isCollapsed ? "true" : "false"}
+    >
       {/* Mobile header */}
       {!isDesktop && (
         <DrawerHeader
@@ -109,8 +209,8 @@ export default function Sidebar(props) {
         />
       )}
 
-      {/* Desktop search – styled via tokens */}
-      {isDesktop && (
+      {/* Desktop search - styled via tokens */}
+      {isDesktop && !isCollapsed && (
         <Box sx={{ p: 1.5, pt: 2, flexShrink: 0 }}>
           <SearchField
             value={searchValue}
@@ -137,20 +237,22 @@ export default function Sidebar(props) {
       )}
 
       {/* Section label */}
-      <Box sx={{ px: 2, pb: 1, pt: isDesktop ? 0.5 : 1, flexShrink: 0 }}>
-        <TypographyX
-          variant="overline"
-          sx={{
-            color: "var(--sidebar-fg-dim, var(--g-fg-muted, " + fgDim + "))",
-            letterSpacing: 1.1,
-            textTransform: "uppercase",
-            background: "linear-gradient(90deg, currentColor 0%, transparent 80%)",
-            WebkitBackgroundClip: "text",
-          }}
-        >
-          Navigation
-        </TypographyX>
-      </Box>
+      {!isCollapsed && (
+        <Box sx={{ px: 2, pb: 1, pt: isDesktop ? 0.5 : 1, flexShrink: 0 }}>
+          <TypographyX
+            variant="overline"
+            sx={{
+              color: "var(--sidebar-fg-dim, var(--g-fg-muted, " + fgDim + "))",
+              letterSpacing: 1.1,
+              textTransform: "uppercase",
+              background: "linear-gradient(90deg, currentColor 0%, transparent 80%)",
+              WebkitBackgroundClip: "text",
+            }}
+          >
+            Navigation
+          </TypographyX>
+        </Box>
+      )}
 
       {/* Scroll area */}
       <Box
@@ -159,7 +261,7 @@ export default function Sidebar(props) {
           minHeight: 0,
           overflowY: "auto",
           overscrollBehavior: "contain",
-          px: 1,
+          px: isCollapsed ? 0.5 : 1,
           pb: 2,
           scrollbarWidth: "thin",
           scrollbarColor: "var(--sidebar-scroll, rgba(255,255,255,0.25)) transparent",
@@ -177,6 +279,7 @@ export default function Sidebar(props) {
           expandedSet={expandedSet}
           onToggle={onToggle}
           onNavigate={onNavigate}
+          collapsed={isCollapsed}
         />
       </Box>
 
@@ -191,7 +294,7 @@ export default function Sidebar(props) {
   );
 
   return isDesktop ? (
-    <Drawer variant="permanent" open PaperProps={{ sx: paperBase }}>
+    <Drawer variant="permanent" open PaperProps={paperProps}>
       {content}
     </Drawer>
   ) : (
@@ -200,7 +303,7 @@ export default function Sidebar(props) {
       open={open}
       onClose={onClose}
       ModalProps={{ keepMounted: true }}
-      PaperProps={{ sx: paperBase }}
+      PaperProps={paperProps}
     >
       {content}
     </Drawer>

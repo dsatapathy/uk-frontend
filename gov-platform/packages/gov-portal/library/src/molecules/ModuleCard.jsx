@@ -14,41 +14,60 @@ export const ModuleCard = React.memo(function ModuleCard({
   const theme = useTheme();
   const go = (e) => { e?.preventDefault?.(); onNavigate?.(module); };
 
-  // default icon color similar to screenshot
-  const iconColor = module?.iconColor || "#239460"; // warm orange
+  const primaryFallback = theme.palette.primary?.main || "#1b5e20";
+  const primaryToken = `var(--g-primary, ${primaryFallback})`;
+  const iconColor = module?.iconColor || primaryToken;
   const IconEl = getIcon(module?.icon || "Widgets");
 
   return (
     <DSCard
-      // make DSCard act like a plain tile (no header/float)
       elevation={0}
       hoverRaise={false}
       radius={2}
       onClick={go}
       to={module?.path}
       sx={{
-        borderRadius: 2,
-        border: `1px solid ${alpha(theme.palette.text.primary, 0.12)}`,
-        backgroundColor: "#fff",
-        transition: "box-shadow 160ms ease, transform 160ms ease",
-        boxShadow: "0 1px 0 rgba(40, 219, 4, 0.02)",
-        "&:hover": {
-          boxShadow: "0 6px 18px rgba(20, 108, 0, 0.08)",
-          transform: "translateY(-2px)",
+        '&&': {
+          borderRadius: 2,
+          border: 'none',
+          background: 'linear-gradient(135deg, #ffffff, #e6f0ff)',
+          transition:
+            'box-shadow 200ms cubic-bezier(0.4, 0, 0.2, 1), transform 200ms cubic-bezier(0.4, 0, 0.2, 1)',
+          boxShadow: `
+        0 8px 22px -16px ${alpha(theme.palette.common.black, 0.35)},
+        0 0 16px -10px ${primaryToken}
+      `,
+
+          '&:hover': {
+            boxShadow: `
+                    0 12px 32px -14px ${alpha(theme.palette.common.black, 0.28)},
+                    0 0 22px -6px ${primaryToken}`,
+            transform: 'translateY(-4px) scale(1.03)',
+          },          
+          '&:hover .module-card-icon': {
+            transform: 'rotate(25deg) scale(1.08)',
+            background: 'linear-gradient(135deg, #ffffff, #e6f0ff)',
+            borderRadius: '50%',
+            boxShadow: `0 2px 10px ${alpha(theme.palette.common.black, 0.18)}`,
+            filter: `drop-shadow(0 0 6px ${alpha(theme.palette.primary?.main || '#1b5e20', 0.3)})`,
+          },
+
+          '&:hover .module-card-icon svg': { color: primaryToken },
+          ...cardSx,
         },
-        ...cardSx,
       }}
       contentSx={{
         p: { xs: 1.5, sm: 2 },
-        display: "grid",
-        justifyItems: "center",
-        alignContent: "center",
+        display: 'grid',
+        justifyItems: 'center',
+        alignContent: 'center',
         gap: 1,
         minHeight: 50,
       }}
     >
       {/* icon */}
       <Box
+        className="module-card-icon"
         sx={{
           width: 44,
           height: 44,
@@ -57,6 +76,7 @@ export const ModuleCard = React.memo(function ModuleCard({
           // keep it flat like screenshot (no gradient/puck)
           color: iconColor,       // <-- icon color here
           opacity: 1,             // full opacity
+          transition: "transform 220ms cubic-bezier(0.4, 0, 0.2, 1), filter 220ms cubic-bezier(0.4, 0, 0.2, 1)",
         }}
       >
         {React.isValidElement(IconEl)
@@ -70,7 +90,7 @@ export const ModuleCard = React.memo(function ModuleCard({
         sx={{
           textAlign: "center",
           fontWeight: 600,
-          color: theme.palette.text.primary,
+          color: primaryToken,
           lineHeight: 1.25,
           // IMPORTANT: allow full wrapping, no "..."
           whiteSpace: "normal",

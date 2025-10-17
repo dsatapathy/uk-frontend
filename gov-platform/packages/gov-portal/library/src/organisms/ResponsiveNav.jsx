@@ -21,7 +21,20 @@ export default function ResponsiveNav({
   children,
 }) {
   const theme = useTheme();
-  const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
+  const mdUpQuery = React.useMemo(() => theme.breakpoints.up("md"), [theme]);
+  const normalizedMdQuery = React.useMemo(
+    () => (mdUpQuery.startsWith("@media ") ? mdUpQuery.replace("@media ", "") : mdUpQuery),
+    [mdUpQuery],
+  );
+  const defaultDesktopMatch = React.useMemo(() => {
+    if (typeof window === "undefined" || typeof window.matchMedia !== "function") return false;
+    return window.matchMedia(normalizedMdQuery).matches;
+  }, [normalizedMdQuery]);
+  const mediaQueryOptions = React.useMemo(
+    () => ({ defaultMatches: defaultDesktopMatch, noSsr: true }),
+    [defaultDesktopMatch],
+  );
+  const isDesktop = useMediaQuery(mdUpQuery, mediaQueryOptions);
   const [openMobile, setOpenMobile] = React.useState(false);
   const [query, setQuery] = React.useState("");
   const { show, hide } = useLoader();
@@ -90,6 +103,7 @@ export default function ResponsiveNav({
         display: "grid",
         gridTemplateRows: { xs: "56px 1fr", sm: "64px 1fr" },
         "--sidebar-w": `${DRAWER_WIDTH}px`,
+        "--sidebar-collapsed-w": "72px",
         height: "100dvh",          // lock to viewport
         overflow: "hidden",        // window never scrolls
       }}
@@ -126,7 +140,7 @@ export default function ResponsiveNav({
       <Box
         sx={{
           display: "grid",
-          gridTemplateColumns: { xs: "1fr", md: "var(--sidebar-w) 1fr" },
+          gridTemplateColumns: { xs: "1fr", md: "auto 1fr" },
           minHeight: 0,
           overflow: "hidden",      // prevent second scrollbar here
         }}

@@ -5,7 +5,16 @@ import { ensureId } from "../utils/menu-utils";
 import NavItem from "./NavItem";
 
 
-export default function NavTree({ items, currentPath, expandedSet, onToggle, onNavigate, level = 0, parentKey = "root" }) {
+export default function NavTree({
+    items,
+    currentPath,
+    expandedSet,
+    onToggle,
+    onNavigate,
+    level = 0,
+    parentKey = "root",
+    collapsed = false,
+}) {
     return (
         <List disablePadding>
             {items.map((item, idx) => {
@@ -20,9 +29,10 @@ export default function NavTree({ items, currentPath, expandedSet, onToggle, onN
                             selected={selected}
                             open={expandedSet.has(id)}
                             onClick={() => (hasChildren ? onToggle(id) : onNavigate(item))}
+                            collapsed={collapsed}
                         />
                         {hasChildren && (
-                            <Collapse in={expandedSet.has(id)} timeout="auto" unmountOnExit>
+                            <Collapse in={!collapsed && expandedSet.has(id)} timeout={collapsed ? 0 : "auto"} unmountOnExit>
                                 <NavTree
                                     items={item.children}
                                     currentPath={currentPath}
@@ -31,6 +41,7 @@ export default function NavTree({ items, currentPath, expandedSet, onToggle, onN
                                     onNavigate={onNavigate}
                                     level={level + 1}
                                     parentKey={id}
+                                    collapsed={collapsed}
                                 />
                             </Collapse>
                         )}
@@ -49,4 +60,5 @@ NavTree.propTypes = {
     onNavigate: PropTypes.func.isRequired,
     level: PropTypes.number,
     parentKey: PropTypes.string,
+    collapsed: PropTypes.bool,
 };
