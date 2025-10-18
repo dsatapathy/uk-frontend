@@ -5,8 +5,8 @@ import { memberProfileSteps } from "../form/member-profile.steps";
 import { getComponent } from "@gov/core";
 import { useSubmitData } from "@gov/data";
 import {apiService} from "@gov/data";
-import { useSnackbar } from "../../../../library/src/atoms/Snackbar";
-import { useLoader } from "../../../../library/src/atoms/Loader";
+import { useSnackbar } from "@gov/library";
+import { useLoader } from "@gov/library";
 // ✅ fix nesting
 const ui = {
   padding: 2,
@@ -268,6 +268,7 @@ export default function BeneficiaryMemberProfile() {
     // Optionally show loading indicator here
 
     try {
+      show("Loading member data — please wait...");
       // Fetch member data from API
       const memberData = await fetchMemberData(memberId);
 
@@ -279,7 +280,9 @@ export default function BeneficiaryMemberProfile() {
       flat.memberId = memberId;
       // Patch the form with the fetched data
       formApiRef.current?.patch?.(flat, { shouldValidate: false, shouldDirty: false });
+      hide();
     } catch (err) {
+      hide();
       enqueue({ message: "Failed to load member data", severity: "error" });
     }
 
@@ -320,7 +323,7 @@ export default function BeneficiaryMemberProfile() {
             form: "Beneficiary Member Profile",
             body: isUpdate ? "Your profile has been successfully updated." : "Your profile has been successfully created.",
             name: response?.data?.data?.memberName || "Unknown",
-            memberId: response?.data?.data?.memberId || "00XX00"
+            reference: response?.data?.data?.memberId || "00XX00"
           }).toString();
           const target = `${window.location.origin}/common/acknowledgement_page?${params}`;
           window.location.href = target;

@@ -79,7 +79,7 @@ export const leaderProfileSchema = {
                 },
                 {
                     id: "presidentNameId",
-                    type: "text",
+                    type: "autocomplete",
                     label: "Select President Name",
                     options: {
                         endpointKey: "v1/master/data",

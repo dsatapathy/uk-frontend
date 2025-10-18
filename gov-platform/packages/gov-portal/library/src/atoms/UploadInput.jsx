@@ -8,6 +8,7 @@ import { getIcon } from "../utils/icons";
 import { get } from "lodash";
 import { http } from "../../../data/services/bootstrap";
 import { useSnackbar } from "./Snackbar";
+import {useLoader} from "./Loader";
 // ---------- utils ----------
 const isDefined = (v) => v !== undefined && v !== null;
 const isAcceptableItem = (x) =>
@@ -65,6 +66,7 @@ export default function UploadInput({
   const [filesUI, setFilesUI] = React.useState(() => toArray(value, multiple));
 
   const { enqueue } = useSnackbar();
+  const { show, hide } = useLoader();
   // Keep internal state in sync with parent whenever it changes
   React.useEffect(() => {
     setFilesUI(toArray(value, multiple));
@@ -101,6 +103,7 @@ export default function UploadInput({
   };
 
   const pick = async (e) => {
+    show("Uploading file — please wait...");
     const picked = Array.from(e.target.files || []);
     if (!picked.length) return;
 
@@ -121,8 +124,10 @@ export default function UploadInput({
       }
       emitChange(multiple ? fileDescriptors : [fileDescriptors[0]]);
       // Show success snackbar
+      hide();
       enqueue({ message: "File(s) uploaded successfully.", severity: "success", duration: 4000 });
     } catch (err) {
+      hide();
       enqueue({ message: "File upload failed. Please try again.", severity: "error", duration: 6000 });
       console.error(err);
     }

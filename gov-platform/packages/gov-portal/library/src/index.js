@@ -8,7 +8,8 @@ export * from "./registry/organisms";
 export * from "./registry/layouts";
 export * from "./registry/components";
 export * from "./registry/hooks";
-
+export * from "./atoms/Snackbar";
+export * from "./atoms/Loader";
 import { registerAtoms } from "./registry/atoms";
 import { registerMolecules } from "./registry/molecules";
 import { registerOrganisms } from "./registry/organisms";

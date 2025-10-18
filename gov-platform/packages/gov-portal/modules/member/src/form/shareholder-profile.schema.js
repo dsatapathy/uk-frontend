@@ -15,7 +15,7 @@ export const shareholderProfileSchema = {
           defaultValue: "create",
           options: {
             items: [
-              { label: "Create New", value: "create" },
+              { label: "Create New Shareholder", value: "create" },
               { label: "Update Existing", value: "update" }
             ]
           },
@@ -149,31 +149,31 @@ export const shareholderProfileSchema = {
           validations: [{ type: "required" }],
           grid: { span: { xs: 12, sm: 6, md: 4 } }
         },
-        {
-          id: "financeYear",
+                {
+          id: "shareholderNameId",
           type: "autocomplete",
-          label: "Finance Year",
-          options: {
-            endpointKey: "v1/master/data",
-            labelKey: "label",
-            valueKey: "value",
-            query: { type: "financial_year"}
-          },
-          validations: [{ type: "required" }],
-          grid: { span: { xs: 12, sm: 6, md: 4 } }
-        },
-        {
-          id: "shareholderName",
-          type: "text",
           label: "Name of Shareholder",
           validations: [{ type: "required" }],
+          options: {
+            endpointKey: "v1/master/data",
+            labelKey: "memberName",
+            valueKey: "memberId",
+            query: { type: "member_profiles" },
+            dependsOn: ["values.shg"],
+            dependsOnHint: "Select SHG first",
+            queryBuilder: (deps) => ({
+              type: "member_profiles",
+              id: deps.shg
+            })
+          },
           rules: [{ when: "values.action === 'update'", action: "hide" }],
           grid: { span: { xs: 12, sm: 6, md: 4 } }
         },
         {
           id: "shareholderId",
           type: "autocomplete",
-          label: "Choose Shareholder to Update",
+          label: "Select Shareholder",
+          validations: [{ type: "required" }],
           options: {
             endpointKey: "v1/master/data",
             labelKey: "name",
@@ -187,6 +187,18 @@ export const shareholderProfileSchema = {
             })
           },
           rules: [{ when: "values.action !== 'update'", action: "hide" }],
+          grid: { span: { xs: 12, sm: 6, md: 4 } }
+        },
+        {
+          id: "financeYear",
+          type: "autocomplete",
+          label: "Finance Year",
+          options: {
+            endpointKey: "v1/master/data",
+            labelKey: "label",
+            valueKey: "value",
+            query: { type: "financial_year"}
+          },
           validations: [{ type: "required" }],
           grid: { span: { xs: 12, sm: 6, md: 4 } }
         },

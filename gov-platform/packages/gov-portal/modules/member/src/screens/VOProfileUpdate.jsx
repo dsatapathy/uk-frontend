@@ -2,8 +2,8 @@ import React from "react";
 import { getComponent } from "@gov/core";
 import { voRegistrationFormSchema } from "../form/vo-registration.schema";
 import { useSubmitData } from "@gov/data";
-import { useSnackbar } from "../../../../library/src/atoms/Snackbar";
-import { useLoader } from "../../../../library/src/atoms/Loader";
+import { useSnackbar } from "@gov/library";
+import { useLoader } from "@gov/library";
 import {apiService} from "@gov/data";
 
 const ui = {
@@ -119,7 +119,7 @@ function flatFromMock(voData, update = false) {
 async function fetchVoData(voId) {
   const url = "v1/master/data";
   const method = "get";
-  const params = { type: "vo", id: voId };
+  const params = { type: "vo_profile", id: voId };
   const payload = null;
   const voData = await apiService({ method, url, params, payload });
   if (!voData) throw new Error("VO not found");
@@ -160,6 +160,7 @@ export default function VOProfileUpdate() {
         // Optionally show loading indicator here
     
         try {
+          show("Loading VO data — please wait...");
           // Fetch vo data from API
           const voData = await fetchVoData(voIdToUpdate);
 
@@ -171,7 +172,9 @@ export default function VOProfileUpdate() {
           flat.voId = voIdToUpdate;
           // Patch the form with the fetched data
           formApiRef.current?.patch?.(flat, { shouldValidate: false, shouldDirty: false });
+          hide();
         } catch (err) {
+          hide();
           enqueue({ message: "Failed to load vo data", severity: "error" });
         }
     

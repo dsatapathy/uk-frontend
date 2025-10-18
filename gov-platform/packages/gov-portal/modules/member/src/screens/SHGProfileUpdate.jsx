@@ -2,8 +2,8 @@ import React from "react";
 import { getComponent } from "@gov/core";
 import { shgRegistrationSchema } from "../form/shg-registration.schema";
 import { useSubmitData } from "@gov/data";
-import { useSnackbar } from "../../../../library/src/atoms/Snackbar";
-import { useLoader } from "../../../../library/src/atoms/Loader";
+import { useSnackbar } from "@gov/library";
+import { useLoader } from "@gov/library";
 import {apiService} from "@gov/data";
 
 const ui = {
@@ -145,6 +145,7 @@ export default function SHGProfileUpdate() {
       // Optionally show loading indicator here
   
       try {
+        show("Loading SHG data — please wait...");
         // Fetch shg data from API
         const shgData = await fetchShgData(shgId);
   
@@ -156,7 +157,9 @@ export default function SHGProfileUpdate() {
         flat.shgId = shgId;
         // Patch the form with the fetched data
         formApiRef.current?.patch?.(flat, { shouldValidate: false, shouldDirty: false });
+        hide();
       } catch (err) {
+        hide();
         enqueue({ message: "Failed to load shg data", severity: "error" });
       }
   
@@ -193,7 +196,7 @@ export default function SHGProfileUpdate() {
             form: "SHG Profile",
             body: isUpdate ? "Your SHG profile has been successfully updated." : "Your SHG profile has been successfully created.",
             shgName: response?.data?.data?.shgName || "Unknown",
-            shgId: response?.data?.data?.shgId || "00XX00",
+            reference: response?.data?.data?.shgId || "00XX00",
           }).toString();
           const target = `${window.location.origin}/common/acknowledgement_page?${params}`;
           window.location.href = target;

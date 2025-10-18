@@ -2,8 +2,8 @@ import React from "react";
 import { getComponent } from "@gov/core";
 import { clfLcRegistrationSchema } from "../form/clf-lc-creation-updation.schema";
 import { useSubmitData } from "@gov/data";
-import { useSnackbar } from "../../../../library/src/atoms/Snackbar";
-import { useLoader } from "../../../../library/src/atoms/Loader";
+import { useSnackbar } from "@gov/library";
+import { useLoader } from "@gov/library";
 import { apiService } from "@gov/data";
 
 
@@ -45,18 +45,14 @@ function flatFromMock(clfData, update = false) {
     // --- Basic action ---
     action: update ? "update" : "create",
 
-    // --- CLF / LC Type ---
-    isClfOrLcCreateUpdate: clfData?.isClfOrLcCreateUpdate
-      ? String(clfData.isClfOrLcCreateUpdate)
-      : "",
 
     // --- Location hierarchy ---
     district: clfData?.district ? Number(clfData.district) : "",
     block: clfData?.block ? Number(clfData.block) : "",
 
     // --- CLF/LC Identification ---
-    clfLcName: clfData?.clfLcName ? String(clfData.clfLcName) : "",
-    clfLcToUpdate: clfData?.clfLcToUpdate ? String(clfData.clfLcToUpdate) : "",
+    clfName: clfData?.clfName ? String(clfData.clfName) : "",
+    clfToUpdateId: clfData?.clfToUpdateId ? String(clfData.clfToUpdateId) : "",
     agreementEffectiveDate: clfData?.agreementEffectiveDate
       ? String(clfData.agreementEffectiveDate)
       : "",
@@ -120,14 +116,14 @@ function flatFromMock(clfData, update = false) {
 }
 
 
-async function fetchClfLcData(clfLcId, clf_lc) {
+async function fetchClfLcData(clfId) {
   const url = "v1/master/data";
   const method = "get";
-  const params = { type: "clf_lc_profile", id: clfLcId, isClfOrLc: clf_lc };
+  const params = { type: "clf_profile", id: clfId };
   const payload = null;
-  const clfLcData = await apiService({ method, url, params, payload });
-  if (!clfLcData) throw new Error("CLF/LC not found");
-  return clfLcData;
+  const clfData = await apiService({ method, url, params, payload });
+  if (!clfData) throw new Error("CLF/LC not found");
+  return clfData;
 }
 
 export default function CLFLCProfileUpdate() {
@@ -156,26 +152,29 @@ export default function CLFLCProfileUpdate() {
         return;
       }
     }
-    if (name !== "clfLcToUpdate") return;
-    const id = typeof vals.clfLcToUpdate === "object"
-      ? (vals.clfLcToUpdate?.id ?? vals.clfLcToUpdate?.value ?? vals.clfLcToUpdate?.code ?? null)
-      : vals.clfLcToUpdate;
-    const clfLcToUpdateId = id;
-    const clf_lc = vals.isClfOrLcCreateUpdate === "clf" ? "clf" : "lc";
-    if (!clfLcToUpdateId || !clf_lc) return;
+    if (name !== "clfToUpdateId") return;
+    const id = typeof vals.clfToUpdateId === "object"
+      ? (vals.clfToUpdateId?.id ?? vals.clfToUpdateId?.value ?? vals.clfToUpdateId?.code ?? null)
+      : vals.clfToUpdateId;
+    const clfToUpdateId = id;
+
+    if (!clfToUpdateId) return;
     // Optionally show loading indicator here
 
     try {
+      show("Loading CLF/LC data — please wait...");
       // Fetch vo data from API
-      const clfLcData = await fetchClfLcData(clfLcToUpdateId, clf_lc);
+      const clfData = await fetchClfLcData(clfToUpdateId);
       // Flatten or transform voData as needed for your form
-      const flat = flatFromMock(clfLcData, true);
+      const flat = flatFromMock(clfData, true);
 
       // IMPORTANT: ensure the selected vo id remains what the user picked
-      flat.voId = clfLcToUpdateId;
+      flat.voId = clfToUpdateId;
       // Patch the form with the fetched data
       formApiRef.current?.patch?.(flat, { shouldValidate: false, shouldDirty: false });
+      hide();
     } catch (err) {
+      hide();
       enqueue({ message: "Failed to load vo data", severity: "error" });
     }
 
@@ -184,7 +183,7 @@ export default function CLFLCProfileUpdate() {
   const handleSubmit = async (vals) => {
     const flatFormData = vals || formApiRef.current?.getValues?.() || {};
     const isUpdate = String(flatFormData.action || "").toLowerCase() === "update";
-    show(isUpdate ? "Updating CLF/LC profile — please wait..." : "Submitting CLF/LC profile — please wait...");
+    show(isUpdate ? "Updating CLF profile — please wait..." : "Submitting CLF profile — please wait...");
     const payload = {
       module: "USER_DATA_UPDATE",
       operation: isUpdate ? "UPDATE" : "CREATE",
@@ -199,7 +198,7 @@ export default function CLFLCProfileUpdate() {
         onSuccess: (response) => {
           hide();
           enqueue({
-            message: isUpdate ? "CLF/LC profile updated successfully" : "CLF/LC profile submitted successfully",
+            message: isUpdate ? "CLF profile updated successfully" : "CLF profile submitted successfully",
             severity: "success",
             duration: 6000,
           });
@@ -208,11 +207,11 @@ export default function CLFLCProfileUpdate() {
           // or stay on page — here we redirect with an appropriate heading for both.
           const params = new URLSearchParams({
             status: "success",
-            heading: isUpdate ? "Update Successful For CLF/LC Profile" : "Submission Successful For CLF/LC Profile",
-            form: "CLF/LC Profile",
-            body: isUpdate ? "Your CLF/LC profile has been successfully updated." : "Your CLF/LC profile has been successfully created.",
-            clfLcName: response?.data?.data?.clfLcName || "Unknown",
-            clfLcId: response?.data?.data?.clfLcId || "00XX00",
+            heading: isUpdate ? "Update Successful For CLF Profile" : "Submission Successful For CLF Profile",
+            form: "CLF Profile",
+            body: isUpdate ? "Your CLF profile has been successfully updated." : "Your CLF profile has been successfully created.",
+            clfName: response?.data?.data?.clfName || "Unknown",
+            reference: response?.data?.data?.clfId || "00XX00",
           }).toString();
           const target = `${window.location.origin}/common/acknowledgement_page?${params}`;
           window.location.href = target;

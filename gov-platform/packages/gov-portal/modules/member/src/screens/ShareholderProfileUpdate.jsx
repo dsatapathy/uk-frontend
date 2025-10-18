@@ -2,8 +2,8 @@ import React from "react";
 import { getComponent } from "@gov/core";
 import { shareholderProfileSchema } from "../form/shareholder-profile.schema";
 import { useSubmitData } from "@gov/data";
-import { useSnackbar } from "../../../../library/src/atoms/Snackbar";
-import { useLoader } from "../../../../library/src/atoms/Loader";
+import { useSnackbar } from "@gov/library";
+import { useLoader } from "@gov/library";
 import { apiService } from "@gov/data";
 
 
@@ -102,7 +102,7 @@ function flatFromMock(shareholderData, update = false) {
 async function fetchShareholderData(shareholderNameToUpdateId) {
   const url = "v1/master/data";
   const method = "get";
-  const params = { type: "shareholder", id: shareholderNameToUpdateId };
+  const params = { type: "shareholder_profile", id: shareholderNameToUpdateId };
   const payload = null;
   const shareholderData = await apiService({ method, url, params, payload });
   if (!shareholderData) throw new Error("Shareholder not found");
@@ -115,6 +115,7 @@ export default function ShareholderProfileUpdate() {
   const submitMutation = useSubmitData();
   const { enqueue } = useSnackbar();
   const { show, hide } = useLoader();
+
   const handleValuesChange = React.useCallback(async (vals, meta) => {
     const name = meta?.name;
     if (!name) return;
@@ -135,6 +136,7 @@ export default function ShareholderProfileUpdate() {
       }
     }
     if (name !== "shareholderId") return;
+    if (name == "shareholderId" && vals.action === "update") {
     const id = typeof vals.shareholderId === "object"
       ? (vals.shareholderId?.id ?? vals.shareholderId?.value ?? vals.shareholderId?.code ?? null)
       : vals.shareholderId;
@@ -143,6 +145,7 @@ export default function ShareholderProfileUpdate() {
     // Optionally show loading indicator here
 
     try {
+      show("Loading shareholder data — please wait...");
       // Fetch vo data from API
       const shareholderData = await fetchShareholderData(shareholderId);
 
@@ -152,11 +155,20 @@ export default function ShareholderProfileUpdate() {
 
       // IMPORTANT: ensure the selected vo id remains what the user picked
       flat.shareholderId = shareholderId;
+      flat.district = vals.district || "";
+      flat.block = vals.block || "";
+      flat.gp = vals.gp || "";
+      flat.clf = vals.clf || "";
+      flat.vo = vals.vo || "";
+      flat.shg = vals.shg || "";
       // Patch the form with the fetched data
       formApiRef.current?.patch?.(flat, { shouldValidate: false, shouldDirty: false });
+      hide();
     } catch (err) {
+      hide();
       enqueue({ message: "Failed to load shareholder data", severity: "error" });
     }
+  }
 
   }, []);
   // Handler for form submit
@@ -172,6 +184,8 @@ export default function ShareholderProfileUpdate() {
     };
     const Url = "v1/reap/operations";
     const method = "post";
+    // API Simulation: wait for 2 seconds
+    await new Promise((resolve) => setTimeout(resolve, 10000));
     submitMutation.mutate(
       { method, url: Url, payload },
       {
