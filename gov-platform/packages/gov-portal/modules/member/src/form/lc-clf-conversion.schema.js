@@ -8,20 +8,20 @@ export const lcClfConversionSchema = {
       id: "lc-clf-conversion-details",
       title: "LC to CLF Conversion Details",
       fields: [
-       {
-          id: "action",
-          type: "radio-group",
-          label: "Action",
-          defaultValue: "add",
-          options: {
-            items: [
-              { label: "Convert LC to CLF", value: "add" },
-              { label: "Update Existing", value: "update" }
-            ]
-          },
-          validations: [{ type: "required" }],
-          grid: { span: { xs: 12, sm: 6, md: 4 } }
-        },
+      //  {
+      //     id: "action",
+      //     type: "radio-group",
+      //     label: "Action",
+      //     defaultValue: "add",
+      //     options: {
+      //       items: [
+      //         { label: "Convert LC to CLF", value: "add" },
+      //         { label: "Update Existing", value: "update" }
+      //       ]
+      //     },
+      //     validations: [{ type: "required" }],
+      //     grid: { span: { xs: 12, sm: 6, md: 4 } }
+      //   },
         {
           id: "district",
           type: "autocomplete",
@@ -53,8 +53,17 @@ export const lcClfConversionSchema = {
         },
         {
           id: "lcName",
-          type: "text",
-          label: "LC Name",
+          type: "autocomplete",
+          label: "Select LC Name",
+          options: {
+            endpointKey: "v1/master/data",
+            labelKey: "name",
+            valueKey: "id",
+            query: { type: "lc" },
+            dependsOn: ["values.block"],
+            dependsOnHint: "Select Block first",
+            queryBuilder: (deps) => ({ type: "blocks", id: deps.block })
+          },
           validations: [{ type: "required" }],
           grid: { span: { xs: 12, sm: 6, md: 4 } }
         },
@@ -76,6 +85,7 @@ export const lcClfConversionSchema = {
           type: "text",
           label: "CLF Registration Number",
           validations: [{ type: "required" }],
+          rules: [{ when: "values.convertedToClf === 'No'", action: "hide" }],
           grid: { span: { xs: 12, sm: 6, md: 4 } }
         },
         {
@@ -85,6 +95,7 @@ export const lcClfConversionSchema = {
           validations: [{ type: "required" }],
           props: { format: "DD/MM/YYYY" },
           config: { valueKind: "iso", outputFormat: "YYYY-MM-DD", disableFuture: true },
+          rules: [{ when: "values.convertedToClf === 'No'", action: "hide" }],
           grid: { span: { xs: 12, sm: 6, md: 4 } }
         },
         {
@@ -92,6 +103,7 @@ export const lcClfConversionSchema = {
           type: "text",
           label: "CLF New Name",
           validations: [{ type: "required" }],
+          rules: [{ when: "values.convertedToClf === 'No'", action: "hide" }],
           grid: { span: { xs: 12, sm: 6, md: 4 } }
         },
         {
@@ -102,6 +114,7 @@ export const lcClfConversionSchema = {
             { type: "required" },
             { type: "pattern", value: "^\\d+$", message: "Only numbers allowed" }
           ],
+          rules: [{ when: "values.convertedToClf === 'No'", action: "hide" }],
           grid: { span: { xs: 12, sm: 6, md: 4 } }
         },
         {
@@ -112,6 +125,7 @@ export const lcClfConversionSchema = {
             { type: "required" },
             { type: "pattern", value: "^\\d+$", message: "Only numbers allowed" }
           ],
+          rules: [{ when: "values.convertedToClf === 'No'", action: "hide" }],
           grid: { span: { xs: 12, sm: 6, md: 4 } }
         }
       ]

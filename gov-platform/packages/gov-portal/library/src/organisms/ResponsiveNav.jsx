@@ -165,7 +165,7 @@ export default function ResponsiveNav({
         <Box
           component="main"
           sx={{
-            p: 2,
+            // p: 2,
             minHeight: 0,
             overflowY: "auto",
             overscrollBehavior: "contain",

@@ -23,19 +23,19 @@ export const clfLcRegistrationSchema = {
           validations: [{ type: "required" }],
           grid: { span: { xs: 12, sm: 6, md: 4 } }
         },
-        {
-          id: "isClfOrLcCreateUpdate",
-          type: "dropdown",
-          label: "Is it CLF or LC Data ?",
-          options: {
-            items: [
-              { label: "CLF", value: "clf" },
-              { label: "LC", value: "lc" }
-            ]
-          },
-          validations: [{ type: "required" }],
-          grid: { span: { xs: 12, sm: 6, md: 4 } }
-        },
+        // {
+        //   id: "isClfOrLcCreateUpdate",
+        //   type: "dropdown",
+        //   label: "Is it CLF or LC Data ?",
+        //   options: {
+        //     items: [
+        //       { label: "CLF", value: "clf" },
+        //       { label: "LC", value: "lc" }
+        //     ]
+        //   },
+        //   validations: [{ type: "required" }],
+        //   grid: { span: { xs: 12, sm: 6, md: 4 } }
+        // },
         {
           id: "district",
           type: "autocomplete",
@@ -66,28 +66,27 @@ export const clfLcRegistrationSchema = {
           grid: { span: { xs: 12, sm: 6, md: 4 } }
         },
         {
-          id: "clfLcName",
+          id: "clfName",
           type: "text",
-          label: "CLF / LCs Name",
+          label: "CLF Name",
           validations: [{ type: "required" }],
           grid: { span: { xs: 12, sm: 6, md: 4 } },
           rules: [{ when: "values.action === 'update'", action: "hide" }],
         },
         {
-          id: "clfLcToUpdate",
+          id: "clfToUpdateId",
           type: "autocomplete",
-          label: "Choose CLF / LC to Update",
+          label: "Choose CLF to Update",
           options: {
             endpointKey: "v1/master/data",
             labelKey: "name",
             valueKey: "id",
             query: { type: "clf_profiles" },
-            dependsOn: ["values.block", "values.isClfOrLcCreateUpdate"],
+            dependsOn: ["values.block"],
             dependsOnHint: "Select Block first",
             queryBuilder: (deps) => ({
               type: "clf_profiles",
               id: deps.block,
-              isClfOrLc: deps.isClfOrLcCreateUpdate
             }
             )
           },
@@ -98,7 +97,7 @@ export const clfLcRegistrationSchema = {
         {
           id: "agreementEffectiveDate",
           type: "date",
-          label: "CLF / LC Adoption Agreement (Effective) Date",
+          label: "CLF Adoption Agreement (Effective) Date",
           validations: [{ type: "required" }],
           props: { format: "DD/MM/YYYY" },
           config: { valueKind: "iso", outputFormat: "YYYY-MM-DD", disableFuture: true },
@@ -135,20 +134,20 @@ export const clfLcRegistrationSchema = {
         {
           id: "address",
           type: "text",
-          label: "Address of CLF / LCs",
+          label: "Address of CLF",
           grid: { span: { xs: 12, sm: 6, md: 4 } }
         },
         {
           id: "registrationNo",
           type: "text",
-          label: "CLF / LC Registration No.",
+          label: "CLF Registration No.",
           validations: [{ type: "required" }],
           grid: { span: { xs: 12, sm: 6, md: 4 } }
         },
         {
           id: "registrationDate",
           type: "date",
-          label: "CLF / LCs Date of Registration",
+          label: "CLF Date of Registration",
           props: { format: "DD/MM/YYYY" },
           config: { valueKind: "iso", outputFormat: "YYYY-MM-DD", disableFuture: true },
           grid: { span: { xs: 12, sm: 6, md: 4 } }
@@ -157,28 +156,28 @@ export const clfLcRegistrationSchema = {
 
           id: "presidentName",
           type: "text",
-          label: "CLF / LC BOD's Name: President",
+          label: "CLF BOD's Name: President",
           validations: [{ type: "required" }],
           grid: { span: { xs: 12, sm: 6, md: 4 } }
         },
         {
           id: "secretaryName",
           type: "text",
-          label: "CLF / LC BOD's Name: Secretary",
+          label: "CLF BOD's Name: Secretary",
           validations: [{ type: "required" }],
           grid: { span: { xs: 12, sm: 6, md: 4 } }
         },
         {
           id: "treasurerName",
           type: "text",
-          label: "CLF / LC BOD's Name: Treasurer",
+          label: "CLF BOD's Name: Treasurer",
           validations: [{ type: "required" }],
           grid: { span: { xs: 12, sm: 6, md: 4 } }
         },
         {
           id: "bodNames",
           type: "textarea",
-          label: "CLF / LC BOD Names (Others)",
+          label: "CLF BOD Names (Others)",
           description: "Enter multiple names (up to 10)",
           grid: { span: { xs: 12, sm: 6, md: 4 } }
         },
@@ -199,7 +198,7 @@ export const clfLcRegistrationSchema = {
         {
           id: "staffHeader",
           type: "subheader",
-          label: "Names of Staff in CLF / LC",
+          label: "Names of Staff in CLF",
           grid: { span: { xs: 12, sm: 6, md: 4 } }
         },
         {
@@ -252,8 +251,9 @@ export const clfLcRegistrationSchema = {
         {
           id: "bankAccount",
           type: "text",
-          label: "CLF / LCs Bank A/C No.",
+          label: "CLF Bank A/C No.",
           validations: [{ type: "required" }, { type: "pattern", value: "^\\d+$" }],
+          props: { maxLength: 24 },
           grid: { span: { xs: 12, sm: 6, md: 4 } }
         },
         {

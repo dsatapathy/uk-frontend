@@ -2,8 +2,8 @@ import React from "react";
 import { getComponent } from "@gov/core";
 import { leaderProfileSchema } from "../form/leader-profile.schema";
 import { useSubmitData } from "@gov/data";
-import { useSnackbar } from "../../../../library/src/atoms/Snackbar";
-import { useLoader } from "../../../../library/src/atoms/Loader";
+import { useSnackbar } from "@gov/library";
+import { useLoader } from "@gov/library";
 import { apiService } from "@gov/data";
 
 
@@ -130,6 +130,7 @@ export default function LeaderProfileUpdate() {
     // Optionally show loading indicator here
 
     try {
+      show("Loading leader data — please wait...");
       // Fetch vo data from API
       const leaderData = await fetchLeaderData(presidentNameId);
 
@@ -141,7 +142,9 @@ export default function LeaderProfileUpdate() {
       flat.presidentNameId = presidentNameId;
       // Patch the form with the fetched data
       formApiRef.current?.patch?.(flat, { shouldValidate: false, shouldDirty: false });
+      hide();
     } catch (err) {
+      hide();
       enqueue({ message: "Failed to load vo data", severity: "error" });
     }
 
@@ -154,7 +157,7 @@ export default function LeaderProfileUpdate() {
     const payload = {
       module: "USER_DATA_UPDATE",
       operation: isUpdate ? "UPDATE" : "CREATE",
-      formType: "LEADER_PROFILE",
+      formType: "REPRESENTATIVE_PROFILE",
       formData: flatFormData,
     };
     const Url = "v1/reap/operations";
@@ -176,7 +179,7 @@ export default function LeaderProfileUpdate() {
             form: "Leader Profile",
             body: isUpdate ? "Your Leader profile has been successfully updated." : "Your Leader profile has been successfully created.",
             leaderName: response?.data?.data?.presidentName || "Unknown",
-            leaderId: response?.data?.data?.presidentId || "00XX00",
+            reference: response?.data?.data?.presidentNameId || "00XX00",
           }).toString();
           const target = `${window.location.origin}/common/acknowledgement_page?${params}`;
           window.location.href = target;

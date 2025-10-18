@@ -9,14 +9,14 @@ export const fpoProfileSchema = {
             title: "FPO Profile Details",
             fields: [
                 {
-                    id: "mode",
+                    id: "action",
                     type: "radio-group",
-                    label: "Mode",
+                    label: "Action",
                     defaultValue: "create",
                     options: {
                         items: [
-                            { label: "Create", value: "create" },
-                            { label: "Update", value: "update" }
+                            { label: "Create new FPO", value: "create" },
+                            { label: "Update existing FPO", value: "update" }
                         ]
                     },
                     validations: [{ type: "required" }],
@@ -35,68 +35,89 @@ export const fpoProfileSchema = {
                     validations: [{ type: "required" }],
                     grid: { span: { xs: 12, sm: 6, md: 4 } }
                 },
-                {
-                    id: "block",
-                    type: "autocomplete",
-                    label: "Block",
-                    options: {
-                        endpointKey: "v1/master/data",
-                        labelKey: "name",
-                        valueKey: "id",
-                        query: { type: "blocks" },
-                        dependsOn: ["values.district"],
-                        dependsOnHint: "Select District first",
-                        queryBuilder: (deps) => ({
-                            type: "blocks",
-                            id: deps.district
-                        })
-                    },
-                    validations: [{ type: "required" }],
-                    grid: { span: { xs: 12, sm: 6, md: 4 } }
-                },
-                {
-                    id: "gp",
-                    type: "autocomplete",
-                    label: "Gram Panchayat",
-                    options: {
-                        endpointKey: "v1/master/data",
-                        labelKey: "name",
-                        valueKey: "id",
-                        query: { type: "panchayats" },
-                        dependsOn: ["values.block"],
-                        dependsOnHint: "Select Block first",
-                        queryBuilder: (deps) => ({
-                            type: "panchayats",
-                            id: deps.block
-                        })
-                    },
-                    validations: [{ type: "required" }],
-                    grid: { span: { xs: 12, sm: 6, md: 4 } }
-                },
-                {
-                    id: "clf",
-                    type: "autocomplete",
-                    label: "CLF",
-                    options: {
-                        endpointKey: "v1/master/data",
-                        labelKey: "name",
-                        valueKey: "id",
-                        query: { type: "clf_profiles" },
-                        dependsOn: ["values.block"],
-                        dependsOnHint: "Select Block first",
-                        queryBuilder: (deps) => ({
-                            type: "clf_profiles",
-                            id: deps.block
-                        })
-                    },
-                    validations: [{ type: "required" }],
-                    grid: { span: { xs: 12, sm: 6, md: 4 } }
-                },
+                // {
+                //     id: "block",
+                //     type: "autocomplete",
+                //     label: "Block",
+                //     options: {
+                //         endpointKey: "v1/master/data",
+                //         labelKey: "name",
+                //         valueKey: "id",
+                //         query: { type: "blocks" },
+                //         dependsOn: ["values.district"],
+                //         dependsOnHint: "Select District first",
+                //         queryBuilder: (deps) => ({
+                //             type: "blocks",
+                //             id: deps.district
+                //         })
+                //     },
+                //     validations: [{ type: "required" }],
+                //     grid: { span: { xs: 12, sm: 6, md: 4 } }
+                // },
+                // {
+                //     id: "gp",
+                //     type: "autocomplete",
+                //     label: "Gram Panchayat",
+                //     options: {
+                //         endpointKey: "v1/master/data",
+                //         labelKey: "name",
+                //         valueKey: "id",
+                //         query: { type: "panchayats" },
+                //         dependsOn: ["values.block"],
+                //         dependsOnHint: "Select Block first",
+                //         queryBuilder: (deps) => ({
+                //             type: "panchayats",
+                //             id: deps.block
+                //         })
+                //     },
+                //     validations: [{ type: "required" }],
+                //     grid: { span: { xs: 12, sm: 6, md: 4 } }
+                // },
+                // {
+                //     id: "clf",
+                //     type: "autocomplete",
+                //     label: "CLF",
+                //     options: {
+                //         endpointKey: "v1/master/data",
+                //         labelKey: "name",
+                //         valueKey: "id",
+                //         query: { type: "clf_profiles" },
+                //         dependsOn: ["values.block"],
+                //         dependsOnHint: "Select Block first",
+                //         queryBuilder: (deps) => ({
+                //             type: "clf_profiles",
+                //             id: deps.block
+                //         })
+                //     },
+                //     validations: [{ type: "required" }],
+                //     grid: { span: { xs: 12, sm: 6, md: 4 } }
+                // },
                 {
                     id: "fpoName",
                     type: "text",
                     label: "FPO Name",
                     validations: [{ type: "required" }],
+                    rules: [{ when: "values.action === 'update'", action: "hide" }],
+                    grid: { span: { xs: 12, sm: 6, md: 4 } }
+                },
+                {
+                    id: "fpoId",
+                    type: "autocomplete",
+                    label: "Select FPO Name",
+                    options: {
+                        endpointKey: "v1/master/data",
+                        labelKey: "name",
+                        valueKey: "id",
+                        query: { type: "fpo_profiles" },
+                        dependsOn: ["values.district"],
+                        dependsOnHint: "Select District first",
+                        queryBuilder: (deps) => ({
+                            type: "fpo_profiles",
+                            id: deps.district
+                        })  // This will be sent as query params
+                    },
+                    validations: [{ type: "required" }],
+                    rules: [{ when: "values.action !== 'update'", action: "hide" }],
                     grid: { span: { xs: 12, sm: 6, md: 4 } }
                 },
                 {
@@ -105,9 +126,9 @@ export const fpoProfileSchema = {
                     label: "Registration Type",
                     options: {
                         endpointKey: "v1/master/data",
-                        labelKey: "name",
-                        valueKey: "id",
-                        query: { type: "registration_types" }  // This will be sent as query params
+                        labelKey: "label",
+                        valueKey: "value",
+                        query: { type: "registration_type" }  // This will be sent as query params
                     },
                     validations: [{ type: "required" }],
                     grid: { span: { xs: 12, sm: 6, md: 4 } }
@@ -127,9 +148,9 @@ export const fpoProfileSchema = {
                     label: "Year Taken in REAP",
                     options: {
                         endpointKey: "v1/master/data",
-                        labelKey: "year",
-                        valueKey: "year",
-                        query: { type: "years" }
+                        labelKey: "label",
+                        valueKey: "value",
+                        query: { type: "reap_year" }
                     },
                     validations: [{ type: "required" }],
                     grid: { span: { xs: 12, sm: 6, md: 4 } }
@@ -152,14 +173,26 @@ export const fpoProfileSchema = {
                     id: "bankAccountNo",
                     type: "text",
                     label: "Bank Account No",
-                    validations: [{ type: "required" }],
+                    validations: [
+                        { type: "required" },
+                        { type: "pattern", value: "^(|\\d+)$", message: "Only numbers allowed" }
+                    ],
+                    props: { maxLength: 24 },
                     grid: { span: { xs: 12, sm: 6, md: 4 } }
                 },
                 {
                     id: "ifscCode",
                     type: "text",
                     label: "IFSC Code",
-                    validations: [{ type: "required" }],
+                    validations: [
+                        { type: "required" },
+                        {
+                            type: "pattern",
+                            value: "^[A-Z]{4}0[A-Z0-9]{6}$",
+                            message: "Invalid IFSC"
+                        }
+                    ],
+                    props: { maxLength: 11, placeholder: "e.g., HDFC0001234" },
                     grid: { span: { xs: 12, sm: 6, md: 4 } }
                 },
                 {
@@ -197,6 +230,7 @@ export const fpoProfileSchema = {
                         { type: "required" },
                         { type: "pattern", value: "^[6-9]\\d{9}$", message: "Invalid mobile number" }
                     ],
+                    props: { maxLength: 10, placeholder: "10-digit number" },
                     grid: { span: { xs: 12, sm: 6, md: 4 } }
                 },
                 {
@@ -220,6 +254,7 @@ export const fpoProfileSchema = {
                         { type: "required" },
                         { type: "pattern", value: "^[6-9]\\d{9}$", message: "Invalid mobile number" }
                     ],
+                    props: { maxLength: 10, placeholder: "10-digit number" },
                     grid: { span: { xs: 12, sm: 6, md: 4 } }
                 },
                 {
@@ -243,6 +278,7 @@ export const fpoProfileSchema = {
                         { type: "required" },
                         { type: "pattern", value: "^[6-9]\\d{9}$", message: "Invalid mobile number" }
                     ],
+                    props: { maxLength: 10, placeholder: "10-digit number" },
                     grid: { span: { xs: 12, sm: 6, md: 4 } }
                 },
                 {
@@ -264,11 +300,12 @@ export const fpoProfileSchema = {
                     validations: [
                         { type: "pattern", value: "^[6-9]\\d{9}$", message: "Invalid mobile number" }
                     ],
+                    props: { maxLength: 10, placeholder: "10-digit number" },
                     grid: { span: { xs: 12, sm: 6, md: 4 } }
                 },
                 {
                     id: "fpoFurniture",
-                    type: "autocomplete",
+                    type: "radio-group",
                     label: "FPO Furniture Procured",
                     options: {
                         items: [
@@ -280,48 +317,48 @@ export const fpoProfileSchema = {
                 },
                 {
                     id: "workingCapital",
-                    type: "autocomplete",
+                    type: "radio-group",
                     label: "Working Capital Transferred",
                     options: {
                         items: [
-                            { label: "Yes", value: "yes" },
-                            { label: "No", value: "no" }
+                            { label: "Yes", value: "Yes" },
+                            { label: "No", value: "No" }
                         ]
                     },
                     grid: { span: { xs: 12, sm: 6, md: 4 } }
                 },
                 {
                     id: "governanceTraining",
-                    type: "autocomplete",
+                    type: "radio-group",
                     label: "Governance Training",
                     options: {
                         items: [
-                            { label: "Yes", value: "yes" },
-                            { label: "No", value: "no" }
+                            { label: "Yes", value: "Yes" },
+                            { label: "No", value: "No" }
                         ]
                     },
                     grid: { span: { xs: 12, sm: 6, md: 4 } }
                 },
                 {
                     id: "businessTraining",
-                    type: "autocomplete",
+                    type: "radio-group",
                     label: "Business Training",
                     options: {
                         items: [
-                            { label: "Yes", value: "yes" },
-                            { label: "No", value: "no" }
+                            { label: "Yes", value: "Yes" },
+                            { label: "No", value: "No" }
                         ]
                     },
                     grid: { span: { xs: 12, sm: 6, md: 4 } }
                 },
                 {
                     id: "staffRecruited",
-                    type: "autocomplete",
+                    type: "radio-group",
                     label: "Staff Recruited",
                     options: {
                         items: [
-                            { label: "Yes", value: "yes" },
-                            { label: "No", value: "no" }
+                            { label: "Yes", value: "Yes" },
+                            { label: "No", value: "No" }
                         ]
                     },
                     grid: { span: { xs: 12, sm: 6, md: 4 } }

@@ -12,11 +12,11 @@ export const pgProfileSchema = {
           id: "action",
           type: "radio-group",
           label: "Action",
-          defaultValue: "add",
+          defaultValue: "create",
           options: {
             items: [
-              { label: "Add New Member", value: "add" },
-              { label: "Update Existing", value: "update" }
+              { label: "Create New PG", value: "create" },
+              { label: "Update Existing PG", value: "update" }
             ]
           },
           validations: [{ type: "required" }],
@@ -112,21 +112,29 @@ export const pgProfileSchema = {
           type: "text",
           label: "PG Name",
           validations: [{ type: "required" }],
+          rules: [{ when: "values.action === 'update'", action: "hide" }],
+          grid: { span: { xs: 12, sm: 6, md: 4 } }
+        },
+       {
+          id: "pgNameId",
+          type: "autocomplete",
+          label: "Select PG Name to update",
+          options: {
+            endpointKey: "v1/master/data",
+            labelKey: "name",
+            valueKey: "id",
+            query: { type: "lcs" },
+            dependsOn: ["values.lc"],
+            queryBuilder: (deps) => ({ type: "lcs", id: deps.lc })
+          },
+          validations: [{ type: "required" }],
+          rules: [{ when: "values.action !== 'update'", action: "hide" }],
           grid: { span: { xs: 12, sm: 6, md: 4 } }
         },
         {
           id: "pgCode",
-          type: "autocomplete",
+          type: "text",
           label: "PG Code",
-          options: {
-            endpointKey: "v1/master/data",
-            labelKey: "code",
-            valueKey: "id",
-            query: { type: "pg_codes" },
-            dependsOn: ["values.lc"],
-            dependsOnHint: "Select Livelihood Cluster first",
-            queryBuilder: (deps) => ({ type: "pg_codes", id: deps.lc })
-          },
           validations: [{ type: "required" }],
           grid: { span: { xs: 12, sm: 6, md: 4 } }
         },
@@ -186,10 +194,10 @@ export const pgProfileSchema = {
           id: "pgMeetingFrequency",
           type: "autocomplete",
           label: "PG Meeting Frequency",
-          options: {
+           options: {
             endpointKey: "v1/master/data",
-            labelKey: "name",
-            valueKey: "id",
+            labelKey: "label",
+            valueKey: "value",
             query: { type: "meeting_frequency" }  // This will be sent as query params
           },
           validations: [{ type: "required" }],
@@ -299,6 +307,7 @@ export const pgProfileSchema = {
           validations: [{ type: "required" },
             { type: "pattern", value: "^\\d+$", message: "Only numbers allowed" }
           ],
+          props: { maxLength: 24 },
           grid: { span: { xs: 12, sm: 6, md: 4 } }
         },
         {
@@ -308,6 +317,7 @@ export const pgProfileSchema = {
           validations: [{ type: "required" },
             { type: "pattern", value: "^[A-Z]{4}0[A-Z0-9]{6}$", message: "Invalid IFSC code format" }
           ],
+          props: { maxLength: 11, placeholder: "e.g., HDFC0001234"  },
           grid: { span: { xs: 12, sm: 6, md: 4 } }
         },
         {

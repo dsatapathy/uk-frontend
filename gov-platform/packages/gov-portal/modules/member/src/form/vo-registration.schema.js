@@ -240,6 +240,7 @@ export const voRegistrationFormSchema = {
                     validations: [{ type: "required" },
                     { type: "pattern", pattern: "^[0-9]*$", message: "Only numbers are allowed" }
                     ],
+                    props: { maxLength: 24 },
                     description: "Enter VO account number",
                     grid: { span: { xs: 12, sm: 6, md: 4 } }
                 },
@@ -247,7 +248,14 @@ export const voRegistrationFormSchema = {
                     id: "vo_ifsc_code",
                     type: "text",
                     label: "VO IFSC Code",
-                    validations: [{ type: "required" }],
+                    validations: [
+                        {
+                            type: "pattern",
+                            value: "^[A-Z]{4}0[A-Z0-9]{6}$",
+                            message: "Invalid IFSC"
+                        }
+                    ],
+                    props: { maxLength: 11 },
                     description: "Enter VO IFSC code",
                     grid: { span: { xs: 12, sm: 6, md: 4 } }
                 },

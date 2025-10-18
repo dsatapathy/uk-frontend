@@ -5,8 +5,8 @@ import { useHistory } from "react-router-dom";
 import { runtime } from "@gov/core";
 import { useMenu } from "@gov/data";
 import { Box } from "@mui/material";
-import { SnackbarProvider } from "../../../library/src/atoms/Snackbar.jsx";
-import { LoaderProvider } from "../../../library/src/atoms/Loader.jsx";
+import { SnackbarProvider } from "@gov/library";
+import { LoaderProvider } from "@gov/library";
 // ---------- helpers ----------
 function renderLogoFromBrand(brand) {
   if (!brand) return null;
