@@ -55,7 +55,9 @@
 /* Required asterisk colors: use semantic/error scale from tokens */
 .asterisk {
   margin-left: var(--g-s1);
+  color: var(--error-600, #d32f2f);
 }
+.asterisk.color--danger  { color: var(--error-600, #d32f2f); }
 .asterisk.color--error   { color: var(--error-600, #d32f2f); }
 .asterisk.color--default { color: currentColor; }
 

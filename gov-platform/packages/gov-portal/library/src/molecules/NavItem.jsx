@@ -67,13 +67,13 @@ export default function NavItem({ item, level = 0, selected, open, onClick, coll
       }}
     >
       {/* left indentation */}
-      <Box
+      {/* <Box
         sx={{
           width: INDENT,
           flex: collapsed ? "0 0 0" : "0 0 auto",
           transition: "width 0.24s cubic-bezier(0.4, 0, 0.2, 1)",
         }}
-      />
+      /> */}
 
       {/* icon */}
       <Box

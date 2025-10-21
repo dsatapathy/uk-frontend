@@ -239,7 +239,7 @@ export default function Sidebar(props) {
       {/* Section label */}
       {!isCollapsed && (
         <Box sx={{ px: 2, pb: 1, pt: isDesktop ? 0.5 : 1, flexShrink: 0 }}>
-          <TypographyX
+          {/* <TypographyX
             variant="overline"
             sx={{
               color: "var(--sidebar-fg-dim, var(--g-fg-muted, " + fgDim + "))",
@@ -250,7 +250,7 @@ export default function Sidebar(props) {
             }}
           >
             Navigation
-          </TypographyX>
+          </TypographyX> */}
         </Box>
       )}
 
