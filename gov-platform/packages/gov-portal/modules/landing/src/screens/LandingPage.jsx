@@ -82,7 +82,7 @@ export default function LandingPage() {
   });
 
   return (
-    <Container maxWidth="lg" sx={{ py: { xs: 2, md: 3 } }}>
+    <Container sx={{ py: { xs: 2, md: 3 } }}>
       {sections}
       <NotificationsModal
         radius={1}

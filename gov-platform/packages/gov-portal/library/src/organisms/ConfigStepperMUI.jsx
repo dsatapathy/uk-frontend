@@ -312,8 +312,6 @@ export default function ConfigStepperMUI({
           px: { xs: 2, md: 3 },
           py: 2,
           width: "100%",
-          maxWidth: 1200,
-          mx: "auto",
           zIndex: 1,
           display: "flex",
           justifyContent: "space-between",
