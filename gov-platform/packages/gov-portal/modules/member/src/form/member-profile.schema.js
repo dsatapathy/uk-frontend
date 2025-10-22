@@ -168,7 +168,7 @@ export const memberProfileSchema = {
             { type: "required" },
             { type: "pattern", value: "^\\d+$", message: "Invalid Input, Expecting Number" }
           ],
-          props: { min: 0, step: 1 },
+          props: { min: 0, step: 1, placeholder: "Please enter code " },
           config: { inputMode: "numeric" },
           grid: { span: { xs: 12, sm: 6, md: 4 } }
         },

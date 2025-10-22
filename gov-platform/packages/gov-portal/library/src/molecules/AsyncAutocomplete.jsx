@@ -39,7 +39,7 @@ export default function AsyncAutocomplete({
   const dropdownFontFamily =
     field?.options?.dropdownFontFamily || `"Nunito",sans-serif`;
   const dropdownFontSize =
-    field?.options?.dropdownFontSize != null ? field.options.dropdownFontSize : 18;
+    field?.options?.dropdownFontSize != null ? field.options.dropdownFontSize : 14;
 
   const onInputChange = useMemo(
     () =>
@@ -144,8 +144,10 @@ export default function AsyncAutocomplete({
               ? field?.options?.dependsOnHint || "Please select the parent field first"
               : error?.message
           }
+          placeholder={field?.options?.placeholder || ""}
           InputProps={{
             ...params.InputProps,
+            placeholder: field?.options?.placeholder || "Type to search...",
             endAdornment: (
               <>
                 {(isLoading || isFetching) && open && ready ? (

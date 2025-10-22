@@ -21,6 +21,7 @@ import s from "@gov/styles/library/form/InputNumber.module.scss";
  * - format:  function(n:number|null) => string
  *            | { locale?: string, options?: Intl.NumberFormatOptions }
  *            | "integer" | "decimal" (convenience presets)
+ * - placeholder
  * - error: boolean
  * - disabled, readOnly
  * - ariaDescribedBy: string (ids appended)
@@ -110,6 +111,7 @@ export default function InputNumber({
   max,
   step = 1,
   format = "decimal",
+  placeholder,
   error,
   disabled,
   readOnly,
@@ -214,6 +216,9 @@ export default function InputNumber({
 
   // accessibility: expose spinbutton semantics even if type="text"
   const ariaValueNow = value ?? coerceNumberFromInput(display);
+  const tfProps = { ...(textFieldProps || {}) };
+  const tfPlaceholder = placeholder ?? tfProps.placeholder;
+  delete tfProps.placeholder;
   return (
     <div className={rootClass} onWheel={onWheel}>
       <div className={s.inline}>
@@ -227,7 +232,7 @@ export default function InputNumber({
           variant={cfg.variant}
           size={muiSize}
           type="text" // keep text to allow formatted strings & partials
-          placeholder={textFieldProps?.placeholder}
+          placeholder={tfPlaceholder}
           disabled={disabled}
           InputProps={{
             readOnly,
@@ -252,7 +257,7 @@ export default function InputNumber({
           }}
           fullWidth={cfg.fullWidth}
           error={!!error}
-          {...(textFieldProps || {})}
+          {...tfProps}
           onKeyDown={(e) => {
             if (e.key === "ArrowUp") {
               e.preventDefault();

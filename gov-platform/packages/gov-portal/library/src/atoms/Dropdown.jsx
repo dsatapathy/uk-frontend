@@ -33,6 +33,11 @@ const DEFAULT_CFG = {
   autoComplete: "off",
 };
 
+const OPTION_SX = { fontSize: "var(--g-font-size-md, 0.875rem)" };
+const PLACEHOLDER_STYLE = {
+  color: "var(--field-placeholder, var(--g-fg-muted, rgba(100, 116, 139, 0.85)))",
+};
+
 export default function Dropdown({
   rhf,
 
@@ -65,6 +70,32 @@ export default function Dropdown({
 
   const rootClass = [s.root, s[`my--${cfg.marginY}`]].join(" ");
   const describedBy = [ariaDescribedBy].filter(Boolean).join(" ");
+  const isEmpty = controlled.value === undefined || controlled.value === null || controlled.value === "";
+
+  const tfProps = { ...(textFieldProps || {}) };
+  const selectProps = { ...(tfProps.SelectProps || {}) };
+  delete tfProps.SelectProps;
+
+  if (placeholder) {
+    if (selectProps.displayEmpty === undefined) selectProps.displayEmpty = true;
+    if (!selectProps.renderValue) {
+      selectProps.renderValue = (selected) => {
+        if (isEmpty || selected === "" || selected === undefined || selected === null) {
+          return <span style={PLACEHOLDER_STYLE}>{placeholder}</span>;
+        }
+
+        if (Array.isArray(selected)) {
+          if (!selected.length) return <span style={PLACEHOLDER_STYLE}>{placeholder}</span>;
+          return selected
+            .map((val) => options.find((opt) => opt.value === val)?.label ?? val)
+            .join(", ");
+        }
+
+        const match = options.find((opt) => opt.value === selected);
+        return match ? match.label : selected;
+      };
+    }
+  }
 
   return (
     <div className={rootClass}>
@@ -88,20 +119,21 @@ export default function Dropdown({
         InputProps={{
           readOnly,
         }}
+        SelectProps={selectProps}
         inputProps={{
           autoComplete: cfg.autoComplete,
           ...(inputProps || {}),
           "aria-describedby": describedBy || undefined,
         }}
-        {...(textFieldProps || {})}
+        {...tfProps}
       >
         {placeholder && (
-          <MenuItem value="" disabled>
+          <MenuItem value="" disabled sx={{ ...OPTION_SX, ...PLACEHOLDER_STYLE }}>
             {placeholder}
           </MenuItem>
         )}
         {options.map((opt) => (
-          <MenuItem key={opt.value} value={opt.value}>
+          <MenuItem key={opt.value} value={opt.value} sx={OPTION_SX}>
             {opt.label}
           </MenuItem>
         ))}
