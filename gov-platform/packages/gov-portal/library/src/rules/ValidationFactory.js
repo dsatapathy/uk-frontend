@@ -122,7 +122,7 @@ function baseForField(field, opts) {
       if (allowEmpty) {
         return s.optional();
       } else {
-        return s.refine((v) => !isEmpty(v), { message: "Required" });
+        return s.refine((v) => !isEmpty(v), { message: "This field is required" });
       }
     }
     // strings: text/password/email/tel/url/textarea/autocomplete/…
