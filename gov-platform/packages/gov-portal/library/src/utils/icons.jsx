@@ -22,9 +22,14 @@ const LOADERS = {
   refresh: () => import("@mui/icons-material/Refresh"),
   add: () => import("@mui/icons-material/Add"),
   remove: () => import("@mui/icons-material/Remove"),
-  person: () => import("@mui/icons-material/Person"),
   agriculture: () => import('@mui/icons-material/Agriculture'),
-  business: () => import('@mui/icons-material/Business')
+  business: () => import('@mui/icons-material/Business'),
+  businesscenter: () => import('@mui/icons-material/BusinessCenter'),
+  currencyrupee: () => import('@mui/icons-material/CurrencyRupee'),
+  construction: () => import('@mui/icons-material/Construction'),
+  modeltraining: () => import('@mui/icons-material/ModelTraining'),
+  report: () => import('@mui/icons-material/Report'),
+
 };
 /** 2) Aliases */
 const ALIASES = {
