@@ -13,7 +13,8 @@ import { getIcon } from "../utils/icons";
 import { Brand } from "../components/Brand";
 import { useAppConfig } from "@gov/ui-engine";
 import defaultS from "@gov/styles/modules/auth/Auth.module.scss";
-
+import { fontFamily } from "@mui/system";
+import { Link as RouterLink, useHistory } from "react-router-dom";
 function useMenu() {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
@@ -23,9 +24,9 @@ function useMenu() {
 }
 
 /** Compact, modern action chip:
- * - On md+ shows icon + label inside a rounded pill
+ * - On md shows icon  label inside a rounded pill
  * - On xs/sm, collapses label; still shows a Tooltip
- * - Hover grows the pill width and fades label in (md+ only)
+ * - Hover grows the pill width and fades label in (md only)
  */
 function ActionChip({
   icon,
@@ -83,7 +84,7 @@ function ActionChip({
     >
       <Box sx={{ display: "grid", placeItems: "center", fontSize: 20 }}>{icon}</Box>
 
-      {/* Label appears on md+; animates in/out based on hover */}
+      {/* Label appears on md; animates in/out based on hover */}
       <Box
         sx={{
           display: { xs: collapseOnSmall ? "none" : "inline-flex", sm: collapseOnSmall ? "none" : "inline-flex", md: "inline-flex" },
@@ -119,7 +120,8 @@ export default function TopBar(props) {
     notifications = [], notificationCount, onClickNotification,
     profileMenu = [], onLogout, homeMenu = [], lineDeptMenu = [],
   } = props;
-
+  const history = useHistory();
+  const goLanding = React.useCallback(() => history.push("/landing"), [history]);
   const theme = useTheme();
   const s = defaultS;
   const appCfg = useAppConfig();
@@ -208,7 +210,7 @@ export default function TopBar(props) {
   );
 
   const itemSx = {
-    mx: 1, my: 0.25, borderRadius: 2, color: "#01604a",
+    mx: 1, my: 0.25, borderRadius: 2, color: "#01604a", fontFamily: "'Poppins', sans-serif",
     "&:hover": { backgroundColor: alpha(primaryColor, 0.08) },
   };
 
@@ -232,8 +234,32 @@ export default function TopBar(props) {
           </IconButton>
         )}
 
-        <Brand classes={s} {...brandProps} showLogo={isDesktop} titleSx={titleSx} />
-
+        <Box
+  component={RouterLink}
+  to="/landing"
+  onClick={goLanding}
+  aria-label="Go to landing page"
+  sx={{
+    display: "inline-flex",
+    alignItems: "center",
+    textDecoration: "none",
+    color: "inherit",
+    cursor: "pointer",
+    "&:focus-visible": {
+      outline: "2px solid",
+      outlineColor: alpha(primaryColor, 0.5),
+      outlineOffset: 2,
+      borderRadius: 1,
+    },
+  }}
+>
+  <Brand
+    classes={s}
+    {...brandProps}
+    showLogo={isDesktop}
+    titleSx={titleSx}
+  />
+</Box>
         {isDesktop && showSearchOnDesktop ? (
           <Box sx={{ flex: 1, display: "flex", justifyContent: "center", px: 2 }}>
             <Box sx={{ flex: 1, maxWidth: maxSearchWidthDesktop, minWidth: 200 }}>
@@ -244,7 +270,7 @@ export default function TopBar(props) {
           <Box sx={{ flex: 1 }} />
         )}
 
-        {/* Right actions: chips that show text on md+ and tooltip on small */}
+        {/* Right actions: chips that show text on md and tooltip on small */}
         <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
           {/* Mobile search toggle stays icon-only */}
           {!isDesktop && (
@@ -271,7 +297,7 @@ export default function TopBar(props) {
           />
 
           {/* Line Departments */}
-          <ActionChip
+          {/* <ActionChip
             icon={getIcon("layers")}
             label="Line Dept."
             tooltip="Line Department"
@@ -279,7 +305,7 @@ export default function TopBar(props) {
             aria-haspopup="menu"
             aria-controls={line.open ? "line-menu" : undefined}
             aria-expanded={line.open ? "true" : undefined}
-          />
+          /> */}
 
           {/* Notifications (optional; shows badge on chip) */}
           {/* <ActionChip

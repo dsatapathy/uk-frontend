@@ -92,7 +92,7 @@ export default function TypographyX({
           color: toneToColor(tone),   // defaults to CSS var
           fontWeight: typeof weight === "number" ? weight : FW[weight],
           marginBottom: MARGINS[mb] ?? 0,
-          fontFamily: '"Nunito", sans-serif',
+          fontFamily: "'Poppins', sans-serif",
         },
         underline ? { textDecoration: "underline" } : null,
         respSx,

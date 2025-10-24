@@ -77,7 +77,6 @@ export default function UploadInput({
   const emitChange = (arr) => {
     // normalize payload for parent
     const next = multiple ? arr : (arr[0] ?? null);
-    console.log('next', arr, next);
     setFilesUI(arr);        // optimistic UI
     onChange?.(next);       // inform RHF/parent
   };

@@ -1,21 +1,20 @@
-// page/LandingPage.jsx (DS + RQ version)
 import React from "react";
-import { useConfig } from "@gov/library";
 import { useHistory, useLocation } from "react-router-dom";
-
+import { getComponent } from "@gov/core";
+import { useSelector } from "react-redux";
+import { useConfig } from "@gov/library";
 import {
   useNotifications,
   useModuleList,
   useCreateNotification,
 } from "@gov/data";
-import { getComponent } from "@gov/core";
-import { useSelector } from "react-redux";
 import { loadLanding } from "@gov/ui";
 
-export default function LandingPage() {
+export default function CommonHome() {
   const LandingTemplate = getComponent("LandingTemplate");
   const history = useHistory();
   const location = useLocation();
+
   const { config: landingConfig, loading: cfgLoading } = useConfig(loadLanding, "landing");
   const { user } = useSelector((s) => s.auth.user || {});
   const isAdmin = !!user?.roles?.includes?.("admin");
@@ -51,13 +50,11 @@ export default function LandingPage() {
       const next = targetPath || mod?.path;
       if (!next) return;
       history.push(next);
-      // analytics / prefetch hooks can go here
     },
     [history]
   );
 
-  if (cfgLoading) return null;
-  if (!LandingTemplate) return null;
+  if (cfgLoading || !LandingTemplate) return null;
 
   return (
     <LandingTemplate
@@ -65,14 +62,14 @@ export default function LandingPage() {
       modules={modules}
       modulesLoading={modulesLoading}
       notifications={notifications}
+      isAdmin={isAdmin}
+      onNavigate={onNavigate}
+      onCreateNotification={onCreateNotification}
       notificationsModalProps={{
         intent: "neutral",
         variant: "solid",
         radius: 1,
       }}
-      isAdmin={isAdmin}
-      onCreateNotification={onCreateNotification}
-      onNavigate={onNavigate}
     />
   );
 }

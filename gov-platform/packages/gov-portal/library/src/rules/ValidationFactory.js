@@ -318,7 +318,6 @@ export function buildZodFromSchema(schema, options) {
 
   // add cross-field validations
   return obj.superRefine((data, ctx) => {
-    console.log("superRefine", { data, ctx });
     for (const { fieldId, v } of crossRules) {
       const type = String(v?.type || "").toLowerCase();
       const msg = v?.message;

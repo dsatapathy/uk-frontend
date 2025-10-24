@@ -84,7 +84,6 @@ export function Icon({ name, fontSize = "small", color, sx, ...props }) {
   const key = resolveKey(name);
   const LazyIcon = getLazyIconForKey(key);
   if (!LazyIcon) return null;
-  console.log("sx", sx)
   return (
     <React.Suspense fallback={null}>
       <LazyIcon

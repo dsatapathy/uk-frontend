@@ -218,7 +218,7 @@ export default function ThemeBridge() {
     "--g-surface-3": surface3,
 
     "--g-fg": p.text.primary,         // primary text
-    "--g-fg-muted": p.text.secondary, // secondary text
+    "--g-fg-muted": "#000", // secondary text
     "--g-border": p.divider,          // dividers, card borders
 
     "--g-primary": brandScale["--agri-600"],

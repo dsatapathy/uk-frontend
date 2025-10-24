@@ -27,7 +27,6 @@ export function useLoginFlow(loginCfg) {
   const appCfg = useAppConfig();
   // Merge any config provided via context (app-level) with hook-level config
   loginCfg = useMemo(() => ({ ...(appCfg.auth?.login || {}), ...(appCfg?.http || {}), ...(loginCfg || {}) }), [appCfg, loginCfg]);
-  console.log("useLoginFlow config:", loginCfg);
   const baseURL = loginCfg?.baseURL || "";
   const endpoint = loginCfg?.submit?.endpoint || "/auth/login";
   const method = (loginCfg?.submit?.method || "POST").toUpperCase();

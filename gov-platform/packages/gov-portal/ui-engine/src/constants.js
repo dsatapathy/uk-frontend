@@ -9,27 +9,27 @@ export const DEFAULT_THEME = {
 
   shape: { borderRadius: 12 },
   typography: {
-    fontFamily: '"Nunito", sans-serif',
+    fontFamily: "'Poppins', sans-serif",
   },
   components: {
     MuiCssBaseline: {
       styleOverrides: {
         ":root": {
-          "--g-font": '"Nunito", sans-serif',
+          "--g-font": "'Poppins', sans-serif",
         },
         "html, body, #root": {
           height: "100%",
         },
         body: {
-          fontFamily: '"Nunito", sans-serif',
+          fontFamily: "'Poppins', sans-serif",
           WebkitFontSmoothing: "antialiased",
           MozOsxFontSmoothing: "grayscale",
         },
         "*": {
-          fontFamily: '"Nunito", sans-serif',
+          fontFamily: "'Poppins', sans-serif",
         },
         ".MuiTypography-root": {
-          fontFamily: '"Nunito", sans-serif',
+          fontFamily: "'Poppins', sans-serif",
         },
       },
     },
@@ -120,7 +120,7 @@ export const DEFAULT_THEME = {
 
     MuiFormHelperText: {
       styleOverrides: {
-        root: { marginLeft: 0, color: "var(--field-help, #64748b)" },
+        root: { marginLeft: 0, color: "var(--field-help, #000000)" },
       },
     },
 

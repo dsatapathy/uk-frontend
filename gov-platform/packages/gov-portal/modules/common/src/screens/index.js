@@ -6,3 +6,8 @@ export const loadAcknowledgePage = asDefault(
   "AcknowledgePage"
 );
 
+export const loadCommonHome = asDefault(
+  () => import("./CommonHome.jsx"),
+  "CommonHome"
+);
+
