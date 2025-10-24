@@ -15,6 +15,7 @@ import {
   loadFPOProfileUpdate,
   loadPGProfileUpdate,
   loadLCToCLFConversion,
+  loadMemberLanding,
 } from "./screens";
 
 // If your project keeps them in ./screens instead, just swap the import path above to "./screens".
@@ -57,6 +58,10 @@ export function register(app) {
     "LCToCLFConversion",
     LazyWrap(loadLCToCLFConversion, "LC → CLF Conversion")
   );
+  registerComponent(
+    "MemberLanding",
+    LazyWrap(loadMemberLanding, "Member Landing")
+  );
 
   // Actions (optional shortcuts you can fire from menu/items)
   registerAction("user.member.profile", () => app.history.push("/member/user/memberdetails"));
@@ -72,7 +77,7 @@ export function register(app) {
   // Routes (aligned to your menu paths)
   app.addRoutes([
     // default member landing (kept)
-    { path: "/member", exact: true, layout: "Shell", page: { type: "BeneficiaryMemberProfile" } },
+    { path: "/member", exact: true, layout: "Shell", page: { type: "MemberLanding" } },
 
     // User Data Updation → 9 pages
     { path: "/member/user/memberdetails", exact: true, layout: "Shell", page: { type: "BeneficiaryMemberProfile" } },

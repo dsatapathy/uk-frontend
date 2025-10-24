@@ -45,3 +45,8 @@ export const loadLCToCLFConversion = asDefault(
   () => import("./LCToCLFConversion.jsx"),
   "LCToCLFConversion"
 );
+
+export const loadMemberLanding = asDefault(
+  () => import("./MemberLanding.jsx"),
+  "MemberLanding"
+);
