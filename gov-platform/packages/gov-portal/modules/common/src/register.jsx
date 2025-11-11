@@ -8,6 +8,7 @@ import "@gov/styles/modules/bpa/index.scss";
 import {
   loadAcknowledgePage,
   loadCommonHome,
+  loadUserDataModuleSearch,
 } from "./screens";
 
 
@@ -35,9 +36,13 @@ export function register(app) {
 
   registerComponent("CommonHome", LazyWrap(loadCommonHome, "Common Home"));
   registerComponent("AcknowledgePage", LazyWrap(loadAcknowledgePage, "Acknowledge Page"));
+  registerComponent("UserDataModuleSearch", LazyWrap(loadUserDataModuleSearch, "User Data Module Search"));
+
+  // Define routes
   app.addRoutes([
     { path: buildPath(), exact: true, layout: "Shell", page: { type: "CommonHome" } },
     { path: buildPath("home"), exact: true, layout: "Shell", page: { type: "CommonHome" } },
     { path: buildPath("acknowledgement_page"), exact: true, layout: "Shell", page: { type: "AcknowledgePage" } },
+    { path: "/common/user_data_module_search", exact: true, layout: "Shell", page: { type: "UserDataModuleSearch" } },
   ]);
 }

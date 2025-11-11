@@ -100,9 +100,9 @@ export const pgProfileSchema = {
             endpointKey: "v1/master/data",
             labelKey: "name",
             valueKey: "id",
-            query: { type: "lcs" },
+            query: { type: "lc_profiles" },
             dependsOn: ["values.block"],
-            queryBuilder: (deps) => ({ type: "lcs", id: deps.block })
+            queryBuilder: (deps) => ({ type: "lc_profiles", id: deps.block })
           },
           validations: [{ type: "required" }],
           grid: { span: { xs: 12, sm: 6, md: 4 } }
@@ -116,16 +116,16 @@ export const pgProfileSchema = {
           grid: { span: { xs: 12, sm: 6, md: 4 } }
         },
        {
-          id: "pgNameId",
+          id: "pgId",
           type: "autocomplete",
           label: "Select PG Name to update",
           options: {
             endpointKey: "v1/master/data",
             labelKey: "name",
             valueKey: "id",
-            query: { type: "lcs" },
+            query: { type: "pg_profiles" },
             dependsOn: ["values.lc"],
-            queryBuilder: (deps) => ({ type: "lcs", id: deps.lc })
+            queryBuilder: (deps) => ({ type: "pg_profiles", id: deps.lc })
           },
           validations: [{ type: "required" }],
           rules: [{ when: "values.action !== 'update'", action: "hide" }],
@@ -139,7 +139,7 @@ export const pgProfileSchema = {
           grid: { span: { xs: 12, sm: 6, md: 4 } }
         },
         {
-          id: "dateOfRegistration",
+          id: "registrationDate",
           type: "date",
           label: "Date of Registration",
           props: { format: "DD/MM/YYYY" },
@@ -191,7 +191,7 @@ export const pgProfileSchema = {
           grid: { span: { xs: 12, sm: 6, md: 4 } }
         },
         {
-          id: "pgMeetingFrequency",
+          id: "meetingFrequency",
           type: "autocomplete",
           label: "PG Meeting Frequency",
            options: {
@@ -204,7 +204,7 @@ export const pgProfileSchema = {
           grid: { span: { xs: 12, sm: 6, md: 4 } }
         },
         {
-          id: "livelihoodCommitteeFormation",
+          id: "livelihoodCommitteeFormed",
           type: "radio-group",
           label: "Livelihood Committee Formation",
           validations: [{ type: "required" }],
@@ -301,7 +301,7 @@ export const pgProfileSchema = {
           grid: { span: { xs: 12, sm: 6, md: 4 } }
         },
         {
-          id: "pgAccountNo",
+          id: "pgAccountNumber",
           type: "text",
           label: "PG A/C No.",
           validations: [{ type: "required" },

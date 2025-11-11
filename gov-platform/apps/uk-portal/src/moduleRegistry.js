@@ -9,6 +9,9 @@ const all = {
   bpa: () => import("@gov/mod-bpa"),
   member: () => import("@gov/mod-member"),
   common: () => import("@gov/mod-common"),
+  enterprise: () => import("@gov/mod-enterprise"),
+  livelihood: () => import("@gov/mod-livelihood"),
+  finance: () => import("@gov/mod-finance"),
 };
 
 console.log("[env] VITE_ENABLED_MODULES =", import.meta.env.VITE_ENABLED_MODULES);

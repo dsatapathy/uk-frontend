@@ -53,9 +53,9 @@ function flatFromMock(pgData, update = false) {
 
     // --- PG Identification ---
     pgName: pgData?.pgName ? String(pgData.pgName) : "",
-    pgNameId: pgData?.pgNameId ? Number(pgData.pgNameId) : "",
+    pgId: pgData?.pgId ? Number(pgData.pgId) : "",
     pgCode: pgData?.pgCode ? String(pgData.pgCode) : "",
-    dateOfRegistration: pgData?.dateOfRegistration ? String(pgData.dateOfRegistration) : "",
+    registrationDate: pgData?.registrationDate ? String(pgData.registrationDate) : "",
     address: pgData?.address ? String(pgData.address) : "",
 
     // --- Member details ---
@@ -65,8 +65,8 @@ function flatFromMock(pgData, update = false) {
 
     // --- Governance & Functionality ---
     presidentElected: pgData?.presidentElected ? String(pgData.presidentElected) : "",
-    pgMeetingFrequency: pgData?.pgMeetingFrequency ? String(pgData.pgMeetingFrequency) : "",
-    livelihoodCommitteeFormation: pgData?.livelihoodCommitteeFormation ? String(pgData.livelihoodCommitteeFormation) : "",
+    meetingFrequency: pgData?.meetingFrequency ? String(pgData.meetingFrequency) : "",
+    livelihoodCommitteeFormed: pgData?.livelihoodCommitteeFormed ? String(pgData.livelihoodCommitteeFormed) : "",
 
     // --- Value Chain Details ---
     valueChain1: pgData?.valueChain1 ? String(pgData.valueChain1) : "",
@@ -85,7 +85,7 @@ function flatFromMock(pgData, update = false) {
 
     // --- Bank Details ---
     pgBankName: pgData?.pgBankName ? String(pgData.pgBankName) : "",
-    pgAccountNo: pgData?.pgAccountNo ? String(pgData.pgAccountNo) : "",
+    pgAccountNumber: pgData?.pgAccountNumber ? String(pgData.pgAccountNumber) : "",
     pgIfscCode: pgData?.pgIfscCode ? String(pgData.pgIfscCode) : "",
 
     // --- Verification ---
@@ -131,10 +131,10 @@ export default function PGProfileUpdate() {
         return;
       }
     }
-    if (name !== "pgNameId") return;
-    const id = typeof vals.pgNameId === "object"
-      ? (vals.pgNameId?.id ?? vals.pgNameId?.value ?? vals.pgNameId?.code ?? null)
-      : vals.pgNameId;
+    if (name !== "pgId") return;
+    const id = typeof vals.pgId === "object"
+      ? (vals.pgId?.id ?? vals.pgId?.value ?? vals.pgId?.code ?? null)
+      : vals.pgId;
     const pgId = id;
     if (!pgId) return;
     // Optionally show loading indicator here

@@ -15,6 +15,7 @@ import Repeater from "../organisms/Repeater.jsx";
 import UploadInput from "../atoms/UploadInput.jsx";
 import CaptchaBox from "../components/CaptchaBox.jsx";
 import Dropdown from "../atoms/Dropdown.jsx";
+import { Typography } from "@mui/material";
 
 /** -----------------------------------------------------------------------
  * Small, safe helpers
@@ -242,7 +243,28 @@ export default function FieldController({
       </FieldWrapper>
     );
   }
-
+  // ──────────────────────────────
+  // SPECIAL CASE: HEADING / SUBHEADING
+  // Treat these as pure layout elements (not form controls).
+  // They should not be "optional" fields nor wrapped as inputs.
+  // Respect hidden flag but bypass Controller / FieldWrapper entirely.
+  // ──────────────────────────────
+  if (field.type === "heading" || field.type === "subHeading") {
+    if (hidden) return null;
+    const label = field.props?.label ?? field.label;
+    if (field.type === "heading") {
+      return (
+        <Typography id={field.id} component="div" variant="h6" sx={{ fontWeight: 700, mb: 1.5 }}>
+          {label}
+        </Typography>
+      );
+    }
+    return (
+      <Typography id={field.id} component="div" variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>
+        {label}
+      </Typography>
+    );
+  }
   // ──────────────────────────────
   // DEFAULT PATH: single RHF Controller
   // ──────────────────────────────

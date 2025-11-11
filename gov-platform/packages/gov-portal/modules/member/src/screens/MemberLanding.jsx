@@ -2,7 +2,8 @@ import React from "react";
 import { useLocation } from "react-router-dom";
 import CircularProgress from "@mui/material/CircularProgress";
 import Box from "@mui/material/Box";
-import { loadCommonHome } from "@gov/mod-common/screens";
+import { loadCommonHome } from "@gov/mod-common";
+
 
 const CommonHome = React.lazy(loadCommonHome);
 const BeneficiaryMemberProfile = React.lazy(() =>

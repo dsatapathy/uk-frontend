@@ -6,6 +6,7 @@ import { visuallyHidden } from "@mui/utils";
 import s from "@gov/styles/library/form/Label.module.scss";
 import TypographyX from "./TypographyX";
 
+
 /**
  * Label — Config-driven, responsive, SCSS-styled (no context).
  *
@@ -66,7 +67,7 @@ export default function Label({ htmlFor, required = false, tooltip, config, chil
         {required ? (
           <>
             {cfg.showRequiredMark ? (
-              <span className={asteriskClass} aria-hidden="true">
+              <span className={asteriskClass} style={{ color: "red" }} aria-hidden="true">
                 {cfg.requiredMark}
               </span>
             ) : null}

@@ -1,6 +1,7 @@
 import { makeLoader, registerAll, registerAllOnce } from "./helpers";
 
 export const DynamicForm   = makeLoader("../organisms/DynamicForm.jsx",   "DynamicForm");
+export const DynamicTable   = makeLoader("../organisms/DynamicTable.jsx",   "DynamicTable");
 export const FormGrid      = makeLoader("../organisms/FormGrid.jsx",      "FormGrid");
 export const FieldGroup    = makeLoader("../organisms/FieldGroup.jsx",    "FieldGroup");
 export const Repeater      = makeLoader("../organisms/Repeater.jsx",      "Repeater");
@@ -10,6 +11,7 @@ export const LandingTemplate = makeLoader("../organisms/LandingTemplate.jsx", "L
 export const ConfigStepperMUI = makeLoader("../organisms/ConfigStepperMUI.jsx", "ConfigStepperMUI");
 const defs = [
   ["DynamicForm",    DynamicForm],
+  ["DynamicTable",    DynamicTable],
   ["FormGrid",       FormGrid],
   ["FieldGroup",     FieldGroup],
   ["Repeater",       Repeater],

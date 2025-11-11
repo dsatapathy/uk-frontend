@@ -13,7 +13,8 @@
   "files": ["dist"],
   "sideEffects": ["**/*.css", "**/*.scss"],
   "dependencies": {
-        "@gov/data": "0.0.0"
+        "@gov/data": "0.0.0",
+        "@gov/library": "0.0.0"
   },
   "peerDependencies": {
     "@gov/core": "0.1.0",

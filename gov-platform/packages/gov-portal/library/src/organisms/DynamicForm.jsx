@@ -172,8 +172,27 @@ function collectHiddenFieldIds(schema, values) {
 function makeVisibilityAwareResolver(zodSchema, formSchema) {
   const base = zodResolver(zodSchema);
   return async (values, context, options) => {
-    const res = await base(values, context, options);
-    const hidden = collectHiddenFieldIds(formSchema, values);
+    // Clean empty date strings so zod preprocessors see undefined instead of ""
+    const cleaned = { ...values };
+    try {
+      const dateFieldIds = (formSchema?.sections || [])
+        .flatMap((s) => (s.fields || []))
+        .filter((f) => {
+          const t = String(f.type || "").toLowerCase();
+          return t === "date" || t === "datepicker";
+        })
+        .map((f) => f.id);
+      if (dateFieldIds.length) {
+        dateFieldIds.forEach((id) => {
+          if (cleaned[id] === "") cleaned[id] = undefined;
+        });
+        // eslint-disable-next-line no-console
+        // console.debug("DynamicForm.cleanDates", { dateFieldIds, before: values, after: cleaned });
+      }
+    } catch (e) {}
+
+    const res = await base(cleaned, context, options);
+    const hidden = collectHiddenFieldIds(formSchema, cleaned);
 
     // 1) strip errors for hidden fields
     if (res.errors) {

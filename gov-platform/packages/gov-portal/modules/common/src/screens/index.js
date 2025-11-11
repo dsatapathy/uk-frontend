@@ -10,4 +10,8 @@ export const loadCommonHome = asDefault(
   () => import("./CommonHome.jsx"),
   "CommonHome"
 );
+export const loadUserDataModuleSearch = asDefault(
+  () => import("./UserDataModuleSearch.jsx"),
+  "UserDataModuleSearch"
+);
 

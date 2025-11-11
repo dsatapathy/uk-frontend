@@ -22,7 +22,10 @@ const devOnlySrcAliases = {
   "@gov/form-engine": toFs(path.resolve(repoRoot, "packages/gov-portal/formengine/src")),
   "@gov/styles": toFs(path.resolve(repoRoot, "packages/gov-portal/styles")),
   "@gov/mod-member": toFs(path.resolve(repoRoot, "packages/gov-portal/modules/member/src")),
-  "@gov/mod-common": toFs(path.resolve(repoRoot, "packages/gov-portal/modules/common/src"))
+  "@gov/mod-common": toFs(path.resolve(repoRoot, "packages/gov-portal/modules/common/src")),
+  "@gov/mod-enterprise": toFs(path.resolve(repoRoot, "packages/gov-portal/modules/enterprise/src")),
+  "@gov/mod-livelihood": toFs(path.resolve(repoRoot, "packages/gov-portal/modules/livelihood/src")),
+  "@gov/mod-finance": toFs(path.resolve(repoRoot, "packages/gov-portal/modules/finance/src")),
 };
 
 // Tiny React 17-safe shim for Emotion’s helper

@@ -1,0 +1,272 @@
+export const pashuSakhiTrainingFormSchema = {
+    $schema: "fe.v1",
+    id: "pashu-sakhi-training-form",
+    version: "1.0.0",
+    title: "Pashu Sakhi Training Details",
+    sections: [
+        {
+            id: "pashu-sakhi-training-details",
+            title: "Pashu Sakhi Training Information",
+            fields: [
+                /* --- Basic Details --- */
+                {
+                    id: "participantCategory",
+                    type: "autocomplete",
+                    label: "Category of Participants",
+                    options: {
+                        endpointKey: "v1/master/data",
+                        labelKey: "label",
+                        valueKey: "value",
+                        query: { type: "pashu_sakhi_participants" },
+                    },
+                    validations: [{ type: "required" }],
+                    grid: { span: { xs: 12, sm: 6, md: 4 } },
+                },
+
+                /* --- Location Hierarchy --- */
+                {
+                    id: "districtId",
+                    type: "autocomplete",
+                    label: "District Name",
+                    options: {
+                        endpointKey: "v1/master/data",
+                        labelKey: "name",
+                        valueKey: "id",
+                        query: { type: "districts" },
+                    },
+                    validations: [{ type: "required" }],
+                    grid: { span: { xs: 12, sm: 6, md: 4 } },
+                },
+                {
+                    id: "blockId",
+                    type: "autocomplete",
+                    label: "Block Name",
+                    options: {
+                        endpointKey: "v1/master/data",
+                        labelKey: "name",
+                        valueKey: "id",
+                        query: { type: "blocks" },
+                        dependsOn: ["values.districtId"],
+                        dependsOnHint: "Select District first",
+                        queryBuilder: (deps) => ({
+                            type: "blocks",
+                            id: deps.districtId,
+                        }),
+                    },
+                    validations: [{ type: "required" }],
+                    grid: { span: { xs: 12, sm: 6, md: 4 } },
+                },
+                {
+                    id: "panchayatId",
+                    type: "autocomplete",
+                    label: "Gram Panchayat Name",
+                    options: {
+                        endpointKey: "v1/master/data",
+                        labelKey: "name",
+                        valueKey: "id",
+                        query: { type: "panchayats" },
+                        dependsOn: ["values.blockId"],
+                        dependsOnHint: "Select Block first",
+                        queryBuilder: (deps) => ({
+                            type: "panchayats",
+                            id: deps.blockId,
+                        }),
+                    },
+                    validations: [{ type: "required" }],
+                    grid: { span: { xs: 12, sm: 6, md: 4 } },
+                },
+                {
+                    id: "villageId",
+                    type: "autocomplete",
+                    label: "Village Name",
+                    options: {
+                        endpointKey: "v1/master/data",
+                        labelKey: "name",
+                        valueKey: "id",
+                        query: { type: "villages" },
+                        dependsOn: ["values.panchayatId"],
+                        dependsOnHint: "Select Gram Panchayat first",
+                        queryBuilder: (deps) => ({
+                            type: "villages",
+                            id: deps.panchayatId,
+                        }),
+                    },
+                    validations: [{ type: "required" }],
+                    grid: { span: { xs: 12, sm: 6, md: 4 } },
+                },
+
+                {
+                    id: "clfCode",
+                    type: "autocomplete",
+                    label: "CLF Name",
+                    options: {
+                        endpointKey: "v1/master/data",
+                        labelKey: "name",
+                        valueKey: "id",
+                        query: { type: "clf_profiles" },
+                        dependsOn: ["values.blockId"],
+                        dependsOnHint: "Select Block first",
+                        queryBuilder: (deps) => ({
+                            type: "clf_profiles",
+                            id: deps.blockId,
+                        }),
+                    },
+                    validations: [{ type: "required" }],
+                    grid: { span: { xs: 12, sm: 6, md: 4 } },
+                },
+                {
+                    id: "voCode",
+                    type: "autocomplete",
+                    label: "VO Name",
+                    options: {
+                        endpointKey: "v1/master/data",
+                        labelKey: "name",
+                        valueKey: "id",
+                        query: { type: "vo_profiles" },
+                        dependsOn: ["values.clfCode"],
+                        dependsOnHint: "Select CLF first",
+                        queryBuilder: (deps) => ({
+                            type: "vo_profiles",
+                            id: deps.clfCode,
+                        }),
+                    },
+                    validations: [{ type: "required" }],
+                    grid: { span: { xs: 12, sm: 6, md: 4 } },
+                },
+                {
+                    id: "shgCode",
+                    type: "autocomplete",
+                    label: "SHG",
+                    options: {
+                        endpointKey: "v1/master/data",
+                        labelKey: "name",
+                        valueKey: "id",
+                        query: { type: "shg_profiles" },
+                        dependsOn: ["values.voCode"],
+                        dependsOnHint: "Select VO first",
+                        queryBuilder: (deps) => ({
+                            type: "shg_profiles",
+                            id: deps.voCode,
+                        }),
+                    },
+                    validations: [{ type: "required" }],
+                    grid: { span: { xs: 12, sm: 6, md: 4 } },
+                },
+
+                /* --- Training Details --- */
+                {
+                    id: "detailsOfTraining",
+                    type: "subHeading",
+                    label: "Details of Training Undertaken",
+                    grid: { span: { xs: 12, sm: 12, md: 12 } },
+                },
+                {
+                    id: "memberName",
+                    type: "text",
+                    label: "Pashu Sakhi Name",
+                    validations: [{ type: "required" }],
+                    props: { placeholder: "Enter Pashu Sakhi name" },
+                    grid: { span: { xs: 12, sm: 6, md: 4 } },
+                },
+                {
+                    id: "mobileNo",
+                    type: "text",
+                    label: "PS Mobile Number",
+                    placeholder: "Enter Pashu Sakhi mobile number",
+                    validations: [
+                        { type: "required" },
+                        {
+                            type: "pattern",
+                            value: "^[6-9]\\d{9}$",
+                            message: "Enter a valid 10-digit mobile number",
+                        },
+                    ],
+                    props: { maxLength: 10, placeholder: "Enter Pashu Sakhi mobile number" },
+                    grid: { span: { xs: 12, sm: 6, md: 4 } },
+                },
+                {
+                    id: "organizedBy",
+                    type: "autocomplete",
+                    label: "Organized By",
+                    options: {
+                        endpointKey: "v1/master/data",
+                        labelKey: "label",
+                        valueKey: "value",
+                        query: { type: "pashu_sakhi_organized_by" },
+                    },
+                    validations: [{ type: "required" }],
+                    grid: { span: { xs: 12, sm: 6, md: 4 } },
+                },
+                {
+                    id: "resourceOrganization",
+                    type: "autocomplete",
+                    label: "Name of Resource Organization",
+                    options: {
+                        endpointKey: "v1/master/data",
+                        labelKey: "label",
+                        valueKey: "value",
+                        query: { type: "pashu_sakhi_resource_organization" },
+                    },
+                    validations: [{ type: "required" }],
+                    grid: { span: { xs: 12, sm: 6, md: 4 } },
+                },
+                {
+                    id: "levelOfTraining",
+                    type: "autocomplete",
+                    label: "Level of Training",
+                    options: {
+                        endpointKey: "v1/master/data",
+                        labelKey: "label",
+                        valueKey: "value",
+                        query: { type: "pashu_sakhi_training_level" },
+                    },
+                    validations: [{ type: "required" }],
+                    grid: { span: { xs: 12, sm: 6, md: 4 } },
+                },
+                {
+                    id: "trainingDuration",
+                    type: "text",
+                    label: "Training Duration (Days/Hours)",
+                    placeholder: "Enter training duration",
+                    // validations: [
+                    //     { type: "pattern", value: "^\\d+$", message: "Enter a valid number" },
+                    // ],
+                    props: { placeholder: "Enter training duration" },
+                    grid: { span: { xs: 12, sm: 6, md: 4 } },
+                },
+
+                /* --- File Uploads --- */
+                {
+                    id: "uploadSupportingDocuments",
+                    type: "subHeading",
+                    label: "Upload Supporting Documents",
+                    grid: { span: { xs: 12, sm: 12, md: 12 } },
+                },
+                {
+                    id: "trainingPhoto",
+                    type: "file",
+                    label: "Training Photograph",
+                    props: {
+                        accept: "image/*",
+                        maxFiles: 3,
+                        maxSizeMB: 5,
+                    },
+                    validations: [{ type: "required" }],
+                    grid: { span: { xs: 12, sm: 6, md: 4 } },
+                },
+                {
+                    id: "trainingCertificate",
+                    type: "file",
+                    label: "Training Certificate (Only PDF)",
+                    props: {
+                        accept: ".pdf",
+                        maxFiles: 1,
+                        maxSizeMB: 5,
+                    },
+                    validations: [{ type: "required" }],
+                    grid: { span: { xs: 12, sm: 6, md: 4 } },
+                },
+            ],
+        },
+    ],
+};
