@@ -110,9 +110,27 @@ export default function createHttp(cfg = {}, storage) {
           isRefreshing = true;
           refreshPromise = (async () => {
             try {
-              const { data } = await axios.post(refreshURL, {}, { withCredentials: true });
-              const token = data?.tokens?.accessToken || data?.token;
-              const refreshToken = data?.tokens?.refreshToken || data?.refreshToken;
+              // const { data } = await axios.post(refreshURL, {}, { withCredentials: true });
+              // retrieve refresh token from storage (supports both tokens.refreshToken and refreshToken)
+              const savedAuth = storage?.get?.("auth") || {};
+              const refreshTokenForApi =
+                savedAuth.tokens.refreshToken || "";
+                
+
+              if (!refreshTokenForApi) {
+                // nothing to refresh with
+                 refreshFailed = true;
+                setTokens(undefined);
+                return undefined;
+              }
+
+              const { data } = await axios.post(
+                refreshURL,
+                { refreshToken: refreshTokenForApi },
+                { withCredentials: true }
+              );
+              const token = data?.data?.accessToken || data?.accessToken;
+              const refreshToken = data?.data?.refreshToken || data?.refreshToken;
               if (token) {
                 setTokens({ accessToken: token, refreshToken });
                 refreshFailed = false;

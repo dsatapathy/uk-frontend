@@ -118,7 +118,7 @@ export const AttentionBar = React.memo(function AttentionBar({
             {getIcon("edit")}
           </IconButton>
         )}
-        <AppButton
+        {/* <AppButton
           intent="primary"
           variant="solid"
           endIcon={getIcon("notifications")}
@@ -127,7 +127,7 @@ export const AttentionBar = React.memo(function AttentionBar({
           size={isXs ? "small" : "medium"}
         >
           {right?.ctaLabel || "Notifications"}
-        </AppButton>
+        </AppButton> */}
       </Stack>
     </DSBox>
   );

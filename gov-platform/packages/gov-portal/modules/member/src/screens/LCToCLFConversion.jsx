@@ -54,7 +54,7 @@ const DynamicForm = getComponent("DynamicForm");
     show("Converting LC to CLF — please wait...");
     const payload = {
       module: "USER_DATA_UPDATE",
-      operation: isUpdate ? "UPDATE" : "CREATE",
+      operation: "CREATE",
       formType: "LC_TO_CLF_PROFILE",
       formData: flatFormData,
     };

@@ -212,7 +212,7 @@ export default function VOProfileUpdate() {
               form: "VO Profile",
               body: isUpdate ? "Your VO profile has been successfully updated." : "Your VO profile has been successfully created.",
               voName: response?.data?.data?.vo || "Unknown",
-              voId: response?.data?.data?.voId   || "00XX00",
+              reference: response?.data?.data?.voId   || "00XX00",
             }).toString();
             const target = `${window.location.origin}/common/acknowledgement_page?${params}`;
             window.location.href = target;

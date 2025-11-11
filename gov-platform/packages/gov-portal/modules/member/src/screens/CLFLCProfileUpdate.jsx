@@ -211,7 +211,7 @@ export default function CLFLCProfileUpdate() {
             form: "CLF Profile",
             body: isUpdate ? "Your CLF profile has been successfully updated." : "Your CLF profile has been successfully created.",
             clfName: response?.data?.data?.clfName || "Unknown",
-            reference: response?.data?.data?.clfId || "00XX00",
+            reference: response?.data?.data?.clfId || response?.data?.clfId || "00XX00",
           }).toString();
           const target = `${window.location.origin}/common/acknowledgement_page?${params}`;
           window.location.href = target;

@@ -52,17 +52,17 @@ export const lcClfConversionSchema = {
           grid: { span: { xs: 12, sm: 6, md: 4 } }
         },
         {
-          id: "lcName",
+          id: "lcId",
           type: "autocomplete",
           label: "Select LC Name",
           options: {
             endpointKey: "v1/master/data",
             labelKey: "name",
             valueKey: "id",
-            query: { type: "lc" },
+            query: { type: "lc_profiles" },
             dependsOn: ["values.block"],
             dependsOnHint: "Select Block first",
-            queryBuilder: (deps) => ({ type: "blocks", id: deps.block })
+            queryBuilder: (deps) => ({ type: "lc_profiles", id: deps.block })
           },
           validations: [{ type: "required" }],
           grid: { span: { xs: 12, sm: 6, md: 4 } }
