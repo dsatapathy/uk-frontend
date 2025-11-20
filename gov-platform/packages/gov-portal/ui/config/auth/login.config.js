@@ -104,7 +104,7 @@ const loginConfig = {
     },
   },
   // register: { label: "Register", redirect: "/register" },
-  onSuccessRoute: "/landing",
+  onSuccessRoute: "/reap-mis/landing",
 };
 
 export default loginConfig;

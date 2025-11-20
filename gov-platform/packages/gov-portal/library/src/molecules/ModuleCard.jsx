@@ -3,6 +3,7 @@ import React from "react";
 import DSCard from "../atoms/DSCard";
 import TypographyX from "../atoms/TypographyX";
 import { getIcon } from "../utils/icons";
+import { useAppNavigation } from "../hooks/useAppNavigation";
 import { Box } from "@mui/material";
 import { alpha, useTheme } from "@mui/material/styles";
 
@@ -46,6 +47,7 @@ export const ModuleCard = React.memo(function ModuleCard({
   cardSx,
 }) {
   const theme = useTheme();
+  const { createHref, navigate } = useAppNavigation();
   const moduleId =
     module?.id ?? module?.moduleId ?? module?.value ?? module?.code ?? "";
   const targetPath = React.useMemo(() => {
@@ -67,9 +69,23 @@ export const ModuleCard = React.memo(function ModuleCard({
     }
   }, [module?.path, moduleId]);
 
-  const go = () => {
-    onNavigate?.(module, targetPath || module?.path); // no preventDefault
-  };
+  const routeTarget = targetPath || module?.path;
+  const href = React.useMemo(() => createHref(routeTarget), [createHref, routeTarget]);
+  const go = React.useCallback(
+    (event) => {
+      if (!routeTarget) {
+        event?.preventDefault?.();
+        return;
+      }
+      event?.preventDefault?.();
+      if (typeof onNavigate === "function") {
+        onNavigate(module, routeTarget);
+        return;
+      }
+      navigate(routeTarget);
+    },
+    [routeTarget, onNavigate, module, navigate]
+  );
 
   const primaryFallback = theme.palette.primary?.main || "#1b5e20";
   const primaryToken = `var(--g-primary, ${primaryFallback})`;
@@ -84,7 +100,7 @@ export const ModuleCard = React.memo(function ModuleCard({
       hoverRaise={false}
       radius={2}
       onClick={go}
-      to={targetPath || module?.path}
+      to={href || undefined}
       sx={{
         "&&": {
           borderRadius: 2,

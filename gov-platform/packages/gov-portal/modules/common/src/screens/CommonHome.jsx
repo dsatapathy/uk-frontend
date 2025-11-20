@@ -1,8 +1,8 @@
 import React from "react";
-import { useHistory, useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { getComponent } from "@gov/core";
 import { useSelector } from "react-redux";
-import { useConfig } from "@gov/library";
+import { useConfig, useAppNavigation } from "@gov/library";
 import {
   useNotifications,
   useModuleList,
@@ -12,8 +12,8 @@ import { loadLanding } from "@gov/ui";
 
 export default function CommonHome() {
   const LandingTemplate = getComponent("LandingTemplate");
-  const history = useHistory();
   const location = useLocation();
+  const { navigate } = useAppNavigation();
 
   const { config: landingConfig, loading: cfgLoading } = useConfig(loadLanding, "landing");
   const { user } = useSelector((s) => s.auth.user || {});
@@ -49,9 +49,9 @@ export default function CommonHome() {
     (mod, targetPath) => {
       const next = targetPath || mod?.path;
       if (!next) return;
-      history.push(next);
+      navigate(next);
     },
-    [history]
+    [navigate]
   );
 
   if (cfgLoading || !LandingTemplate) return null;

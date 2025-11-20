@@ -12,6 +12,13 @@ export default function RouteBuilder({ routes = [], context }) {
   return (
     <Switch>
       {routes.map((r) => {
+        if (r.redirect) {
+          return (
+            <Route key={`redirect-${r.path}-${r.redirect}`} exact={!!r.exact} path={r.path}>
+              <Redirect to={r.redirect} />
+            </Route>
+          );
+        }
         const Layout =
           typeof r.layout === "string"
             ? (getLayout?.(r.layout) /*|| getLocalLayout?.(r.layout)*/ || React.Fragment)

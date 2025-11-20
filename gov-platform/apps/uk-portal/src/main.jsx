@@ -8,11 +8,17 @@ import topBarLogo from "../public/assets/images/Logo.png"
 const enabled = Object.keys(moduleMap);
 const basePaths = { auth: "/login", landing: "/landing", bpa: "/bpa", member: "/member" };
 const defaultModules = enabled.map(k => ({ key: k, basePath: basePaths[k] || `/${k}` }));
+const normalizeBase = (base) => {
+  if (!base || base === "/") return "/";
+  const withLead = base.startsWith("/") ? base : `/${base}`;
+  return withLead.endsWith("/") ? withLead.slice(0, -1) : withLead;
+};
+const appBase = normalizeBase(import.meta.env.BASE_URL);
 const moduleRegistry = Object.fromEntries(defaultModules.map((m) => [m.key, moduleMap[m.key]]));
 // Only defaults/registry are used; source/endpoints are ignored here.
 start({
   target: "#root",
-  base: "/",
+  base: appBase,
   brand: { 
     logo: landingLogo, 
     title: "UK Portal", 
@@ -74,7 +80,9 @@ start({
     },
   },
   // --- Authentication ---
-  http: { baseURL: "http://reap-mis-myapp-ukgv.casacam.net:9090/reap-mis/api/" },
+  http: { 
+    baseURL: "http://reap-mis-myapp-ukgv.casacam.net:9090/reap-mis/api/"//"http://dev-test.chandigarhsmartcity.in/reap-mis/api/" 
+  },
   auth: {
     strategy: "jwt",
     login: {
@@ -111,5 +119,5 @@ start({
       registry: moduleRegistry
     }
   },
-  redirects: [{ from: "/", to: "/bpa" }]
+  redirects: [{ from: "/", to: "/landing" }]
 });

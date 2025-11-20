@@ -40,6 +40,11 @@ export function start(rawConfig) {
   } = cfg;
 
   const history = createBrowserHistory({ basename: base });
+  if (typeof window !== "undefined") {
+    window.__ROUTER_BASENAME__ = base || "";
+    window.__ENGINE_BASE__ = base || "";
+    window.__APP_BASE__ = base || "";
+  }
 
   // Layout/Shell
   registerShellAsLayout(); // seed built-ins

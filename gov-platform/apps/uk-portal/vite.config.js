@@ -10,6 +10,12 @@ const __dirname = path.dirname(__filename);
 
 const repoRoot = path.resolve(__dirname, "..", "..");
 const toFs = (p) => p.replace(/\\/g, "/");
+const normalizeBaseForVite = (value) => {
+  if (!value) return null;
+  if (value === "/") return "/";
+  const withLead = value.startsWith("/") ? value : `/${value}`;
+  return withLead.endsWith("/") ? withLead : `${withLead}/`;
+};
 
 // --- DEV-ONLY aliases: read packages from source when running `vite` ---
 const devOnlySrcAliases = {
@@ -58,8 +64,11 @@ export default defineConfig(({ command, mode }) => {
   const analyze =
     process.env.ANALYZE === "1" || String(process.env.ANALYZE).toLowerCase() === "true";
 
+  const envBase = normalizeBaseForVite(env.VITE_BASE_URL || process.env.VITE_BASE_URL);
+  const base = envBase ?? (mode === "production" ? "/reap-mis/" : "/");
+
   return {
-    base: "/",
+    base,
     plugins: [
       react(),
       ...(isServe ? [] : [visualizer({

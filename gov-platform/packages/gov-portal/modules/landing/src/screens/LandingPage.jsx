@@ -1,7 +1,7 @@
 // page/LandingPage.jsx (DS + RQ version)
 import React from "react";
-import { useConfig } from "@gov/library";
-import { useHistory, useLocation } from "react-router-dom";
+import { useConfig, useAppNavigation } from "@gov/library";
+import { useLocation } from "react-router-dom";
 
 import {
   useNotifications,
@@ -14,11 +14,11 @@ import { loadLanding } from "@gov/ui";
 
 export default function LandingPage() {
   const LandingTemplate = getComponent("LandingTemplate");
-  const history = useHistory();
   const location = useLocation();
   const { config: landingConfig, loading: cfgLoading } = useConfig(loadLanding, "landing");
   const { user } = useSelector((s) => s.auth.user || {});
   const isAdmin = !!user?.roles?.includes?.("admin");
+  const { navigate } = useAppNavigation();
 
   const {
     data: notifications = [],
@@ -50,10 +50,9 @@ export default function LandingPage() {
     (mod, targetPath) => {
       const next = targetPath || mod?.path;
       if (!next) return;
-      history.push(next);
-      // analytics / prefetch hooks can go here
+      navigate(next);
     },
-    [history]
+    [navigate]
   );
 
   if (cfgLoading) return null;
