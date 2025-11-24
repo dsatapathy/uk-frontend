@@ -1,6 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { List, Collapse, Divider } from "@mui/material";
+import { List, Collapse, Divider, Box  } from "@mui/material";
 import { ensureId } from "../utils/menu-utils";
 import NavItem from "./NavItem";
 
@@ -33,16 +33,18 @@ export default function NavTree({
                         />
                         {hasChildren && (
                             <Collapse in={!collapsed && expandedSet.has(id)} timeout={collapsed ? 0 : "auto"} unmountOnExit>
-                                <NavTree
-                                    items={item.children}
-                                    currentPath={currentPath}
-                                    expandedSet={expandedSet}
-                                    onToggle={onToggle}
-                                    onNavigate={onNavigate}
-                                    level={level + 1}
-                                    parentKey={id}
-                                    collapsed={collapsed}
-                                />
+                                <Box sx={{ display: "block", pl: 2 * (level + 1) }}>
+                                    <NavTree
+                                        items={item.children}
+                                        currentPath={currentPath}
+                                        expandedSet={expandedSet}
+                                        onToggle={onToggle}
+                                        onNavigate={onNavigate}
+                                        level={level + 1}
+                                        parentKey={id}
+                                        collapsed={collapsed}
+                                    />
+                                </Box>
                             </Collapse>
                         )}
                         {item.divider ? <Divider sx={{ my: 0.5 }} /> : null}

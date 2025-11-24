@@ -131,7 +131,7 @@ export function DefaultShell({ children, brand }) {
       } catch (err) { }
       // redirect to login
       if (typeof window !== "undefined") {
-        window.location.href = "/login";
+        window.location.href = "/reap-mis/login";
       }
     };
     window.addEventListener("auth:forbidden", onForbidden);

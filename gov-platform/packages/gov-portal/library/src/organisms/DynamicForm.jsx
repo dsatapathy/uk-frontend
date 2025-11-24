@@ -179,7 +179,7 @@ function makeVisibilityAwareResolver(zodSchema, formSchema) {
         .flatMap((s) => (s.fields || []))
         .filter((f) => {
           const t = String(f.type || "").toLowerCase();
-          return t === "date" || t === "datepicker";
+          return t === "date" || t === "datepicker" || t === "autocomplete";
         })
         .map((f) => f.id);
       if (dateFieldIds.length) {

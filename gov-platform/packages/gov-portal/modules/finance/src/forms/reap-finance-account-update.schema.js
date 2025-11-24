@@ -11,17 +11,13 @@ export const reapFinanceAccountUpdateSchema = {
                 /* --- Form Type --- */
                 {
                     id: "modeOfSelector",
-                    type: "dropdown",
+                    type: "autocomplete",
                     label: "Task Type",
                     options: {
+                        endpointKey: "v1/master/data",
                         labelKey: "label",
                         valueKey: "value",
-                        items: [
-                            { label: "Debit Credit Advice", value: "DEBIT_CREDIT_ADVICE" },
-                            { label: "Fixed Asset Details", value: "FIXED_ASSETS_REGISTER" },
-                            { label: "Approval Details", value: "APPROVAL_FOR_EXPENDITURE" },
-                            { label: "Bank Reconciliation Detail", value: "BANK_RECONCILIATION" },
-                        ],
+                        query: { type: "reap_accounts_options" },
                     },
                     validations: [{ type: "required" }],
                     props: { placeholder: "Select the task to be done" },
@@ -33,13 +29,13 @@ export const reapFinanceAccountUpdateSchema = {
                 // ==========================================================
                 {
                     id: "dc_office",
-                    type: "dropdown",
+                    type: "autocomplete",
                     label: "Office",
                     options: {
-                        items: [
-                            { label: "PMU", value: "pmu" },
-                            { label: "DMU", value: "dmu" },
-                        ],
+                        endpointKey: "v1/master/data",
+                        labelKey: "name",
+                        valueKey: "id",
+                        query: { type: "finance_office_type" },
                     },
                     validations: [{ type: "required" }],
                     rules: [{ when: "values.modeOfSelector !== 'DEBIT_CREDIT_ADVICE'", action: "hide" }],
@@ -123,13 +119,13 @@ export const reapFinanceAccountUpdateSchema = {
                 // ==========================================================
                 {
                     id: "fa_category",
-                    type: "dropdown",
+                    type: "autocomplete",
                     label: "Category (Individual/Multiple)",
                     options: {
-                        items: [
-                            { label: "Individual", value: "individual" },
-                            { label: "Multiple", value: "multiple" },
-                        ],
+                        endpointKey: "v1/master/data",
+                        query: { type: "finance_category" },
+                        labelKey: "label",
+                        valueKey: "value",
                     },
                     validations: [{ type: "required" }],
                     rules: [{ when: "values.modeOfSelector !== 'FIXED_ASSETS_REGISTER'", action: "hide" }],
@@ -138,13 +134,13 @@ export const reapFinanceAccountUpdateSchema = {
                 },
                 {
                     id: "fa_office",
-                    type: "dropdown",
+                    type: "autocomplete",
                     label: "Office",
                     options: {
-                        items: [
-                            { label: "District Level", value: "district" },
-                            { label: "Block Level", value: "block" },
-                        ],
+                        endpointKey: "v1/master/data",
+                        labelKey: "name",
+                        valueKey: "id",
+                        query: { type: "finance_office_type" },
                     },
                     validations: [{ type: "required" }],
                     rules: [{ when: "values.modeOfSelector !== 'FIXED_ASSETS_REGISTER'", action: "hide" }],
@@ -249,13 +245,13 @@ export const reapFinanceAccountUpdateSchema = {
                 },
                 {
                     id: "fa_assetProcuredBy",
-                    type: "dropdown",
+                    type: "autocomplete",
                     label: "Asset Procured By",
                     options: {
-                        items: [
-                            { label: "PMU", value: "pmu" },
-                            { label: "DMU", value: "dmu" },
-                        ],
+                        endpointKey: "v1/master/data",
+                        query: { type: "asset_procured_by" },
+                        labelKey: "label",
+                        valueKey: "value",
                     },
                     validations: [{ type: "required" }],
                     rules: [{ when: "values.modeOfSelector !== 'FIXED_ASSETS_REGISTER'", action: "hide" }],
@@ -277,13 +273,13 @@ export const reapFinanceAccountUpdateSchema = {
                 // ==========================================================
                 {
                     id: "ap_office",
-                    type: "dropdown",
+                    type: "autocomplete",
                     label: "Office",
                     options: {
-                        items: [
-                            { label: "PMU", value: "pmu" },
-                            { label: "DMU", value: "dmu" },
-                        ],
+                        endpointKey: "v1/master/data",
+                        labelKey: "name",
+                        valueKey: "id",
+                        query: { type: "finance_office_type" },
                     },
                     validations: [{ type: "required" }],
                     rules: [{ when: "values.modeOfSelector !== 'APPROVAL_FOR_EXPENDITURE'", action: "hide" }],
@@ -371,14 +367,13 @@ export const reapFinanceAccountUpdateSchema = {
                 // ==========================================================
                 {
                     id: "br_office",
-                    type: "dropdown",
+                    type: "autocomplete",
                     label: "Office",
                     options: {
-                        items: [
-                            { label: "PMU", value: "pmu" },
-                            { label: "DMU - District Level", value: "dmu_district" },
-                            { label: "Other Districts", value: "other_districts" },
-                        ],
+                        endpointKey: "v1/master/data",
+                        labelKey: "name",
+                        valueKey: "id",
+                        query: { type: "finance_office_type" },
                     },
                     validations: [{ type: "required" }],
                     rules: [{ when: "values.modeOfSelector !== 'BANK_RECONCILIATION'", action: "hide" }],

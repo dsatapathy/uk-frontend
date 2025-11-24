@@ -37,7 +37,65 @@ const ui = {
   },
 };
 
-
+const payloadHandler = async (flatFormData) => {
+  switch (flatFormData.modeOfSelector) {
+    case "DEBIT_CREDIT_ADVICE":  
+    // process payload for Debit Credit Advice
+    return {
+      modeOfSelector: flatFormData.modeOfSelector||"",
+      office: flatFormData.dc_office||"",
+      financialYear: flatFormData.dc_financialYear||"",
+      issueNo: flatFormData.dc_adviceIssueNo||"",
+      particulars: flatFormData.dc_particulars||"",
+      amount: flatFormData.dc_amount||"",
+      tallyByDmu: flatFormData.dc_tallyEntryDMU||"",
+      tallyByPmu: flatFormData.dc_tallyEntryPMU||"",
+      document: flatFormData.dc_uploadAdvice||{},
+    };
+    case "FIXED_ASSETS_REGISTER":
+    // process payload for Fixed Asset Details
+    return {
+      modeOfSelector: flatFormData.modeOfSelector||"",
+      category: flatFormData.fa_category||"",
+      office: flatFormData.fa_office||"",
+      assetName: flatFormData.fa_assetName||"",
+      financialYear: flatFormData.fa_financialYear||"",
+      month: flatFormData.fa_financialMonth||"",
+      dateOfPurchase: flatFormData.fa_dateOfPurchase||"",
+      supplierName: flatFormData.fa_supplierName||"",
+      perItemAmount: flatFormData.fa_perItemAmount||"",
+      assetIssueTo: flatFormData.fa_assetIssueTo||"",
+      productId: flatFormData.fa_productId||"",
+      assetProcuredBy: flatFormData.fa_assetProcuredBy||"",
+      remarks: flatFormData.fa_remarks||"",
+      document: flatFormData.fa_billCopyUpload||{},
+    };
+    case "APPROVAL_FOR_EXPENDITURE":
+    // process payload for Approval Details
+    return {
+      modeOfSelector: flatFormData.modeOfSelector||"",
+      office: flatFormData.ap_office||"",
+      financialYear: flatFormData.ap_financialYear||"",
+      month: flatFormData.ap_financialMonth||"",
+      dateOfPayment: flatFormData.ap_dateOfPayment||"",
+      particulars: flatFormData.ap_particulars||"",
+      amount: flatFormData.ap_amount||"",
+      approvedBy: flatFormData.ap_approvedBy||"",
+      document: flatFormData.ap_uploadApprovedDocument||{},
+    };
+    case "BANK_RECONCILIATION":
+    // process payload for Bank Reconciliation Detail
+    return {
+      modeOfSelector: flatFormData.modeOfSelector||"",
+      office: flatFormData.br_office||"",
+      financialYear: flatFormData.br_financialYear||"",
+      month: flatFormData.br_monthOfBRS||"",
+      document: flatFormData.br_uploadBRSFile||{},
+    };
+    default:
+      return flatFormData;
+  }
+}
 export default function ReapFinanceAccountUpdate() {
   const DynamicForm = getComponent("DynamicForm");
   const formApiRef = React.useRef(null);
@@ -53,12 +111,13 @@ export default function ReapFinanceAccountUpdate() {
   const handleSubmit = async (vals) => {
     try {
       const flatFormData = vals || formApiRef.current?.getValues?.() || {};
-      show("Adding LC Activity...");
+      const formPayload = await payloadHandler(flatFormData);
+      show("Adding Reap Finance Account Update Activity...");
       const payload = {
         module: "FINANCE_DATA_UPDATE",
         operation: "CREATE",
         formType: "REAP_ACCOUNTS_UPDATE",
-        formData: flatFormData,
+        formData: formPayload,
       };
       const Url = "v1/reap/operations";
       const method = "post";
@@ -68,7 +127,7 @@ export default function ReapFinanceAccountUpdate() {
           onSuccess: (response) => {
             hide();
             enqueue({
-              message: "LC Activity added successfully.",
+              message: "Reap Finance Account Update successfully.",
               severity: "success",
               duration: 6000,
             });
@@ -77,12 +136,12 @@ export default function ReapFinanceAccountUpdate() {
             // or stay on page — here we redirect with an appropriate heading for both.
             const params = new URLSearchParams({
               status: "success",
-              heading: "Submission Successful For LC Activity Addition",
-              form: "LC Activity",
-              body: "Your LC Activity has been successfully created.",
-              reference: response?.data?.data?.localId || response?.data?.localId  || "00XX00",
+              heading: "Submission Successful For Reap Finance Account Update",
+              form: "Reap Finance Account Update",
+              body: "Your Reap Finance Account Update has been successfully created.",
+              reference: response?.data?.data?.localId || response?.data?.localId || "00XX00",
             }).toString();
-            const target = `${window.location.origin}/common/acknowledgement_page?${params}`;
+            const target = `${window.location.origin}/reap-mis/common/acknowledgement_page?${params}`;
             window.location.href = target;
           },
           onError: (error) => {

@@ -6,8 +6,8 @@ import { getComponent } from "@gov/core";
 import { useAppSelector } from "@gov/store";
 import { useLoginFlow } from "../hooks/useLoginFlow";
 import { useConfig } from "@gov/library";
-import { useSnackbar } from "../../../../library/src/atoms/Snackbar";
-import { useLoader } from "../../../../library/src/atoms/Loader";
+import { useSnackbar } from "@gov/library";
+import { useLoader } from "@gov/library";
 // --- Base helpers ---
 const escapeRe = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 function useBase(locationPathname) {
@@ -89,7 +89,7 @@ function LoginInner({ loginConfig }) {
 
   React.useEffect(() => {
     if (!error) return;
-    const msg = error?.response?.data?.message || error?.message || "Login failed";
+    const msg = error?.response?.data?.error?.message || error?.message || "Login failed";
     enqueue({ message: msg, severity: "error", duration: 6000 });
   }, [error, enqueue]);
 

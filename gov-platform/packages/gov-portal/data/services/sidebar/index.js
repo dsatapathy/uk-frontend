@@ -12,7 +12,7 @@ function buildMenuConfig({ count = 150, deps = {}, enabled = true, staleTime = 1
   const requireHydrated = Object.prototype.hasOwnProperty.call(deps, "hydrated");
   return {
     key: ["menu", count, deps.userId ? String(deps.userId) : "anonymous"],
-    url: "/v1/home/menu",
+    url: "/v1/home/menu1",
     method: "get",
     params: { count },
     deps,

@@ -12,6 +12,8 @@ const all = {
   enterprise: () => import("@gov/mod-enterprise"),
   livelihood: () => import("@gov/mod-livelihood"),
   finance: () => import("@gov/mod-finance"),
+  training: () => import("@gov/mod-training"),
+  infrastructure: () => import("@gov/mod-infrastructure"),
 };
 
 console.log("[env] VITE_ENABLED_MODULES =", import.meta.env.VITE_ENABLED_MODULES);

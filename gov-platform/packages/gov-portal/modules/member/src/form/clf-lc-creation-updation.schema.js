@@ -260,14 +260,15 @@ export const clfLcRegistrationSchema = {
           id: "ifscCode",
           type: "text",
           label: "IFSC Code",
-          validations: [{ type: "required" },{ 
-              type: "pattern", 
-              value: "^[A-Z]{4}0[A-Z0-9]{6}$", 
-              message: "Invalid IFSC" 
-            }],
-            props: { maxLength: 11 },
-          grid: { span: { xs: 12, sm: 6, md: 4 },
-         }
+          validations: [{ type: "required" }, {
+            type: "pattern",
+            value: "^[A-Z]{4}0[A-Z0-9]{6}$",
+            message: "Invalid IFSC"
+          }],
+          props: { maxLength: 11 },
+          grid: {
+            span: { xs: 12, sm: 6, md: 4 },
+          }
         },
         {
           id: "bankName",

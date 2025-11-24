@@ -32,6 +32,8 @@ const devOnlySrcAliases = {
   "@gov/mod-enterprise": toFs(path.resolve(repoRoot, "packages/gov-portal/modules/enterprise/src")),
   "@gov/mod-livelihood": toFs(path.resolve(repoRoot, "packages/gov-portal/modules/livelihood/src")),
   "@gov/mod-finance": toFs(path.resolve(repoRoot, "packages/gov-portal/modules/finance/src")),
+  "@gov/mod-training": toFs(path.resolve(repoRoot, "packages/gov-portal/modules/training/src")),
+  "@gov/mod-infrastructure": toFs(path.resolve(repoRoot, "packages/gov-portal/modules/infrastructure/src")),
 };
 
 // Tiny React 17-safe shim for Emotion’s helper

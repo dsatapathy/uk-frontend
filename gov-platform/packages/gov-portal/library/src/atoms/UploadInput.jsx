@@ -88,7 +88,10 @@ export default function UploadInput({
     // You should get the token from your auth context, localStorage, or however your app stores it
     const token = http().getAccessToken();
 
-    const resp = await fetch("http://reap-mis-myapp-ukgv.casacam.net:9090/reap-mis/api/files/upload", {
+    const resp = await fetch(
+      // "https://dev-test.chandigarhsmartcity.in/reap-mis/api/files/upload", 
+      "http://reap-mis-myapp-ukgv.casacam.net:9090/reap-mis/api/files/upload",
+      {
       method: "POST",
       body: formData,
       headers: {

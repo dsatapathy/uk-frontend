@@ -182,8 +182,8 @@ export const ultraPoorPackageClfLevelActivitySchema = {
                     options: {
                         endpointKey: "v1/master/data",
                         query: { type: "ultra_poor_clf_member_profiles" },
-                        labelKey: "memberName",
-                        valueKey: "memberId",
+                        labelKey: "name",
+                        valueKey: "id",
                         dependsOn: ["values.shgCode"],
                         dependsOnHint: "Select SHG first",
                         queryBuilder: (deps) => ({

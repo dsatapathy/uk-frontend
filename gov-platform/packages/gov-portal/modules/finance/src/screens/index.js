@@ -13,3 +13,7 @@ export const loadAwpbRawpbFinanceDataUpdate = asDefault(
   () => import("./AwpbRawpbFinanceDataUpdate.jsx"),
   "AwpbRawpbFinanceDataUpdate"
 );
+export const loadFinanceLandingPage = asDefault(
+  () => import("./FinanceLanding.jsx"),
+  "FinanceLanding"
+);

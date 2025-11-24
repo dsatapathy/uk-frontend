@@ -213,7 +213,7 @@ export default function CLFLCProfileUpdate() {
             clfName: response?.data?.data?.clfName || "Unknown",
             reference: response?.data?.data?.clfId || response?.data?.clfId || "00XX00",
           }).toString();
-          const target = `${window.location.origin}/common/acknowledgement_page?${params}`;
+          const target = `${window.location.origin}/reap-mis/common/acknowledgement_page?${params}`;
           window.location.href = target;
         },
         onError: (error) => {

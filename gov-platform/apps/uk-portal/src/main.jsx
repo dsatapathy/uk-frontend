@@ -81,6 +81,7 @@ start({
   },
   // --- Authentication ---
   http: { 
+    // baseURL: "https://dev-test.chandigarhsmartcity.in/reap-mis/api/"
     baseURL: "http://reap-mis-myapp-ukgv.casacam.net:9090/reap-mis/api/"//"http://dev-test.chandigarhsmartcity.in/reap-mis/api/" 
   },
   auth: {

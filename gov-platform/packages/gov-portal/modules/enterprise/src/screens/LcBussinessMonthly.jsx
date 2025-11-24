@@ -83,7 +83,7 @@ export default function LcBussinessMonthly() {
               body: "Your LC Business Monthly Data Updating has been successfully updated.",
               reference: response?.data?.data?.localId ||  response?.data?.localId ||"00XX00",
             }).toString();
-            const target = `${window.location.origin}/common/acknowledgement_page?${params}`;
+            const target = `${window.location.origin}/reap-mis/common/acknowledgement_page?${params}`;
             window.location.href = target;
           },
           onError: (error) => {

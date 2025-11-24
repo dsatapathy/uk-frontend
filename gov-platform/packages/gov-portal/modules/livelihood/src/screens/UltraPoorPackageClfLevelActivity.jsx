@@ -124,8 +124,9 @@ async function fetchData(Id) {
   const method = "get";
   const params = { type: "ultra_poor_activity_detail", id: Id };
   const payload = null;
-  const response = await apiService({ method, url, params, payload });
+  let response = await apiService({ method, url, params, payload });
   console.log("Fetched Ultra Poor Activity Detail Data:", response);
+  response = response[0];
   if (!response) throw new Error("Ultra Poor Activity Detail not found");
   return response;
 }
@@ -173,7 +174,7 @@ export default function UltraPoorPackageClfLevelActivity() {
       const flat = flatFromMock(responseData, true);
 
       // IMPORTANT: ensure the selected member id remains what the user picked
-      flat.memberId = memberId;
+      flat.localId = localId;
       // Patch the form with the fetched data
       formApiRef.current?.patch?.(flat, { shouldValidate: false, shouldDirty: false });
       hide();
@@ -187,7 +188,7 @@ export default function UltraPoorPackageClfLevelActivity() {
   // Handler for form submit
   const handleSubmit = async (vals) => {
     try {
-      const flatFormData = vals || formApiRef.current?.getValues?.() || {};
+      const flatFormData =formApiRef.current?.getValues?.() || vals ||  {};
       const isUpdate = String(flatFormData.action || "").toLowerCase() === "update";
       show(isUpdate ? "Updating  Ultra Poor CLF Level Activity — please wait..." : "Submitting Ultra Poor CLF Level Activity — please wait...");
       flatFormData.participantCategory = "CLF_MEMBER";
@@ -219,7 +220,7 @@ export default function UltraPoorPackageClfLevelActivity() {
               body: isUpdate ? "Your Ultra Poor CLF Level Activity has been successfully updated." : "Your Ultra Poor CLF Level Activity has been successfully created.",
               reference: response?.data?.data?.localId || "00XX00",
             }).toString();
-            const target = `${window.location.origin}/common/acknowledgement_page?${params}`;
+            const target = `${window.location.origin}/reap-mis/common/acknowledgement_page?${params}`;
             window.location.href = target;
           },
           onError: (error) => {
