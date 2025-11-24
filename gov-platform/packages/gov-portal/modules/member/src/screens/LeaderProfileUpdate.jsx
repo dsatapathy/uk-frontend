@@ -181,7 +181,7 @@ export default function LeaderProfileUpdate() {
             leaderName: response?.data?.data?.presidentName || "Unknown",
             reference: response?.data?.data?.presidentNameId || "00XX00",
           }).toString();
-          const target = `${window.location.origin}/common/acknowledgement_page?${params}`;
+          const target = `${window.location.origin}/reap-mis/common/acknowledgement_page?${params}`;
           window.location.href = target;
         },
         onError: (error) => {

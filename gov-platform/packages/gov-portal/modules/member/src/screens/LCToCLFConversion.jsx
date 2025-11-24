@@ -77,7 +77,7 @@ const DynamicForm = getComponent("DynamicForm");
             body: "Your LC to CLF Conversion has been successfully updated.",
             reference: response?.data?.data?.id || "00XX00",
           }).toString();
-          const target = `${window.location.origin}/common/acknowledgement_page?${params}`;
+          const target = `${window.location.origin}/reap-mis/common/acknowledgement_page?${params}`;
           window.location.href = target;
         },
         onError: (error) => {

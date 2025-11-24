@@ -50,3 +50,17 @@ export const loadMemberLanding = asDefault(
   () => import("./MemberLanding.jsx"),
   "MemberLanding"
 );
+export const loadLcProfileUpdate = asDefault(
+  () => import("./LcProfileUpdate.jsx"),
+  "LcProfileUpdate"
+);
+
+export const loadSearchDevPage = asDefault(
+  () => import("./SearchDevPage.jsx"),
+  "SearchDevPage"
+);
+
+export const loadReportDevPage = asDefault(
+  () => import("./ReportDevPage.jsx"),
+  "ReportDevPage"
+);

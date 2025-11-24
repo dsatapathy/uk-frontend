@@ -116,8 +116,8 @@ export const ultraPoorPackageOutcomeLcLevelActivitySchema = {
                     options: {
                         endpointKey: "v1/master/data",
                         query: { type: "member_profiles" },
-                        labelKey: "memberName",
-                        valueKey: "memberId",
+                        labelKey: "name",
+                        valueKey: "id",
                         dependsOn: ["values.lcId"],
                         dependsOnHint: "Select LC first",
                         queryBuilder: (deps) => ({
@@ -136,7 +136,11 @@ export const ultraPoorPackageOutcomeLcLevelActivitySchema = {
                         endpointKey: "v1/master/data",
                         labelKey: "label",
                         valueKey: "value",
-                        query: { type: "ilip_activities" },
+                        query: { type: "proposed_activity_under_ilip" },
+                        queryBuilder: (deps) => ({
+                            type: "proposed_activity_under_ilip",
+                            id: 2, // LC Level
+                        }),
                     },
                     validations: [{ type: "required" }],
                     grid: { span: { xs: 12, sm: 6, md: 4 } },
@@ -202,7 +206,7 @@ export const ultraPoorPackageOutcomeLcLevelActivitySchema = {
                         endpointKey: "v1/master/data",
                         labelKey: "label",
                         valueKey: "value",
-                        query: { type: "product_units" },
+                        query: { type: "csa_seed_measure_units" },
                     },
                     validations: [{ type: "required" }],
                     grid: { span: { xs: 12, sm: 6, md: 4 } },
@@ -237,7 +241,7 @@ export const ultraPoorPackageOutcomeLcLevelActivitySchema = {
                         endpointKey: "v1/master/data",
                         labelKey: "label",
                         valueKey: "value",
-                        query: { type: "type_of_consuming" },
+                        query: { type: "consumption_type" },
                     },
                     validations: [{ type: "required" }],
                     grid: { span: { xs: 12, sm: 6, md: 4 } },

@@ -299,7 +299,7 @@ export const memberProfileSchema = {
     // 4) Personal Information (B)
     {
       id: "personalB",
-      title: "Demographics",
+      title: "Personal Information",
       fields: [
         {
           id: "dob",
@@ -816,7 +816,7 @@ export const memberProfileSchema = {
             maxFiles: 1,                   // enforced anyway by multiple:false, but explicit is fine
             maxSizeMB: 5                   // e.g. 5 MB cap
           },
-          grid: { span: { xs: 12, sm: 12, md: 12 } }
+          grid: { span: { xs: 12, sm: 6, md: 4 } }
         },
 
         {
@@ -834,7 +834,7 @@ export const memberProfileSchema = {
             { when: "values.pwd !== 'Yes'", action: "hide" },
             { when: "values.pwd === 'Yes'", action: "require" }
           ],
-          grid: { span: { xs: 12, sm: 12, md: 12 } }
+          grid: { span: { xs: 12, sm: 6, md: 4 } }
         },
 
         {
@@ -849,7 +849,7 @@ export const memberProfileSchema = {
             maxFiles: 5,
             maxSizeMB: 5
           },
-          grid: { span: { xs: 12, sm: 12, md: 12 } }
+          grid: { span: { xs: 12, sm: 6, md: 4 } }
         },
         {
           id: "valueChainMapping",
@@ -862,7 +862,7 @@ export const memberProfileSchema = {
             query: { type: "value_chain" },
           },
           validations: [{ type: "required" }],
-          grid: { span: { xs: 12, sm: 6, md: 6 } }
+          grid: { span: { xs: 12, sm: 6, md: 4 } }
         },
         {
           id: "pgMapping",
@@ -875,7 +875,7 @@ export const memberProfileSchema = {
             query: { type: "pg_mapping" },
           },
           validations: [{ type: "required" }],
-          grid: { span: { xs: 12, sm: 6, md: 6 } }
+          grid: { span: { xs: 12, sm: 6, md: 4 } }
         },
 
         { id: "undertaking", type: "checkbox", label: "I confirm the information provided is correct", validations: [{ type: "required" }], grid: { span: { xs: 12 } } }

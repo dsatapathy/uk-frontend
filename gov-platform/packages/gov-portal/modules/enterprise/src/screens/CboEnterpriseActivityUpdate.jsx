@@ -248,7 +248,7 @@ const handleValuesChange = React.useCallback(async (vals, meta) => {
               body: isUpdate ? "Your CBO Enterprise Activity has been successfully updated." : "Your CBO Enterprise Activity has been successfully created.",
               reference: response?.data?.data?.localId || "00XX00",
             }).toString();
-            const target = `${window.location.origin}/common/acknowledgement_page?${params}`;
+            const target = `${window.location.origin}/reap-mis/common/acknowledgement_page?${params}`;
             window.location.href = target;
           },
           onError: (error) => {

@@ -16,6 +16,9 @@ import {
   loadPGProfileUpdate,
   loadLCToCLFConversion,
   loadMemberLanding,
+  loadLcProfileUpdate,
+  loadSearchDevPage,
+  loadReportDevPage
 } from "./screens";
 
 // If your project keeps them in ./screens instead, just swap the import path above to "./screens".
@@ -62,6 +65,18 @@ export function register(app) {
     "MemberLanding",
     LazyWrap(loadMemberLanding, "Member Landing")
   );
+  registerComponent(
+    "LcProfileUpdate",
+    LazyWrap(loadLcProfileUpdate, "LC Profile Update")
+  );
+  registerComponent(
+    "SearchDevelopmentInProgress",
+    LazyWrap(loadSearchDevPage, "Search Development In Progress")
+  );
+  registerComponent(
+    "ReportsDevelopmentInProgress",
+    LazyWrap(loadReportDevPage, "Reports Development In Progress")
+  );
 
   // Actions (optional shortcuts you can fire from menu/items)
   registerAction("user.member.profile", () => app.history.push("/member/user/memberdetails"));
@@ -78,7 +93,9 @@ export function register(app) {
   app.addRoutes([
     // default member landing (kept)
     { path: "/member", exact: true, layout: "Shell", page: { type: "MemberLanding" } },
-
+    // Page to Show Development is in Progress
+    { path: "/member/search_inprogress", exact: true, layout: "Shell", page: { type: "SearchDevelopmentInProgress" } },
+    { path: "/member/reports_inprogress", exact: true, layout: "Shell", page: { type: "ReportsDevelopmentInProgress" } },
     // User Data Updation → 9 pages
     { path: "/member/user/memberdetails", exact: true, layout: "Shell", page: { type: "BeneficiaryMemberProfile" } },
     { path: "/member/user/shg",           exact: true, layout: "Shell", page: { type: "SHGProfileUpdate" } },
@@ -89,5 +106,6 @@ export function register(app) {
     { path: "/member/user/fpo",           exact: true, layout: "Shell", page: { type: "FPOProfileUpdate" } },
     { path: "/member/user/pg",            exact: true, layout: "Shell", page: { type: "PGProfileUpdate" } },
     { path: "/member/user/lc-to-clf",     exact: true, layout: "Shell", page: { type: "LCToCLFConversion" } },
+    { path: "/member/user/lc",             exact: true, layout: "Shell", page: { type: "LcProfileUpdate" } },
   ]);
 }

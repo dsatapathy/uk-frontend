@@ -325,7 +325,7 @@ export default function BeneficiaryMemberProfile() {
             name: response?.data?.data?.memberName || "Unknown",
             reference: response?.data?.data?.memberId || "00XX00"
           }).toString();
-          const target = `${window.location.origin}/common/acknowledgement_page?${params}`;
+          const target = `${window.location.origin}/reap-mis/common/acknowledgement_page?${params}`;
           window.location.href = target;
         },
         onError: (error) => {

@@ -82,7 +82,7 @@ export default function PashuSakhiTraining() {
               body: "Your Pashu Sakhi Training details have been successfully created.",
               reference: response?.data?.data?.pashuId || response?.data?.pashuId || "00XX00",
             }).toString();
-            const target = `${window.location.origin}/common/acknowledgement_page?${params}`;
+            const target = `${window.location.origin}/reap-mis/common/acknowledgement_page?${params}`;
             window.location.href = target;
           },
           onError: (error) => {

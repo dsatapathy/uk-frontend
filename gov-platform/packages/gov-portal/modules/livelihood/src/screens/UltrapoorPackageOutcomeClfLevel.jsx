@@ -38,66 +38,57 @@ const ui = {
   },
 };
 // helper: flatten shg data from API to flat form structure
-function flatFromMock(shgData, update = false) {
+function flatFromMock(data) {
   return {
-    // --- Basic action ---
-    action: update ? "update" : "create",
+    // --- Location hierarchy ---
+    districtId: data?.districtId ? Number(data.districtId) : "",
+    blockId: data?.blockId ? Number(data.blockId) : "",
+    panchayatId: data?.panchayatId ? Number(data.panchayatId) : "",
+    villageId: data?.villageId ? Number(data.villageId) : "",
 
-    // --- Location hierarchy (convert to numbers) ---
-    district: shgData?.district ? Number(shgData.district) : "",
-    block: shgData?.block ? Number(shgData.block) : "",
-    gp: shgData?.gp ? Number(shgData.gp) : "",
-    village: shgData?.village ? Number(shgData.village) : "",
+    // --- Association hierarchy ---
+    clfCode: data?.clfCode ? Number(data.clfCode) : "",
+    voCode: data?.voCode ? Number(data.voCode) : "",
+    shgCode: data?.shgCode ? Number(data.shgCode) : "",
+    memberId: data?.memberId ? Number(data.memberId) : "",
 
-    // --- Association (convert to numbers) ---
-    clf: shgData?.clf ? Number(shgData.clf) : "",
-    vo: shgData?.vo ? Number(shgData.vo) : "",
+    // --- Activity & financial year ---
+    proposedActivity: data?.proposedActivity ? String(data.proposedActivity) : "",
+    financeYear: data?.financeYear ? String(data.financeYear) : "",
 
-    // --- SHG identification ---
-    shgCode: shgData?.shgCode ? String(shgData.shgCode) : "",
-    shgName: shgData?.shgName ? String(shgData.shgName) : "",
-    shgId: shgData?.shgId ? Number(shgData?.shgId) : "",
-    shgJoinDate: shgData?.shgJoinDate ? String(shgData.shgJoinDate) : "",
+    // --- Frequency & month ---
+    frequency: data?.frequency ? String(data.frequency) : "",
+    financeMonth: data?.financeMonth ? String(data.financeMonth) : "",
 
-    // --- Basic details ---
-    address: shgData?.address ? String(shgData.address) : "",
-    totalMembers: shgData?.totalMembers ? String(shgData.totalMembers) : "",
+    // --- Product details ---
+    productName: data?.productName ? String(data.productName) : "",
+    productUnit: data?.productUnit ? String(data.productUnit) : "",
+    totalProduction: data?.totalProduction ? String(data.totalProduction) : "",
+    totalProductPrice: data?.totalProductPrice ? String(data.totalProductPrice) : "",
+    typeOfConsuming: data?.typeOfConsuming ? String(data.typeOfConsuming) : "",
+    pricePerUnit: data?.pricePerUnit ? String(data.pricePerUnit) : "",
+    totalProductSale: data?.totalProductSale ? String(data.totalProductSale) : "",
+    expenditure: data?.expenditure ? String(data.expenditure) : "",
+    incomeBeneficiary: data?.incomeBeneficiary ? String(data.incomeBeneficiary) : "",
+    totalProductionValue: data?.totalProductionValue ? String(data.totalProductionValue) : "",
 
-    // --- Functionality & governance ---
-    presidentElected: shgData?.presidentElected ? String(shgData.presidentElected) : "",
-    meetingFrequency: shgData?.meetingFrequency ? String(shgData.meetingFrequency) : "",
-    discussionOnUltraPoorIE: shgData?.discussionOnUltraPoorIE ? String(shgData.discussionOnUltraPoorIE) : "",
-    livelihoodCommitteeFormation: shgData?.livelihoodCommitteeFormation ? String(shgData.livelihoodCommitteeFormation) : "",
+    // --- Project cost details ---
+    benefContribution: data?.benefContribution ? String(data.benefContribution) : "",
+    projectSupport: data?.projectSupport ? String(data.projectSupport) : "",
+    convergence: data?.convergence ? String(data.convergence) : "",
+    bank: data?.bank ? String(data.bank) : "",
+    totalCost: data?.totalCost ? String(data.totalCost) : "",
 
-    // --- Value chains (multiple) ---
-    valueChain1: shgData?.valueChain1 ? String(shgData.valueChain1) : "",
-    valueChain2: shgData?.valueChain2 ? String(shgData.valueChain2) : "",
-    valueChain3: shgData?.valueChain3 ? String(shgData.valueChain3) : "",
-
-    // --- Financial details ---
-    accountBooksMaintained: shgData?.accountBooksMaintained ? String(shgData.accountBooksMaintained) : "",
-    monthlySavingsRate: shgData?.monthlySavingsRate ? String(shgData.monthlySavingsRate) : "",
-    interloanMemberCount: shgData?.interloanMemberCount ? String(shgData.interloanMemberCount) : "",
-    revolvingFundReceived: shgData?.revolvingFundReceived ? String(shgData.revolvingFundReceived) : "",
-    cifUsed: shgData?.cifUsed ? String(shgData.cifUsed) : "",
-
-    // --- Sakhi involvement ---
-    bankSakhi: shgData?.bankSakhi ? String(shgData.bankSakhi) : "",
-    pashuSakhi: shgData?.pashuSakhi ? String(shgData.pashuSakhi) : "",
-    krishiSakhi: shgData?.krishiSakhi ? String(shgData.krishiSakhi) : "",
-
-    // --- Training details ---
-    basicShgTrainingCompleted: shgData?.basicShgTrainingCompleted ? String(shgData.basicShgTrainingCompleted) : "",
-
-    // --- Bank details ---
-    shgBankName: shgData?.shgBankName ? String(shgData.shgBankName) : "",
-    shgAccountNumber: shgData?.shgAccountNumber ? String(shgData.shgAccountNumber) : "",
-    shgIfsc: shgData?.shgIfsc ? String(shgData.shgIfsc) : "",
-
-    // --- Misc ---
-    meansOfVerification: shgData?.meansOfVerification ? String(shgData.meansOfVerification) : "",
+    // --- Fund details ---
+    fundRecievedDate: data?.fundRecievedDate ? String(data.fundRecievedDate) : "",
+    fundBenefContribution: data?.fundBenefContribution ? String(data.fundBenefContribution) : "",
+    fundProjectSupport: data?.fundProjectSupport ? String(data.fundProjectSupport) : "",
+    fundConvergence: data?.fundConvergence ? String(data.fundConvergence) : "",
+    fundBank: data?.fundBank ? String(data.fundBank) : "",
+    fundTotalCost: data?.fundTotalCost ? String(data.fundTotalCost) : "",
   };
 }
+
 
 
 async function fetchData(Id) {
@@ -105,10 +96,11 @@ async function fetchData(Id) {
   const method = "get";
   const params = { type: "ultra_poor_activity_detail", id: Id };
   const payload = null;
-  const shgData = await apiService({ method, url, params, payload });
-  console.log("Fetched Ultra Poor Activity Detail Data:", shgData);
-  if (!shgData) throw new Error("Ultra Poor Activity Detail not found");
-  return shgData;
+  let response = await apiService({ method, url, params, payload });
+  console.log("Fetched Ultra Poor Activity Detail Data:", response);
+  response = response[0];
+  if (!response) throw new Error("Ultra Poor Activity Detail not found");
+  return response;
 }
 
 export default function UltraPoorPackageOutcomeClfLevelActivity() {
@@ -135,7 +127,7 @@ export default function UltraPoorPackageOutcomeClfLevelActivity() {
 
       // Flatten or transform responseData as needed for your form
       // If your API returns flat data, use it directly
-      const flat = flatFromMock(responseData, true);
+      const flat = flatFromMock(responseData);
 
       // IMPORTANT: ensure the selected member id remains what the user picked
       flat.memberId = memberId;
@@ -151,7 +143,7 @@ export default function UltraPoorPackageOutcomeClfLevelActivity() {
   // Handler for form submit
   const handleSubmit = async (vals) => {
     try {
-      const flatFormData = vals || formApiRef.current?.getValues?.() || {};
+      const flatFormData = formApiRef.current?.getValues?.() || vals || {};
 
       show("Updating Ultra Poor Activity Outcome — please wait...");
       flatFormData.participantCategory = "CLF_MEMBER";
@@ -183,7 +175,7 @@ export default function UltraPoorPackageOutcomeClfLevelActivity() {
               body: "Your Ultra Poor Activity Outcome for Clf level has been successfully updated.",
               reference: response?.data?.data?.localId || response?.data?.localId || "00XX00",
             }).toString();
-            const target = `${window.location.origin}/common/acknowledgement_page?${params}`;
+            const target = `${window.location.origin}/reap-mis/common/acknowledgement_page?${params}`;
             window.location.href = target;
           },
           onError: (error) => {

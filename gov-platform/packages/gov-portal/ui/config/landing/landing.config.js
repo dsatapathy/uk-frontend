@@ -8,9 +8,9 @@ const landingConfig = {
     enabled: true,
     variant: "elevated", // "flat" | "elevated" | "outlined"
     left: {
-      title: "Important Government Updates",
+      title: "Welcome to the UGVS REAP-MIS Application",
       subtitle:
-        "Stay informed about new schemes, application deadlines, and advisories.",
+        "To know more details, please click on the tiles or icons below.",
     },
     right: {
       ctaLabel: "View Notifications",

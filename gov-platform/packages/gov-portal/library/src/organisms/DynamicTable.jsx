@@ -148,9 +148,9 @@ export default function DynamicTable({
     return stableSort(filteredData, getComparator(order, orderBy));
   }, [data, order, orderBy, searchTerm, columns]);
 
-  const totalPages = Math.ceil(total / pageSize) || 1;
+  // const totalPages = Math.ceil(total / pageSize) || 1;
   const isFirstPage = page <= 1;
-  const isLastPage = page >= totalPages;
+  const isLastPage = page >= total;
 
   return (
     <Box sx={{ width: "100%" }}>
@@ -216,8 +216,7 @@ export default function DynamicTable({
             }}
           >
             <Typography variant="body2">
-              Showing {Math.min((page - 1) * pageSize + 1, total)}–
-              {Math.min(page * pageSize, total)} of {total}
+              Showing Page {page} of {total}
             </Typography>
 
             <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
@@ -232,7 +231,7 @@ export default function DynamicTable({
               </Button>
 
               <Typography variant="body2">
-                Page {page} of {totalPages}
+                Page {page} of {total}
               </Typography>
 
               <Button

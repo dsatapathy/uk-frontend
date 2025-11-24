@@ -226,7 +226,7 @@ export default function IndividualEnterprisesActivityUpdate() {
               body: isUpdate ? "Your Individual Enterprise Activity has been successfully updated." : "Your Individual Enterprise Activity has been successfully created.",
               reference: response?.data?.data?.localId || "00XX00",
             }).toString();
-            const target = `${window.location.origin}/common/acknowledgement_page?${params}`;
+            const target = `${window.location.origin}/reap-mis/common/acknowledgement_page?${params}`;
             window.location.href = target;
           },
           onError: (error) => {

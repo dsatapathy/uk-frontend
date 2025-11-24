@@ -35,7 +35,7 @@ const UserDataModuleSearchPage = () => {
   const config = searchConfigForUserData[type];
 
   if (!config) {
-    return <div style={{ padding: 20 }}>❌ Invalid module type: {type}</div>;
+    return <div style={{ padding: 20 }}>❌ Invalid module search form type: {type}</div>;
   }
 
   const DynamicForm = getComponent("DynamicForm");
@@ -49,9 +49,9 @@ const UserDataModuleSearchPage = () => {
   // -----------------------------
   const [tableData, setTableData] = React.useState([]);
   const [searchParams, setSearchParams] = React.useState({});
-  const [totalRecords, setTotalRecords] = React.useState(0);
+  const [totalPages, setTotalPages] = React.useState(0);
   const [page, setPage] = React.useState(1);
-  const [pageSize, setPageSize] = React.useState(10);
+  const [pageSize, setPageSize] = React.useState(5);
   const [loading, setLoading] = React.useState(false);
 
   // -----------------------------
@@ -69,31 +69,40 @@ const UserDataModuleSearchPage = () => {
   // COUNT API → SEARCH API FLOW
   // -----------------------------
   const fetchCountAndData = async (params) => {
-    show("Fetching record count...");
+    show("Fetching data please wait...");
     setLoading(true);
     try {
       // Step 1: Fetch count
-      const method = "GET";
-      const countRes = await apiService({ method, url: config.api.count, params, payload: null });
-      const total = countRes?.data?.totalCount ?? countRes?.data ?? 0;
-      setTotalRecords(total);
-
+      params.pageNo = 1;
+      params.pageSize = pageSize;
+      const method = "POST";
+      const payload = {
+        module: config.payload.module,
+        operation: config.payload.operation,
+        formType: config.payload.formType,
+        formData: params,
+      };
+      const response = await apiService({ method, url: config.api.search, params: null, payload });
+      const totalPages = response?.totalPages || 0;
+      setTotalPages(totalPages);
+      const total = (response?.data).length || 0;
       if (total === 0) {
         enqueue({ message: "No data found for given filters.", severity: "info" });
         setTableData([]);
         return;
       }
-
-      enqueue({ message: `Found ${total} records. Loading first page...`, severity: "success" });
+      enqueue({ message: `Found ${total} records.`, severity: "success" });
 
       // Step 2: Fetch first page of data
-      const payload = {
-        ...params,
-        limit: pageSize,
-        offset: 0,
-      };
-      const searchRes = await apiService({ method: "POST", url: config.api.search, data: payload });
-      setTableData(searchRes?.data?.data || searchRes?.data || []);
+      // const payload = {
+      //   ...params,
+      //   limit: pageSize,
+      //   offset: 0,
+      // };
+      // const searchRes = await apiService({ method: "POST", url: config.api.search, data: payload });
+      const searchRes = config.formatResponse(response?.data || []);
+      setTableData(searchRes || []);
+      setSearchParams(params);
       setPage(1);
     } catch (err) {
       enqueue({ message: "Failed to fetch data.", severity: "error" });
@@ -111,10 +120,16 @@ const UserDataModuleSearchPage = () => {
     show("Loading page...");
     setLoading(true);
     try {
-      const offset = (pageNumber - 1) * pageSize;
-      const payload = { ...searchParams, limit: pageSize, offset };
-      const res = await apiService.post(config.api.search, payload);
-      setTableData(res?.data?.data || res?.data || []);
+      const method = "POST";
+      const payload = {
+        module: config.payload.module,
+        operation: config.payload.operation,
+        formType: config.payload.formType,
+        formData: { ...searchParams, pageNo: pageNumber, pageSize: pageSize },
+      };
+      const res = await apiService({ method, url: config.api.search, params: null, payload });
+      const searchRes = config.formatResponse(res?.data || []);
+      setTableData(searchRes || []);
     } catch (err) {
       enqueue({ message: "Failed to fetch page data.", severity: "error" });
     } finally {
@@ -135,17 +150,17 @@ const UserDataModuleSearchPage = () => {
   // PAGINATION HANDLERS
   // -----------------------------
   const handleNextPage = async () => {
-    if (page * pageSize >= totalRecords) return;
+    if (page >= totalPages) return;
     const newPage = page + 1;
-    setPage(newPage);
     await fetchPageData(newPage);
+    setPage(newPage);
   };
 
   const handlePrevPage = async () => {
     if (page <= 1) return;
     const newPage = page - 1;
-    setPage(newPage);
     await fetchPageData(newPage);
+    setPage(newPage);
   };
 
   // -----------------------------
@@ -184,7 +199,7 @@ const UserDataModuleSearchPage = () => {
           loading={loading}
           page={page}
           pageSize={pageSize}
-          total={totalRecords}
+          total={totalPages}
           onNextPage={handleNextPage}
           onPrevPage={handlePrevPage}
         />

@@ -141,8 +141,8 @@ export const ultraPoorPackageLcLevelActivitySchema = {
                     options: {
                         endpointKey: "v1/master/data",
                         query: { type: "ultra_poor_clf_member_profiles" },
-                        labelKey: "memberName",
-                        valueKey: "memberId",
+                        labelKey: "name",
+                        valueKey: "id",
                         dependsOn: ["values.lcId"],
                         dependsOnHint: "Select LC first",
                         queryBuilder: (deps) => ({

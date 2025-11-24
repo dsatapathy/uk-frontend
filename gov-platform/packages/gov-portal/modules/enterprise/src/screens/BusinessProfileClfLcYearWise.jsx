@@ -130,7 +130,7 @@ export default function BusinessProfileClfLcYearWise() {
               body: "Your Updation for Business Profile of CLF-LCs (Year wise) has been successfully updated.",
               reference: response?.data?.data?.id || response?.data?.id || "00XX00",
             }).toString();
-            const target = `${window.location.origin}/common/acknowledgement_page?${params}`;
+            const target = `${window.location.origin}/reap-mis/common/acknowledgement_page?${params}`;
             window.location.href = target;
           },
           onError: (error) => {
